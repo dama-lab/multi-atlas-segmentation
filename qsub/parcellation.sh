@@ -1,6 +1,6 @@
 # Structural Parcellation shell script (SGE)
 # Author: Ma Da (d.ma.11@ucl.ac.uk)
-# Version 0.7_2013.04.15
+# Version 0.8_2013.08.29 to be modified ...
 #!/bin/bash
 # echo "Bash version ${BASH_VERSION}..."
 
@@ -25,14 +25,19 @@ fi
 ROOT_DIR=$(pwd)
 QSUB_CMD="qsub -l h_rt=1:00:00 -l h_vmem=9.9G -l tmem=9.9G -l s_stack=128M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
 QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -l h_vmem=12G -l tmem=12G -l s_stack=128M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
-PARCELLATION_NNR="-ln 10 -lp 10 -sx 1 -sy 1 -sz 1"
+PARCELLATION_NNR="-ln 4 -lp 4 -sx 3 -sy 3 -sz 3"
 DILATE=4 # value to be dilated for the result mask
 LABFUSION="-STEPS"
 MASK_AFF=" -rigOnly "
 
-if [ -z $STEPS_PARAMETER ]; # if STEPS parameter has not been defined (string=0, e.g. not called by fine_tune.sh)
-  then export STEPS_PARAMETER="4 6" # set up the optimized value for STEPS_PARAMETER
+# Set STEPS parameters
+if [[ -z $k ]] && [[ -z $n ]]; then  # if STEPS parameter is not set
+  # set default STEPS parameter to: "3 5 "
+  export k=3
+  export n=8
 fi
+export STEPS_PARAMETER="${k} ${n} "
+
 # Read user-defined parameters
 if [ ! -z $4 ]; then # check if there is a 4th argument
   if [ -f $4 ]; then # check if the file specified by 4th argument exist
@@ -101,14 +106,16 @@ else
   ${QSUB_CMD} -N ${jmask} echo -e "Pre-defined mask ${MASK} found, start to search/generate initial affine registration from atlas to test image now"
 fi
 
-echo "*********************************************"
-echo "* Segmentation pipeline for mouse brain MRI *"
-echo "*  using multi-atlas label fusion methods   *"
-echo "*     step 2 - structural parcellation      *"
-echo "*********************************************"
-echo "usage: parcellation new_image mask atlas_type (in_vivo/ex_vivo)"
+# echo "*********************************************"
+# echo "* Segmentation pipeline for mouse brain MRI *"
+# echo "* for ${TEST_NAME} *"
+# echo "*  using multi-atlas label fusion methods   *"
+# echo "*     step 2 - structural parcellation      *"
+# echo "*********************************************"
+# echo "usage: parcellation new_image mask atlas_type (in_vivo/ex_vivo)"
 
 # start structural parcellation
+echo "Creating label for: "$TEST_NAME
 PARAMETER_NUMBER=0
 jid_reg="${jid}_reg"
 for G in `ls $3/template/`
@@ -162,7 +169,8 @@ export jid_LabFusion="${jid}_LabFusion"
 if [[ ${LABFUSION}=="-STEPS" ]]; then
   jid_4d_tempate="${jid_4d}_template"
   ${QSUB_SEG_MATH} -hold_jid ${jid_reg}_* -N ${jid_4d_tempate} seg_maths $FIRST_TEMPLATE -merge $PARAMETER_NUMBER 4 $MERGE_TEMPLATE label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz
-  ${QSUB_SEG_MATH} -hold_jid ${jid_4d}_* -N ${jid_LabFusion} seg_LabFusion -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz -STEPS ${STEPS_PARAMETER} $1 label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz -out "\"label/${TEST_NAME}_${ATLAS}_label_STEPS_${STEPS_PARAMETER}.nii.gz\""
+  ${QSUB_SEG_MATH} -hold_jid ${jid_4d}_* -N ${jid_LabFusion} seg_LabFusion -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz -STEPS ${k} ${n} $1 label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz -out "\"label/${TEST_NAME}_${ATLAS}_label_STEPS_${k}_${n}.nii.gz\""
+  #_NNG_${PARCELLATION_NNR}
 fi
 
 

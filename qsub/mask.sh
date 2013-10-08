@@ -8,12 +8,13 @@
 # $2: atlas folder "in_vivo" or "ex_vivo"
 # $3: if exist, read user defined parameters
 
-echo "*********************************************"
-echo "* Segmentation pipeline for mouse brain MRI *"
-echo "*  using multi-atlas label fusion methods   *"
-echo "*         step 1 - brain extraction         *"
-echo "*********************************************"
-echo "usage: mask.sh new_image atlas_folder"
+# echo "*********************************************"
+# echo "* Segmentation pipeline for mouse brain MRI *"
+# echo "* for ${TEST_NAME} *"
+# echo "*  using multi-atlas label fusion methods   *"
+# echo "*         step 1 - brain extraction         *"
+# echo "*********************************************"
+# echo "usage: mask.sh new_image atlas_folder"
 
 # Setup default value for parameters
 ROOT_DIR=$(pwd)
@@ -36,6 +37,13 @@ jid=mask_"$$" # generate a random number as job ID
 jid_folder="${jid}_folder" # creating various folders if not exist
 if [ ! -f $1 ] && [ ! -f $1".nii" ] && [ ! -f $1".nii.gz" ] && [ ! -f $1".hdr" ]
   then echo "test image not exist"
+fi
+
+if [ ! -d job_output ]
+then mkdir job_output
+fi
+if [ ! -d job_error ]
+then mkdir job_error
 fi
 if [ ! -d temp ]
   then mkdir temp
@@ -91,7 +99,7 @@ do
 	   ${QSUB_CMD} -N ${j_mask_ready} echo "get binary mask and dilated mask ready before registration"
 	   
 	   job_aladin="${jname}_aladin" # start create affine registration matrix
-	   if [ ! -f $INITIAL_AFFINE ] # if no initial affine matrix file
+	   if [ ! -f ${INITIAL_AFFINE} ] # if no initial affine matrix file
 	     then
 		 ${QSUB_CMD} -hold_jid $"${jname}_mask_*" -N ${job_aladin} reg_aladin -flo $1 -ref $2/template/$G -rmask $2/mask_dilate/$G -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz ${MASK_AFF}
 	   else # if initial affine matrix file exist, use it
