@@ -1,13 +1,13 @@
 # Structural Parcellation shell script (SGE)
 # Author: Ma Da (d.ma.11@ucl.ac.uk)
-# Version 0.8_2013.08.29 to be modified ...
-#!/bin/bash
-# echo "Bash version ${BASH_VERSION}..."
 
 # $1: enquiry image
 # $2: mask for enquiry image.  if no mask just type "no_mask"
 # $3: atlas folder "in_vivo" or "ex_vivo"
 # $4: if exist, read user defined parameters
+
+#!/bin/bash
+# echo "Bash version ${BASH_VERSION}..."
 echo "***************************************************"
 echo "* CAUTION!! DO NOT use the same name as the atlas *"
 echo "*     if it is not for leave-one-out testing      *"
@@ -23,16 +23,16 @@ fi
 
 # setup default value for parameters
 ROOT_DIR=$(pwd)
-QSUB_CMD="qsub -l h_rt=1:00:00 -l h_vmem=9.9G -l tmem=9.9G -l s_stack=128M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
-QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -l h_vmem=12G -l tmem=12G -l s_stack=128M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
-PARCELLATION_NNR="-ln 4 -lp 4 -sx 3 -sy 3 -sz 3"
-DILATE=4 # value to be dilated for the result mask
+export QSUB_CMD="qsub -l h_rt=5:00:00 -l h_vmem=4G -l tmem=4G -l s_stack=1024M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
+export QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -l h_vmem=8G -l tmem=8G -l s_stack=1024M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
+PARCELLATION_NNR="-ln 4 -lp 4"
+DILATE=1 # value to be dilated for the result mask
 LABFUSION="-STEPS"
-MASK_AFF=" -rigOnly "
+MASK_AFF=" "
 
 # Set STEPS parameters
 if [[ -z $k ]] && [[ -z $n ]]; then  # if STEPS parameter is not set
-  # set default STEPS parameter to: "3 5 "
+  # set default STEPS parameter to: "3 8 "
   export k=3
   export n=8
 fi
@@ -90,8 +90,8 @@ if [ ! -d label/${ATLAS} ]
   then mkdir label/${ATLAS}
 fi
 
-jid=parcellation_"$$" # generate a random number as job ID
-jmask="${jid}_mask" # if no mask has been created yet, evoke mask.sh
+# "$$": generate a random number as job ID
+# if no mask has been created yet, evoke mask.sh
 if [ ! -f $2 ] && [ ! -f $2".nii" ] && [ ! -f $2".nii.gz" ] && [ ! -f $2".hdr" ]
 then
   # create mask for the test image first
@@ -101,9 +101,9 @@ then
 	fi # if path of the script is not defined in bashrc, use "./mask.sh" instead
   # Mask for the test image created
   MASK=mask/${TEST_NAME}_mask_${ATLAS}_STAPLE_d${DILATE}.nii.gz
-  ${QSUB_CMD} -hold_jid ${jname_seg_maths} -N ${jmask} echo -e "Pre-defined mask ${MASK} NOT found, parcellation will start after the mask is generated"
+  echo -e "Pre-defined mask ${MASK} NOT found, parcellation will start after the mask is generated"
 else
-  ${QSUB_CMD} -N ${jmask} echo -e "Pre-defined mask ${MASK} found, start to search/generate initial affine registration from atlas to test image now"
+  echo -e "Pre-defined mask ${MASK} found, start to search/generate initial affine registration from atlas to test image now"
 fi
 
 # echo "*********************************************"
@@ -117,32 +117,29 @@ fi
 # start structural parcellation
 echo "Creating label for: "$TEST_NAME
 PARAMETER_NUMBER=0
-jid_reg="${jid}_reg"
+TEST_NAME=`echo "$(basename $1)" | cut -d'.' -f1`
 for G in `ls $3/template/`
 do
-  jname=${jid_reg}_${G}
   NAME=`echo "$G" | cut -d'.' -f1`
+  jname=${jid_reg}_${TEST_NAME}_${NAME}
   # Check testing image name is different from atlas template. If same, skip (for leave-one-out)
   if [[ ${3}/template/${NAME} != $1 ]] && [[ ${3}/template/${NAME}.nii != $1 ]] && [[ ${3}/template/${NAME}.nii.gz != $1 ]] && [[ ${3}/template/${NAME}.hdr != $1 ]]
   then
 	# check if affine matrix exists as initialization for non-rigid registration. If no, generate it
-	job_affine="${jname}_affine_matrix"
 	if [ ! -f temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff ]; then
 	  # generate affine test->atlas
-	  job_reverse_affine="${jname}_initial_affine"
-	  ${QSUB_CMD} -hold_jid ${jmask} -N ${job_reverse_affine} reg_aladin -flo $1 -ref ${3}/template/${NAME} -rmask ${3}/mask_dilate/${NAME} -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff ${MASK_AFF}
+	  reg_aladin -flo $1 -ref ${3}/template/${NAME} -rmask ${3}/mask_dilate/${NAME} -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff ${MASK_AFF}
 	  # generate inv_affine atlas->test
-	  ${QSUB_CMD} -hold_jid ${job_reverse_affine} -N ${job_affine} reg_transform -ref ${3}/template/${NAME} -invAffine temp/${ATLAS}/${TEST_NAME}_${NAME}_aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff 
+	  reg_transform -ref ${3}/template/${NAME} -invAff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff 
 	else
-	  ${QSUB_CMD} -hold_jid ${jmask} -N ${job_affine} echo -e "Pre-defined affine transformation matrix ${TEST_NAME}_${NAME}_inv_aff found, begin non-rigid registration now"
+	  echo -e "Pre-defined affine transformation matrix ${TEST_NAME}_${NAME}_inv_aff found, begin non-rigid registration now"
 	  
 	fi
 	# use affine transform matrix to initialize non-rigid registration
-	job_reg="${jname}_reg"
-	${QSUB_CMD} -hold_jid ${job_affine} -N ${job_reg} reg_f3d -flo ${3}/template/${NAME} -ref ${1} -rmask ${MASK} -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff -res temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz ${PARCELLATION_NNR}
+	reg_f3d -flo ${3}/template/${NAME} -fmask ${3}/mask_dilate/${NAME} -ref ${1} -rmask ${MASK} -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff -res temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz ${PARCELLATION_NNR}
 	# apply control point to generate transformed label from atlas to test image
     job_resample="${jname}_resample"
-	${QSUB_CMD} -hold_jid ${job_reg} -N ${job_resample} reg_resample -flo ${3}/label/${NAME} -ref ${1} -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz -NN -res label/${ATLAS}/${TEST_NAME}_label_${NAME}.nii.gz
+	reg_resample -flo ${3}/label/${NAME} -ref ${1} -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz -NN -res label/${ATLAS}/${TEST_NAME}_label_${NAME}.nii.gz
     
 	# prepare parameters for label fusion
     if (( $PARAMETER_NUMBER==0 )); then
@@ -160,16 +157,12 @@ done
 let PARAMETER_NUMBER-=1
 
 # Prepare 4D images for label fusion
-jid_4d="${jid}_4d"
-jid_4d_label="${jid_4d}_label"
-${QSUB_SEG_MATH} -hold_jid ${jid_reg}_* -N ${jid_4d_label} seg_maths $FIRST_LABEL -merge $PARAMETER_NUMBER 4 $MERGE_LABEL label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz
+seg_maths $FIRST_LABEL -merge $PARAMETER_NUMBER 4 $MERGE_LABEL label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz
 # Start label fusion
-export jid_LabFusion="${jid}_LabFusion"
 # Determine which label fusion method to use
 if [[ ${LABFUSION}=="-STEPS" ]]; then
-  jid_4d_tempate="${jid_4d}_template"
-  ${QSUB_SEG_MATH} -hold_jid ${jid_reg}_* -N ${jid_4d_tempate} seg_maths $FIRST_TEMPLATE -merge $PARAMETER_NUMBER 4 $MERGE_TEMPLATE label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz
-  ${QSUB_SEG_MATH} -hold_jid ${jid_4d}_* -N ${jid_LabFusion} seg_LabFusion -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz -STEPS ${k} ${n} $1 label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz -out "\"label/${TEST_NAME}_${ATLAS}_label_STEPS_${k}_${n}.nii.gz\""
+  seg_maths $FIRST_TEMPLATE -merge $PARAMETER_NUMBER 4 $MERGE_TEMPLATE label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz
+  seg_LabFusion -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz -STEPS ${k} ${n} $1 label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz -out "\"label/${TEST_NAME}_${ATLAS}_label_STEPS_${k}_${n}.nii.gz\""
   #_NNG_${PARCELLATION_NNR}
 fi
 

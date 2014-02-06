@@ -1,6 +1,5 @@
 # Brain extraction shell script (SGE)
 # Author: Ma Da (d.ma.11@ucl.ac.uk)
-# Version 0.7_2013.04.15 (add non-rigid registration for accurate brain extraction)
 # echo "Bash version ${BASH_VERSION}..."
 #!/bin/bash
 
@@ -18,9 +17,9 @@
 
 # Setup default value for parameters
 ROOT_DIR=$(pwd)
-QSUB_CMD="qsub -l h_rt=1:00:00 -l h_vmem=9.9G -l tmem=9.9G -l s_stack=128M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error "
-QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -l h_vmem=12G -l tmem=12G -l s_stack=128M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
-DILATE=4 # value to be dilated for the result mask
+QSUB_CMD="qsub -l h_rt=2:00:00 -l h_vmem=9G -l tmem=9G -l s_stack=1024M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error "
+QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -l h_vmem=9.9G -l tmem=9.9G -l s_stack=1024M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
+DILATE=1 # value to be dilated for the result mask
 INITIAL_AFFINE="initial_affine.txt"
 MASK_AFF=" "
 # Read user defined parameters # need to add a line to check if $3 exist ...
@@ -37,13 +36,6 @@ jid=mask_"$$" # generate a random number as job ID
 jid_folder="${jid}_folder" # creating various folders if not exist
 if [ ! -f $1 ] && [ ! -f $1".nii" ] && [ ! -f $1".nii.gz" ] && [ ! -f $1".hdr" ]
   then echo "test image not exist"
-fi
-
-if [ ! -d job_output ]
-then mkdir job_output
-fi
-if [ ! -d job_error ]
-then mkdir job_error
 fi
 if [ ! -d temp ]
   then mkdir temp
