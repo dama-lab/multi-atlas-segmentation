@@ -8,6 +8,7 @@
 # $2: atlas (in_vivo ex_vivo)
 # $3: STEPS parameter k (kernel size in terms of voxel number)
 # $4: STEPS parameter n (number of top ranked local atlas to select for label fusion)
+# $5: file that contains other LabFusion parameters
 ROOT_DIR=$(pwd)
 # echo "Bash version ${BASH_VERSION}"
 ATLAS=$(basename $2)

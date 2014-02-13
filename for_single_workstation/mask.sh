@@ -32,11 +32,8 @@ fi
 if [ ! -d mask ]
 then mkdir mask
 fi
-if [ ! -d mask/temp ]
-then mkdir mask/temp
-fi
 if [ ! -d mask/${ATLAS} ]
-  then mkdir mask/${ATLAS}
+  then mkdir -p mask/${ATLAS}
 fi
 if [ ! -d $2/mask ]
 then mkdir $2/mask
@@ -64,7 +61,7 @@ do
 	   fi
 	   reg_aladin -flo $1 -ref $2/template/$G -rmask $2/mask_dilate/$G -aff temp/${ATLAS}/$TEST_NAME"_"$NAME"_aff" -res temp/${ATLAS}/$TEST_NAME"_"$NAME"_aff".nii.gz ${MASK_AFF}
 	   reg_transform -ref $2/template/$G -invAffine temp/${ATLAS}/$TEST_NAME"_"$NAME"_aff" temp/${ATLAS}/$TEST_NAME"_"$NAME"_inv_aff"
-	   reg_resample -flo $2/mask/$G -ref $1 -aff temp/${ATLAS}/$TEST_NAME"_"$NAME"_inv_aff" -NN -res mask/temp/${ATLAS}/$TEST_NAME"_mask_"$G
+	   reg_resample -flo $2/mask/$G -ref $1 -aff temp/${ATLAS}/$TEST_NAME"_"$NAME"_inv_aff" -NN -res mask/${ATLAS}/$TEST_NAME"_mask_"$G
 	   
 	   # change non-rigid registration for more accurate masking (not always working)
 	   # reg_f3d -flo $2/template/$G -ref $1 -aff temp/$TEST_NAME"_"$NAME"_inv_aff" -res temp/${TEST_NAME}_${NAME}_NRR.nii.gz -cpp temp/${TEST_NAME}_${NAME}_NRR_cpp.nii.gz
@@ -82,10 +79,10 @@ done
 let PARAMETER_NUMBER-=1
 
 # Label Fusion
-seg_maths $FIRST_PARAMETER -merge $PARAMETER_NUMBER 4 $MERGE_PARAMETERS mask/${ATLAS}/$TEST_NAME"_mask_4D.nii.gz"
-seg_LabFusion -in mask/${ATLAS}/TEST_NAME"_mask_4D" -STAPLE -out mask/${TEST_NAME}_mask_${ATLAS}_STAPLE.nii.gz
-seg_maths mask/${TEST_NAME}_mask_${ATLAS}_STAPLE.nii.gz -dil ${DILATE} mask/${TEST_NAME}_mask_${ATLAS}_STAPLE_d${DILATE}.nii.gz"
-echo "create mask at: "mask/${TEST_NAME}_mask_${ATLAS}_STAPLE_d${DILATE}.nii.gz"
+seg_maths $FIRST_PARAMETER -merge $PARAMETER_NUMBER 4 $MERGE_PARAMETERS mask/${ATLAS}/${TEST_NAME}_mask_4D.nii.gz
+seg_LabFusion -in mask/${ATLAS}/${TEST_NAME}"_mask_4D" -STAPLE -out mask/${TEST_NAME}_mask_${ATLAS}_STAPLE.nii.gz
+seg_maths mask/${TEST_NAME}_mask_${ATLAS}_STAPLE.nii.gz -dil ${DILATE} mask/${TEST_NAME}_mask_${ATLAS}_STAPLE_d${DILATE}.nii.gz
+echo "create mask at: mask/${TEST_NAME}_mask_${ATLAS}_STAPLE_d${DILATE}.nii.gz"
 
 # rm mask/temp/*.*
 # rm temp/*.*

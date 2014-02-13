@@ -1,5 +1,6 @@
 # Brain extraction shell script (SGE)
 # Author: Ma Da (d.ma.11@ucl.ac.uk)
+# Version 0.7_2013.04.15 (add non-rigid registration for accurate brain extraction)
 # echo "Bash version ${BASH_VERSION}..."
 #!/bin/bash
 
@@ -17,11 +18,11 @@
 
 # Setup default value for parameters
 ROOT_DIR=$(pwd)
-QSUB_CMD="qsub -l h_rt=2:00:00 -l h_vmem=9G -l tmem=9G -l s_stack=1024M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error "
-QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -l h_vmem=9.9G -l tmem=9.9G -l s_stack=1024M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
+QSUB_CMD="qsub -l h_rt=2:00:00 -pe smp 4 -R y -l h_vmem=1G -l tmem=1G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error " #  -l s_stack=128M
+QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -pe smp 8 -R y -l h_vmem=1G -l tmem=1G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # -l s_stack=128M
 DILATE=1 # value to be dilated for the result mask
 INITIAL_AFFINE="initial_affine.txt"
-MASK_AFF=" "
+MASK_AFF="-omp 4"
 # Read user defined parameters # need to add a line to check if $3 exist ...
 if [ ! -z $3 ]; then # check if there is a 3rd argument
   if [ -f $3 ]; then # check if the file specified by 3rd argument exist
@@ -32,7 +33,7 @@ FULL_TEST_NAME=$(basename $1) # basename: truncate path name from the string
 TEST_NAME=`echo "$FULL_TEST_NAME" | cut -d'.' -f1`
 ATLAS=$(basename $2)
 
-jid=mask_"$$" # generate a random number as job ID
+jid="mask_" # generate a random number as job ID "$$"
 jid_folder="${jid}_folder" # creating various folders if not exist
 if [ ! -f $1 ] && [ ! -f $1".nii" ] && [ ! -f $1".nii.gz" ] && [ ! -f $1".hdr" ]
   then echo "test image not exist"
@@ -98,7 +99,7 @@ do
 	     ${QSUB_CMD} -hold_jid $"${jname}_mask_*" -N ${job_aladin} reg_aladin -flo $1 -ref $2/template/$G -rmask $2/mask_dilate/$G -inaff ${INITIAL_AFFINE} -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz ${MASK_AFF}
 	   fi
 	   job_transform="${jname}_transform"
-	   ${QSUB_CMD} -hold_jid ${job_aladin} -N ${job_transform} reg_transform -ref $2/template/$G -invAffine temp/${ATLAS}/${TEST_NAME}_${NAME}_aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff
+	   ${QSUB_CMD} -hold_jid ${job_aladin} -N ${job_transform} reg_transform -ref $2/template/$G -invAff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff
 	   # generate mask from affine registration
 	   job_resample="${jname}_resample"
 	   ${QSUB_CMD} -hold_jid ${job_transform} -N ${job_resample} reg_resample -flo $2/mask/$G -ref $1 -aff temp/${ATLAS}/$TEST_NAME"_"$NAME"_inv_aff" -NN -res mask/${ATLAS}/$TEST_NAME"_mask_"$G
@@ -125,8 +126,8 @@ jname_merge_mask="${jid}_seg_math"
 ${QSUB_SEG_MATH} -hold_jid ${jid_reg}_* -N ${jname_merge_mask} seg_maths $FIRST_PARAMETER -merge $PARAMETER_NUMBER 4 $MERGE_PARAMETERS mask/${ATLAS}/${TEST_NAME}_mask_4D.nii.gz
 jname_seg_LabFusion="${jid}_seg_LabFusion"
 ${QSUB_SEG_MATH} -hold_jid ${jname_merge_mask} -N ${jname_seg_LabFusion} seg_LabFusion -in mask/${ATLAS}/${TEST_NAME}_mask_4D -STAPLE -out mask/${TEST_NAME}_mask_${ATLAS}_STAPLE.nii.gz
-export jname_seg_maths="${jid}_seg_maths"
-${QSUB_CMD} -hold_jid ${jname_seg_LabFusion} -N ${jname_seg_maths} seg_maths mask/${TEST_NAME}_mask_${ATLAS}_STAPLE.nii.gz -dil ${DILATE} mask/${TEST_NAME}_mask_${ATLAS}_STAPLE_d${DILATE}.nii.gz
+export jname_dilate="${jid}_dilate"
+${QSUB_CMD} -hold_jid ${jname_seg_LabFusion} -N ${jname_dilate} seg_maths mask/${TEST_NAME}_mask_${ATLAS}_STAPLE.nii.gz -dil ${DILATE} mask/${TEST_NAME}_mask_${ATLAS}_STAPLE_d${DILATE}.nii.gz
 echo "creating mask at: mask/${TEST_NAME}_mask_${ATLAS}_STAPLE_d${DILATE}.nii.gz"
 
 # rm mask/temp/*.*

@@ -1,5 +1,6 @@
 # Structural Parcellation shell script (SGE)
 # Author: Ma Da (d.ma.11@ucl.ac.uk)
+# Version 0.9_2013.10.21
 #!/bin/bash
 # echo "Bash version ${BASH_VERSION}..."
 
@@ -22,12 +23,13 @@ fi
 
 # setup default value for parameters
 ROOT_DIR=$(pwd)
-export QSUB_CMD="qsub -l h_rt=5:00:00 -l h_vmem=9G -l tmem=9G -l s_stack=1024M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
-export QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -l h_vmem=19.9G -l tmem=19.9G -l s_stack=1024M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
-PARCELLATION_NNR="-ln 4 -lp 4"
+export QSUB_CMD="qsub -l h_rt=5:00:00 -pe smp 4 -R y -l h_vmem=1G -l tmem=1G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" #  -l s_stack=128M
+export QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -pe smp 4 -R y -l h_vmem=2G -l tmem=2G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # -l s_stack=128M
+PARCELLATION_NNR="-ln 4 -lp 4 -omp 4 -sx -3"
 DILATE=1 # value to be dilated for the result mask
 LABFUSION="-STEPS"
-MASK_AFF=" "
+LABFUSION_OPTION="" # parameter options for STAPLE and STEPS in seg_LabFusion
+MASK_AFF="-omp 4"
 
 # Set STEPS parameters
 if [[ -z $k ]] && [[ -z $n ]]; then  # if STEPS parameter is not set
@@ -90,7 +92,7 @@ if [ ! -d label/${ATLAS} ]
 fi
 
 # "$$": generate a random number as job ID
-jmask="mask_$$" # if no mask has been created yet, evoke mask.sh
+jmask="mask_${TEST_NAME}" # if no mask has been created yet, evoke mask.sh
 if [ ! -f $2 ] && [ ! -f $2".nii" ] && [ ! -f $2".nii.gz" ] && [ ! -f $2".hdr" ]
 then
   # create mask for the test image first
@@ -116,7 +118,7 @@ fi
 # start structural parcellation
 echo "Creating label for: "$TEST_NAME
 PARAMETER_NUMBER=0
-jid_reg="reg_$$"
+jid_reg="reg"
 TEST_NAME=`echo "$(basename $1)" | cut -d'.' -f1`
 for G in `ls $3/template/`
 do
@@ -160,22 +162,21 @@ done
 let PARAMETER_NUMBER-=1
 
 # Prepare 4D images for label fusion
-jid_4d="merge4d_$$"
+jid_4d="merge4d_${TEST_NAME}"
 jid_4d_label="${jid_4d}_label"
 ${QSUB_SEG_MATH} -hold_jid ${jid_reg}_* -N ${jid_4d_label} seg_maths $FIRST_LABEL -merge $PARAMETER_NUMBER 4 $MERGE_LABEL label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz
 # Start label fusion
-export jid_LabFusion="LabFusion_$$"
+export jid_LabFusion="LabFusion_${TEST_NAME}"
 # Determine which label fusion method to use
 if [[ ${LABFUSION}=="-STEPS" ]]; then
   jid_4d_tempate="${jid_4d}_template"
   ${QSUB_SEG_MATH} -hold_jid ${jid_reg}_* -N ${jid_4d_tempate} seg_maths $FIRST_TEMPLATE -merge $PARAMETER_NUMBER 4 $MERGE_TEMPLATE label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz
-  ${QSUB_SEG_MATH} -hold_jid ${jid_4d}_* -N ${jid_LabFusion} seg_LabFusion -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz -STEPS ${k} ${n} $1 label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz -out "\"label/${TEST_NAME}_${ATLAS}_label_STEPS_${k}_${n}.nii.gz\""
-  #_NNG_${PARCELLATION_NNR}
+  ${QSUB_SEG_MATH} -hold_jid ${jid_4d}_* -N ${jid_LabFusion} seg_LabFusion -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz -STEPS ${k} ${n} $1 label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz -out label/${TEST_NAME}_label_${ATLAS}_STEPS_${k}_${n}.nii.gz
+  jid_NRR_mask="NRR_mask_${TEST_NAME}"
+  ${QSUB_CMD} -hold_jid ${jid_LabFusion} -N ${jid_NRR_mask} reg_tools -in label/${TEST_NAME}_label_${ATLAS}_STEPS_${k}_${n}.nii.gz -bin -out mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}.nii.gz
+  jid_NRR_mask_dilate="dil_NRR_mask_${TEST_NAME}"
+  ${QSUB_CMD} -hold_jid ${jid_NRR_mask} -N ${jid_NRR_mask_dilate} seg_maths mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}.nii.gz -dil ${DILATE} mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}_d${DILATE}.nii.gz
 fi
-
-
-
-
 
 
 
