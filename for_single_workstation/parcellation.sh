@@ -162,7 +162,7 @@ seg_maths $FIRST_LABEL -merge $PARAMETER_NUMBER 4 $MERGE_LABEL label/${ATLAS}/${
 # Determine which label fusion method to use
 if [[ ${LABFUSION}=="-STEPS" ]]; then
   seg_maths $FIRST_TEMPLATE -merge $PARAMETER_NUMBER 4 $MERGE_TEMPLATE label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz
-  seg_LabFusion -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz -STEPS ${k} ${n} $1 label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz -out "\"label/${TEST_NAME}_${ATLAS}_label_STEPS_${k}_${n}.nii.gz\""
+  seg_LabFusion -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz -STEPS ${k} ${n} $1 label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz -out "label/${TEST_NAME}_${ATLAS}_label_STEPS_${k}_${n}.nii.gz"
   #_NNG_${PARCELLATION_NNR}
 fi
 
