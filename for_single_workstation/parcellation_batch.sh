@@ -12,10 +12,20 @@
 #!/bin/bash
 DILATE=1
 ATLAS=$(basename $2)
+MASK_FOLDER="mask" # default mask folder
+MASK_SUFFIX=""
+MASK_SUFFIX="_mask_${ATLAS}_STAPLE_d${DILATE}" # default mask suffix
+
+# Read user defined parameters # need to add a line to check if $3 exist ...
+if [ ! -z $3 ]; then # check if there is a 3rd argument
+  if [ -f $3 ]; then # check if the file specified by 3rd argument exist
+    . $3 # if file of 4th argument exist, read the parameters from the file
+  fi
+fi
 
 for G in `ls $1`
 do
   TEST_NAME=`echo "$G" | cut -d'.' -f1`
   NAME=`echo "$G" | cut -d'.' -f1`
-  parcellation.sh $1/$G "mask/${TEST_NAME}_mask_${ATLAS}_STAPLE_d${DILATE}.nii.gz" $2 $3
+  parcellation.sh $1/$G "${MASK_FOLDER}/${TEST_NAME}${MASK_SUFFIX}.nii.gz" $2 $3
 done

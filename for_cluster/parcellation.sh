@@ -23,7 +23,8 @@ fi
 
 # setup default value for parameters
 ROOT_DIR=$(pwd)
-export QSUB_CMD="qsub -l h_rt=5:00:00 -pe smp 4 -R y -l h_vmem=1G -l tmem=1G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" #  -l s_stack=128M
+export QSUB_CMD="qsub -l h_rt=5:00:00 -pe smp 4 -R y -l h_vmem=1G -l tmem=1G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # old flag: -l s_stack=128M
+export QSUB_CMD_ONE_CORE="qsub -l h_rt=5:00:00 -pe smp 1 -R y -l h_vmem=2G -l tmem=2G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # old flag: -l s_stack=128M
 export QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -pe smp 4 -R y -l h_vmem=2G -l tmem=2G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # -l s_stack=128M
 PARCELLATION_NNR="-ln 4 -lp 4 -omp 4 -sx -3"
 DILATE=1 # value to be dilated for the result mask
@@ -173,7 +174,7 @@ if [[ ${LABFUSION}=="-STEPS" ]]; then
   ${QSUB_SEG_MATH} -hold_jid ${jid_reg}_* -N ${jid_4d_tempate} seg_maths $FIRST_TEMPLATE -merge $PARAMETER_NUMBER 4 $MERGE_TEMPLATE label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz
   ${QSUB_SEG_MATH} -hold_jid ${jid_4d}_* -N ${jid_LabFusion} seg_LabFusion -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz -STEPS ${k} ${n} $1 label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz -out label/${TEST_NAME}_label_${ATLAS}_STEPS_${k}_${n}.nii.gz
   jid_NRR_mask="NRR_mask_${TEST_NAME}"
-  ${QSUB_CMD} -hold_jid ${jid_LabFusion} -N ${jid_NRR_mask} reg_tools -in label/${TEST_NAME}_label_${ATLAS}_STEPS_${k}_${n}.nii.gz -bin -out mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}.nii.gz
+  ${QSUB_CMD} -hold_jid ${jid_LabFusion} -N ${jid_NRR_mask} seg_maths label/${TEST_NAME}_label_${ATLAS}_STEPS_${k}_${n}.nii.gz -bin mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}.nii.gz
   jid_NRR_mask_dilate="dil_NRR_mask_${TEST_NAME}"
   ${QSUB_CMD} -hold_jid ${jid_NRR_mask} -N ${jid_NRR_mask_dilate} seg_maths mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}.nii.gz -dil ${DILATE} mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}_d${DILATE}.nii.gz
 fi
