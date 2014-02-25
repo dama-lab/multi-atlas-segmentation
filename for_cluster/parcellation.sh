@@ -103,7 +103,7 @@ then
 	fi # if path of the script is not defined in bashrc, use "./mask.sh" instead
   # Mask for the test image created
   MASK=mask/${TEST_NAME}_mask_${ATLAS}_STAPLE_d${DILATE}.nii.gz
-  ${QSUB_CMD} -hold_jid ${jname_seg_maths} -N ${jmask} echo -e "Pre-defined mask ${MASK} NOT found, parcellation will start after the mask is generated"
+  ${QSUB_CMD} -hold_jid ${jname_dilate} -N ${jmask} echo -e "Pre-defined mask ${MASK} NOT found, parcellation will start after the mask is generated"
 else
   ${QSUB_CMD} -N ${jmask} echo -e "Pre-defined mask ${MASK} found, start to search/generate initial affine registration from atlas to test image now"
 fi
