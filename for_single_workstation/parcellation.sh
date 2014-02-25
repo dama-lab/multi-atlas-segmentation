@@ -14,12 +14,8 @@ echo "*     if it is not for leave-one-out testing      *"
 echo "***************************************************"
 echo "usage: parcellation.sh new_image corresponding_mask atlas_folder"
 
-if [ ! -d job_output ]
-  then mkdir job_output
-fi
-if [ ! -d job_error ]
-  then mkdir job_error
-fi
+# if [ ! -d job_output ]; then mkdir job_output; fi
+# if [ ! -d job_error ]; then mkdir job_error; fi
 
 # setup default value for parameters
 ROOT_DIR=$(pwd)
@@ -162,7 +158,7 @@ seg_maths $FIRST_LABEL -merge $PARAMETER_NUMBER 4 $MERGE_LABEL label/${ATLAS}/${
 # Determine which label fusion method to use
 if [[ ${LABFUSION}=="-STEPS" ]]; then
   seg_maths $FIRST_TEMPLATE -merge $PARAMETER_NUMBER 4 $MERGE_TEMPLATE label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz
-  seg_LabFusion -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz -STEPS ${k} ${n} $1 label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz -out "label/${TEST_NAME}_${ATLAS}_label_STEPS_${k}_${n}.nii.gz"
+  seg_LabFusion -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz -STEPS ${k} ${n} $1 label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz -out "label/${TEST_NAME}_label_${ATLAS}_STEPS_${k}_${n}.nii.gz"
   # potential suffix: _NNG_${PARCELLATION_NNR} ?
   seg_maths label/${TEST_NAME}_label_${ATLAS}_STEPS_${k}_${n}.nii.gz -bin mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}.nii.gz
   seg_maths mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}.nii.gz -dil ${DILATE} mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}_d${DILATE}.nii.gz
