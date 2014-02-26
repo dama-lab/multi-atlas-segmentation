@@ -1,6 +1,10 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 
+# Explicitly declare text files we want to always be normalized and converted 
+# to native line endings on checkout.
+*.sh text
+
 # Custom for Visual Studio
 *.cs     diff=csharp
 *.sln    merge=union
