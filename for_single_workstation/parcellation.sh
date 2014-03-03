@@ -90,14 +90,15 @@ fi
 # if no mask has been created yet, evoke mask.sh
 if [ ! -f $2 ] && [ ! -f $2".nii" ] && [ ! -f $2".nii.gz" ] && [ ! -f $2".hdr" ]
 then
+  echo -e "Pre-defined mask ${MASK} NOT found, parcellation will start after the mask is generated"
   # create mask for the test image first
-	if [ ! -z $4 ] && [ -f $4 ];  # check if there is a 4th argument# check if the file specified by 4th argument exist
-	then . mask.sh $1 $3 $4 # if file of 4th argument exist, read the parameters from the file
-	else . mask.sh $1 $3 # if there's no 4th argument or file not exist ("." eauqals to "source")
-	fi # if path of the script is not defined in bashrc, use "./mask.sh" instead
+  if [ ! -z $4 ] && [ -f $4 ];  # check if there is a 4th argument# check if the file specified by 4th argument exist
+  then . mask.sh $1 $3 $4 # if file of 4th argument exist, read the parameters from the file
+  else . mask.sh $1 $3 # if there's no 4th argument or file not exist ("." eauqals to "source")
+  fi # if path of the script is not defined in bashrc, use "./mask.sh" instead
   # Mask for the test image created
   MASK=mask/${TEST_NAME}_mask_${ATLAS}_STAPLE_d${DILATE}.nii.gz
-  echo -e "Pre-defined mask ${MASK} NOT found, parcellation will start after the mask is generated"
+
 else
   echo -e "Pre-defined mask ${MASK} found, start to search/generate initial affine registration from atlas to test image now"
 fi
@@ -124,7 +125,7 @@ do
 	# check if affine matrix exists as initialization for non-rigid registration. If no, generate it
 	if [ ! -f temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff ]; then
 	  # generate affine test->atlas
-	  reg_aladin -flo $1 -ref ${3}/template/${NAME} -rmask ${3}/mask_dilate/${NAME} -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff ${MASK_AFF}
+	  reg_aladin -flo $1 -ref ${3}/template/${NAME} -rmask ${3}/mask_dilate/${NAME} -fmask ${MASK} -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff ${MASK_AFF}
 	  # generate inv_affine atlas->test
 	  reg_transform -ref ${3}/template/${NAME} -invAffine temp/${ATLAS}/${TEST_NAME}_${NAME}_aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff 
 	else

@@ -14,12 +14,8 @@ echo "*     if it is not for leave-one-out testing      *"
 echo "***************************************************"
 echo "usage: parcellation.sh new_image corresponding_mask atlas_folder"
 
-if [ ! -d job_output ]
-  then mkdir job_output
-fi
-if [ ! -d job_error ]
-  then mkdir job_error
-fi
+if [ ! -d job_output ]; then mkdir job_output; fi
+if [ ! -d job_error ]; then mkdir job_error; fi
 
 # setup default value for parameters
 ROOT_DIR=$(pwd)
@@ -133,7 +129,7 @@ do
 	if [ ! -f temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff ]; then
 	  # generate affine test->atlas
 	  job_reverse_affine="${jname}_initial_affine"
-	  ${QSUB_CMD} -hold_jid ${jmask} -N ${job_reverse_affine} reg_aladin -flo $1 -ref ${3}/template/${NAME} -rmask ${3}/mask_dilate/${NAME} -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff ${MASK_AFF}
+	  ${QSUB_CMD} -hold_jid ${jmask} -N ${job_reverse_affine} reg_aladin -flo $1 -ref ${3}/template/${NAME} -rmask ${3}/mask_dilate/${NAME} -fmask ${MASK} -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff ${MASK_AFF}
 	  # generate inv_affine atlas->test
 	  ${QSUB_CMD} -hold_jid ${job_reverse_affine} -N ${job_affine} reg_transform -ref ${3}/template/${NAME} -invAff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff 
 	else
