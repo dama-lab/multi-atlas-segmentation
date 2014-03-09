@@ -25,7 +25,7 @@ export QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -pe smp 4 -R y -l h_vmem=2G -l tmem=2
 PARCELLATION_NNR="-ln 4 -lp 4 -omp 4 -sx -3"
 DILATE=1 # value to be dilated for the result mask
 LABFUSION="-STEPS"
-LABFUSION_OPTION="" # parameter options for STAPLE and STEPS in seg_LabFusion
+LABFUSION_OPTION="-v 1" # parameter options for STAPLE or STEPS in seg_LabFusion
 MASK_AFF="-omp 4"
 
 # Set STEPS parameters
@@ -88,7 +88,6 @@ if [ ! -d label/${ATLAS} ]
   then mkdir label/${ATLAS}
 fi
 
-# "$$": generate a random number as job ID
 jmask="mask_${TEST_NAME}" # if no mask has been created yet, evoke mask.sh
 if [ ! -f $2 ] && [ ! -f $2".nii" ] && [ ! -f $2".nii.gz" ] && [ ! -f $2".hdr" ]
 then
@@ -115,7 +114,8 @@ fi
 # start structural parcellation
 echo "Creating label for: "$TEST_NAME
 PARAMETER_NUMBER=0
-jid_reg="reg"
+jid="$$" # generate a random number as job ID
+jid_reg="reg_${jid}"
 TEST_NAME=`echo "$(basename $1)" | cut -d'.' -f1`
 for G in `ls $3/template/`
 do
@@ -139,16 +139,21 @@ do
 	# use affine transform matrix to initialize non-rigid registration
 	job_reg="${jname}_reg"
 	${QSUB_CMD} -hold_jid ${job_affine} -N ${job_reg} reg_f3d -flo ${3}/template/${NAME} -fmask ${3}/mask_dilate/${NAME} -ref ${1} -rmask ${MASK} -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff -res temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz ${PARCELLATION_NNR}
-	# apply control point to generate transformed label from atlas to test image
+	# apply control point to transform label/mask from atlas to test image
     job_resample="${jname}_resample"
-	${QSUB_CMD} -hold_jid ${job_reg} -N ${job_resample} reg_resample -flo ${3}/label/${NAME} -ref ${1} -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz -NN -res label/${ATLAS}/${TEST_NAME}_label_${NAME}.nii.gz
+	job_resample_nrr_mask=${job_resample}_nrr_mask
+	${QSUB_CMD} -hold_jid ${job_reg} -N ${job_resample_nrr_mask} reg_resample -flo ${3}/mask/${NAME} -ref ${1} -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz -NN -res mask/${ATLAS}/${TEST_NAME}_nrr_mask_${NAME}.nii.gz
+	job_resample_label=${job_resample}_label
+	${QSUB_CMD} -hold_jid ${job_reg} -N ${job_resample_label} reg_resample -flo ${3}/label/${NAME} -ref ${1} -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz -NN -res label/${ATLAS}/${TEST_NAME}_label_${NAME}.nii.gz
     
 	# prepare parameters for label fusion
     if (( $PARAMETER_NUMBER==0 )); then
-      FIRST_TEMPLATE="temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz" 
+      FIRST_TEMPLATE="temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz"
+ 	  FIRST_MASK="mask/${ATLAS}/${TEST_NAME}_nrr_mask_${NAME}.nii.gz"
 	  FIRST_LABEL="label/${ATLAS}/${TEST_NAME}_label_${NAME}.nii.gz"
     else
-      MERGE_TEMPLATE="${MERGE_TEMPLATE} temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz" 
+      MERGE_TEMPLATE="${MERGE_TEMPLATE} temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz"
+	  MERGE_MASK="${MERGE_MASK} mask/${ATLAS}/${TEST_NAME}_nrr_mask_${NAME}.nii.gz"
 	  MERGE_LABEL="${MERGE_LABEL} label/${ATLAS}/${TEST_NAME}_label_${NAME}.nii.gz"
     fi
     let PARAMETER_NUMBER+=1
@@ -160,6 +165,8 @@ let PARAMETER_NUMBER-=1
 
 # Prepare 4D images for label fusion
 jid_4d="merge4d_${TEST_NAME}"
+jid_4d_nrr_mask="${jid_4d}_nrr_mask"
+${QSUB_SEG_MATH} -hold_jid ${jid_reg}_* -N ${jid_4d_nrr_mask} seg_maths $FIRST_MASK -merge $PARAMETER_NUMBER 4 $MERGE_MASK mask/${ATLAS}/${TEST_NAME}_nrr_mask_4D.nii.gz
 jid_4d_label="${jid_4d}_label"
 ${QSUB_SEG_MATH} -hold_jid ${jid_reg}_* -N ${jid_4d_label} seg_maths $FIRST_LABEL -merge $PARAMETER_NUMBER 4 $MERGE_LABEL label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz
 # Start label fusion
@@ -168,9 +175,9 @@ export jid_LabFusion="LabFusion_${TEST_NAME}"
 if [[ ${LABFUSION}=="-STEPS" ]]; then
   jid_4d_tempate="${jid_4d}_template"
   ${QSUB_SEG_MATH} -hold_jid ${jid_reg}_* -N ${jid_4d_tempate} seg_maths $FIRST_TEMPLATE -merge $PARAMETER_NUMBER 4 $MERGE_TEMPLATE label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz
-  ${QSUB_SEG_MATH} -hold_jid ${jid_4d}_* -N ${jid_LabFusion} seg_LabFusion -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz -STEPS ${k} ${n} $1 label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz -out label/${TEST_NAME}_label_${ATLAS}_STEPS_${k}_${n}.nii.gz
+  ${QSUB_SEG_MATH} -hold_jid ${jid_4d}_* -N ${jid_LabFusion} seg_LabFusion -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz -STEPS ${k} ${n} $1 label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz ${LABFUSION_OPTION} -out label/${TEST_NAME}_label_${ATLAS}_STEPS_${k}_${n}.nii.gz
   jid_NRR_mask="NRR_mask_${TEST_NAME}"
-  ${QSUB_CMD} -hold_jid ${jid_LabFusion} -N ${jid_NRR_mask} seg_maths label/${TEST_NAME}_label_${ATLAS}_STEPS_${k}_${n}.nii.gz -bin mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}.nii.gz
+  ${QSUB_CMD} -hold_jid ${jid_4d}_* -N ${jid_NRR_mask} seg_LabFusion -in mask/${ATLAS}/${TEST_NAME}_nrr_mask_4D.nii.gz -STEPS ${k} ${n} $1 label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz ${LABFUSION_OPTION} -out mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}.nii.gz
   jid_NRR_mask_dilate="dil_NRR_mask_${TEST_NAME}"
   ${QSUB_CMD} -hold_jid ${jid_NRR_mask} -N ${jid_NRR_mask_dilate} seg_maths mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}.nii.gz -dil ${DILATE} mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}_d${DILATE}.nii.gz
 fi
