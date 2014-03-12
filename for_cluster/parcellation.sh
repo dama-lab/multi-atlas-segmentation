@@ -14,19 +14,16 @@ echo "*     if it is not for leave-one-out testing      *"
 echo "***************************************************"
 echo "usage: parcellation.sh new_image corresponding_mask atlas_folder"
 
-if [ ! -d job_output ]; then mkdir job_output; fi
-if [ ! -d job_error ]; then mkdir job_error; fi
-
 # setup default value for parameters
 ROOT_DIR=$(pwd)
 export QSUB_CMD="qsub -l h_rt=5:00:00 -pe smp 4 -R y -l h_vmem=1G -l tmem=1G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # old flag: -l s_stack=128M
 export QSUB_CMD_ONE_CORE="qsub -l h_rt=5:00:00 -pe smp 1 -R y -l h_vmem=2G -l tmem=2G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # old flag: -l s_stack=128M
 export QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -pe smp 4 -R y -l h_vmem=2G -l tmem=2G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # -l s_stack=128M
-PARCELLATION_NNR="-ln 4 -lp 4 -omp 4 -sx -3"
+PARCELLATION_NNR="-ln 4 -lp 4 -sx -3"
 DILATE=1 # value to be dilated for the result mask
 LABFUSION="-STEPS"
 LABFUSION_OPTION="-v 1" # parameter options for STAPLE or STEPS in seg_LabFusion
-MASK_AFF="-omp 4"
+MASK_AFF=""
 
 # Set STEPS parameters
 if [[ -z $k ]] && [[ -z $n ]]; then  # if STEPS parameter is not set
@@ -49,12 +46,6 @@ echo "Creating parcellation label for: "$TEST_NAME
 ATLAS=$(basename $3)
 MASK=$2
 
-if [ ! -d temp ]
-  then mkdir temp
-fi
-if [ ! -d temp/${ATLAS} ]
-  then mkdir temp/${ATLAS}
-fi
 # create dilated mask for every template image if not already exist
 if [ ! -d $3/mask ]; then
   echo "create mask for every template image if not done yet"
@@ -64,13 +55,10 @@ if [ ! -d $3/mask_dilate ]; then
   echo "create dilated mask for every template image if not done yet"
   mkdir $3/mask_dilate
 fi
-if [ ! -d job_output ]
-then mkdir job_output
-fi
-if [ ! -d job_error ]
-then mkdir job_error
-fi
-
+if [ ! -d job_output ]; then mkdir job_output; fi
+if [ ! -d job_error ]; then mkdir job_error; fi
+if [ ! -d temp/${ATLAS} ]; then mkdir -p temp/${ATLAS}; fi
+if [ ! -d mask ]; then mkdir mask; fi
 for G in `ls $3/template/`
 do
   if [ ! -f $3/mask_dilate/$G ] && [ ! -f $3/mask_dilate/$G".nii" ] && [ ! -f $3/mask_dilate/$G".nii.gz" ] && [ ! -f $3/mask_dilate/$G".hdr" ]; then
@@ -129,7 +117,7 @@ do
 	if [ ! -f temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff ]; then
 	  # generate affine test->atlas
 	  job_reverse_affine="${jname}_initial_affine"
-	  ${QSUB_CMD} -hold_jid ${jmask} -N ${job_reverse_affine} reg_aladin -flo $1 -ref ${3}/template/${NAME} -rmask ${3}/mask_dilate/${NAME} -fmask ${MASK} -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff ${MASK_AFF}
+	  ${QSUB_CMD} -hold_jid ${jmask} -N ${job_reverse_affine} reg_aladin -flo $1 -ref ${3}/template/${NAME} -rmask ${3}/mask_dilate/${NAME} -fmask ${MASK} -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff ${MASK_AFF} -omp 4
 	  # generate inv_affine atlas->test
 	  ${QSUB_CMD} -hold_jid ${job_reverse_affine} -N ${job_affine} reg_transform -ref ${3}/template/${NAME} -invAff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff 
 	else
@@ -138,7 +126,7 @@ do
 	fi
 	# use affine transform matrix to initialize non-rigid registration
 	job_reg="${jname}_reg"
-	${QSUB_CMD} -hold_jid ${job_affine} -N ${job_reg} reg_f3d -flo ${3}/template/${NAME} -fmask ${3}/mask_dilate/${NAME} -ref ${1} -rmask ${MASK} -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff -res temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz ${PARCELLATION_NNR}
+	${QSUB_CMD} -hold_jid ${job_affine} -N ${job_reg} reg_f3d -flo ${3}/template/${NAME} -fmask ${3}/mask_dilate/${NAME} -ref ${1} -rmask ${MASK} -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff -res temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz ${PARCELLATION_NNR} -omp 4
 	# apply control point to transform label/mask from atlas to test image
     job_resample="${jname}_resample"
 	job_resample_nrr_mask=${job_resample}_nrr_mask
