@@ -24,7 +24,7 @@ export QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -l h_vmem=8G -l tmem=8G -l s_stack=10
 PARCELLATION_NNR="-ln 4 -lp 4"
 DILATE=1 # value to be dilated for the result mask
 LABFUSION="-STEPS"
-MASK_AFF=" "
+MASK_AFF="-ln 4 -lp 4"
 
 # Set STEPS parameters
 if [[ -z $k ]] && [[ -z $n ]]; then  # if STEPS parameter is not set
@@ -125,15 +125,17 @@ do
 	# check if affine matrix exists as initialization for non-rigid registration. If no, generate it
 	if [ ! -f temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff ]; then
 	  # generate affine test->atlas
-	  reg_aladin -flo $1 -ref ${3}/template/${NAME} -rmask ${3}/mask_dilate/${NAME} -fmask ${MASK} -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff ${MASK_AFF}
+	  # reg_aladin -flo $1 -ref ${3}/template/${NAME} -rmask ${3}/mask_dilate/${NAME} -fmask ${MASK} -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff ${MASK_AFF}
 	  # generate inv_affine atlas->test
-	  reg_transform -ref ${3}/template/${NAME} -invAffine temp/${ATLAS}/${TEST_NAME}_${NAME}_aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff 
+	  # reg_transform -ref ${3}/template/${NAME} -invAffine temp/${ATLAS}/${TEST_NAME}_${NAME}_aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff 
+	  # generate affine atlas->test
+	  reg_aladin -flo ${3}/template/${NAME} -ref $1 -fmask ${3}/mask_dilate/${NAME} -rmask ${MASK} -res temp/${ATLAS}/${NAME}_${TEST_NAME}_aff.nii.gz -aff temp/${ATLAS}/${NAME}_${TEST_NAME}_aff ${MASK_AFF}
 	else
 	  echo -e "Pre-defined affine transformation matrix ${TEST_NAME}_${NAME}_inv_aff found, begin non-rigid registration now"
 	  
 	fi
 	# use affine transform matrix to initialize non-rigid registration
-	reg_f3d -flo ${3}/template/${NAME} -fmask ${3}/mask_dilate/${NAME} -ref ${1} -rmask ${MASK} -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff -res temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz ${PARCELLATION_NNR}
+	reg_f3d -flo ${3}/template/${NAME} -fmask ${3}/mask_dilate/${NAME} -ref ${1} -rmask ${MASK} -aff temp/${ATLAS}/${NAME}_${TEST_NAME}_aff -res temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz ${PARCELLATION_NNR}
 	# apply control point to generate transformed label from atlas to test image
     job_resample="${jname}_resample"
 	reg_resample -flo ${3}/label/${NAME} -ref ${1} -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz -NN -res label/${ATLAS}/${TEST_NAME}_label_${NAME}.nii.gz

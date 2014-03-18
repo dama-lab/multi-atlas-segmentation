@@ -60,8 +60,8 @@ do
 		 then seg_maths $2/mask/$G -dil 3 $2/mask_dilate/$G
 	   fi
 	   reg_aladin -flo $1 -ref $2/template/$G -rmask $2/mask_dilate/$G -aff temp/${ATLAS}/$TEST_NAME"_"$NAME"_aff" -res temp/${ATLAS}/$TEST_NAME"_"$NAME"_aff".nii.gz ${MASK_AFF}
-	   reg_transform -ref $2/template/$G -invAffine temp/${ATLAS}/$TEST_NAME"_"$NAME"_aff" temp/${ATLAS}/$TEST_NAME"_"$NAME"_inv_aff"
-	   reg_resample -flo $2/mask/$G -ref $1 -aff temp/${ATLAS}/$TEST_NAME"_"$NAME"_inv_aff" -NN -res mask/${ATLAS}/$TEST_NAME"_mask_"$G
+	   reg_transform -ref $2/template/$G -invAffine temp/${ATLAS}/$TEST_NAME"_"$NAME"_aff" temp/${ATLAS}/${NAME}_${TEST_NAME}_aff
+	   reg_resample -flo $2/mask/$G -ref $1 -aff temp/${ATLAS}/${NAME}_${TEST_NAME}_aff -NN -res mask/${ATLAS}/$TEST_NAME"_mask_"$G
 	   
 	   # change non-rigid registration for more accurate masking (not always working)
 	   # reg_f3d -flo $2/template/$G -ref $1 -aff temp/$TEST_NAME"_"$NAME"_inv_aff" -res temp/${TEST_NAME}_${NAME}_NRR.nii.gz -cpp temp/${TEST_NAME}_${NAME}_NRR_cpp.nii.gz

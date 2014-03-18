@@ -22,7 +22,7 @@ QSUB_CMD="qsub -l h_rt=2:00:00 -pe smp 4 -R y -l h_vmem=1G -l tmem=1G -j y -S /b
 QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -pe smp 8 -R y -l h_vmem=1G -l tmem=1G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # -l s_stack=128M
 DILATE=1 # value to be dilated for the result mask
 INITIAL_AFFINE="initial_affine.txt"
-MASK_AFF="-omp 4"
+MASK_AFF=""
 LABFUSION_OPTION="-v 1"
 # Read user defined parameters # need to add a line to check if $3 exist ...
 if [ ! -z $3 ]; then # check if there is a 3rd argument
@@ -34,7 +34,7 @@ FULL_TEST_NAME=$(basename $1) # basename: truncate path name from the string
 TEST_NAME=`echo "$FULL_TEST_NAME" | cut -d'.' -f1`
 ATLAS=$(basename $2)
 
-jid="mask_" # generate a random number as job ID "$$"
+jid="mask_$$" # generate a random number as job ID "$$"
 jid_folder="${jid}_folder" # creating various folders if not exist
 if [ ! -f $1 ] && [ ! -f $1".nii" ] && [ ! -f $1".nii.gz" ] && [ ! -f $1".hdr" ]
   then echo "test image not exist"
@@ -95,22 +95,16 @@ do
 	   job_aladin="${jname}_aladin" # start create affine registration matrix
 	   if [ ! -f ${INITIAL_AFFINE} ] # if no initial affine matrix file
 	     then
-		 ${QSUB_CMD} -hold_jid $"${jname}_mask_*" -N ${job_aladin} reg_aladin -flo $1 -ref $2/template/$G -rmask $2/mask_dilate/$G -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz ${MASK_AFF}
+		 ${QSUB_CMD} -hold_jid $"${jname}_mask_*" -N ${job_aladin} reg_aladin -flo $1 -ref $2/template/$G -rmask $2/mask_dilate/$G -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz ${MASK_AFF} -omp 4
 	   else # if initial affine matrix file exist, use it
-	     ${QSUB_CMD} -hold_jid $"${jname}_mask_*" -N ${job_aladin} reg_aladin -flo $1 -ref $2/template/$G -rmask $2/mask_dilate/$G -inaff ${INITIAL_AFFINE} -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz ${MASK_AFF}
+	     ${QSUB_CMD} -hold_jid $"${jname}_mask_*" -N ${job_aladin} reg_aladin -flo $1 -ref $2/template/$G -rmask $2/mask_dilate/$G -inaff ${INITIAL_AFFINE} -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz ${MASK_AFF} -omp 4
 	   fi
 	   job_transform="${jname}_transform"
-	   ${QSUB_CMD} -hold_jid ${job_aladin} -N ${job_transform} reg_transform -ref $2/template/$G -invAff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff
+	   ${QSUB_CMD} -hold_jid ${job_aladin} -N ${job_transform} reg_transform -ref $2/template/$G -invAff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff temp/${ATLAS}/${NAME}_${TEST_NAME}_aff
 	   # generate mask from affine registration
 	   job_resample="${jname}_resample"
-	   ${QSUB_CMD} -hold_jid ${job_transform} -N ${job_resample} reg_resample -flo $2/mask/$G -ref $1 -aff temp/${ATLAS}/$TEST_NAME"_"$NAME"_inv_aff" -NN -res mask/${ATLAS}/$TEST_NAME"_mask_"$G
+	   ${QSUB_CMD} -hold_jid ${job_transform} -N ${job_resample} reg_resample -flo $2/mask/$G -ref $1 -aff temp/${ATLAS}/${NAME}_${TEST_NAME}_aff -NN -res mask/${ATLAS}/$TEST_NAME"_mask_"$G
 	   
-	   # Using non-rigid registration to generate accurate mask (not always working)
-	   # job_f3d="${jname}_f3d"
-	   # ${QSUB_CMD} -hold_jid ${job_transform} -N ${job_f3d} reg_f3d -flo $2/template/$G -ref $1 -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff -res temp/${ATLAS}/${TEST_NAME}_${NAME}_NRR.nii.gz -cpp temp/${ATLAS}/${TEST_NAME}_${NAME}_NRR_cpp.nii.gz
-	   # Resample the atlas mask to generate mask for test image
-	   # job_resample="${jname}_resample"
-	   # ${QSUB_CMD} -hold_jid ${job_f3d} -N ${job_resample} reg_resample -flo $2/mask/$G -ref $1 -cpp temp/${ATLAS}/${TEST_NAME}_${NAME}_NRR_cpp.nii.gz -NN -res mask/${ATLAS}/$TEST_NAME"_mask_"$G
 	   
 	   if (( $PARAMETER_NUMBER==0 ))
 		 then FIRST_PARAMETER=mask/${ATLAS}/$TEST_NAME"_mask_"$G
