@@ -112,23 +112,29 @@ do
   # Check testing image name is different from atlas template. If same, skip (for leave-one-out)
   if [[ ${3}/template/${NAME} != $1 ]] && [[ ${3}/template/${NAME}.nii != $1 ]] && [[ ${3}/template/${NAME}.nii.gz != $1 ]] && [[ ${3}/template/${NAME}.hdr != $1 ]]
   then
-	# check if affine matrix exists as initialization for non-rigid registration. If no, generate it
-	job_affine="${jname}_affine_matrix"
-	if [ ! -f temp/${ATLAS}/${NAME}_${TEST_NAME}_aff ]; then
-	  # generate affine test->atlas
-	  # job_reverse_affine="${jname}_initial_affine"
-	  # ${QSUB_CMD} -hold_jid ${jmask} -N ${job_reverse_affine} reg_aladin -flo $1 -ref ${3}/template/${NAME} -rmask ${3}/mask_dilate/${NAME} -fmask ${MASK} -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff ${MASK_AFF} -omp 4
-	  # generate inv_affine atlas->test
-	  # ${QSUB_CMD} -hold_jid ${job_reverse_affine} -N ${job_affine} reg_transform -ref ${3}/template/${NAME} -invAff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff
-      # generate affine atlas->test
-	  ${QSUB_CMD} -hold_jid ${jmask} -N ${job_affine} reg_aladin -flo ${3}/template/${NAME} -ref $1 -fmask ${3}/mask_dilate/${NAME} -rmask ${MASK} -res temp/${ATLAS}/${NAME}_${TEST_NAME}_aff.nii.gz -aff temp/${ATLAS}/${NAME}_${TEST_NAME}_aff ${MASK_AFF} -omp 4  
+	# 1. check if control point exists as initialization for non-rigid registration.
+	if [ -f temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz ]; then
+	  job_reg="${jname}_reg"
+	  ${QSUB_CMD} -hold_jid ${jmask} -N ${job_reg} reg_f3d -flo ${3}/template/${NAME} -fmask ${3}/mask_dilate/${NAME} -ref ${1} -rmask ${MASK} -incpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz -res temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz ${PARCELLATION_NNR} -omp 4
 	else
-	  ${QSUB_CMD} -hold_jid ${jmask} -N ${job_affine} echo -e "Pre-defined affine transformation matrix ${NAME}_${TEST_NAME}_aff found, begin non-rigid registration now"
-	  
+	  # 2. check if affine matrix exists as initialization for non-rigid registration. If still not, generate it
+	  job_affine="${jname}_affine_matrix"
+	  if [ ! -f temp/${ATLAS}/${NAME}_${TEST_NAME}_aff ]; then
+	    # generate affine test->atlas
+	    # job_reverse_affine="${jname}_initial_affine"
+	    # ${QSUB_CMD} -hold_jid ${jmask} -N ${job_reverse_affine} reg_aladin -flo $1 -ref ${3}/template/${NAME} -rmask ${3}/mask_dilate/${NAME} -fmask ${MASK} -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff ${MASK_AFF} -omp 4
+	    # generate inv_affine atlas->test
+	    # ${QSUB_CMD} -hold_jid ${job_reverse_affine} -N ${job_affine} reg_transform -ref ${3}/template/${NAME} -invAff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff
+        # generate affine atlas->test
+	    ${QSUB_CMD} -hold_jid ${jmask} -N ${job_affine} reg_aladin -flo ${3}/template/${NAME} -ref $1 -fmask ${3}/mask_dilate/${NAME} -rmask ${MASK} -res temp/${ATLAS}/${NAME}_${TEST_NAME}_aff.nii.gz -aff temp/${ATLAS}/${NAME}_${TEST_NAME}_aff ${MASK_AFF} -omp 4  
+	  else
+	    ${QSUB_CMD} -hold_jid ${jmask} -N ${job_affine} echo -e "Pre-defined affine transformation matrix ${NAME}_${TEST_NAME}_aff found, begin non-rigid registration now"
+	  fi
+	  # use affine transform matrix to initialize non-rigid registration
+	  job_reg="${jname}_reg"
+	  ${QSUB_CMD} -hold_jid ${job_affine} -N ${job_reg} reg_f3d -flo ${3}/template/${NAME} -fmask ${3}/mask_dilate/${NAME} -ref ${1} -rmask ${MASK} -aff temp/${ATLAS}/${NAME}_${TEST_NAME}_aff -res temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz ${PARCELLATION_NNR} -omp 4
 	fi
-	# use affine transform matrix to initialize non-rigid registration
-	job_reg="${jname}_reg"
-	${QSUB_CMD} -hold_jid ${job_affine} -N ${job_reg} reg_f3d -flo ${3}/template/${NAME} -fmask ${3}/mask_dilate/${NAME} -ref ${1} -rmask ${MASK} -aff temp/${ATLAS}/${NAME}_${TEST_NAME}_aff -res temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz ${PARCELLATION_NNR} -omp 4
+	
 	# apply control point to transform label/mask from atlas to test image
     job_resample="${jname}_resample"
 	job_resample_nrr_mask=${job_resample}_nrr_mask

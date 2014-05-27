@@ -12,7 +12,7 @@
 ROOT_DIR=$(pwd)
 # echo "Bash version ${BASH_VERSION}"
 ATLAS=$(basename $2)
-export QSUB_CMD="qsub -l h_rt=1:00:00 -l h_vmem=9.9G -l tmem=9.9G -l s_stack=128M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
+export QSUB_CMD="qsub -l h_rt=5:00:00 -pe smp 4 -R y -l h_vmem=2.5G -l tmem=2.5G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
 
 # Set STEPS parameters
 if [[ ! -z $3 ]] && [[ ! -z $4 ]]; then  # if STEPS parameter is set (-z: zero = not set), so ! -z = set
@@ -21,6 +21,13 @@ if [[ ! -z $3 ]] && [[ ! -z $4 ]]; then  # if STEPS parameter is set (-z: zero =
 else # if [[ -z "${STEPS_PARAMETER}" ]] set default STEPS parameter to: "4 6"
   export k=5
   export n=8
+fi
+
+# Read user-defined parameters
+if [ ! -z $5 ]; then # check if there is a 5th argument
+  if [ -f $5 ]; then # check if the file specified by 5th argument exist
+    . $5 # if file of 5th argument exist, read the parameters from the file
+  fi
 fi
 export STEPS_PARAMETER="${k} ${n} "
 
