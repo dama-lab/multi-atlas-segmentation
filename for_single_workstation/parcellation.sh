@@ -62,7 +62,6 @@ if [ ! -d $3/mask_dilate ]; then
   echo "create dilated mask for every template image if not done yet"
   mkdir $3/mask_dilate
 fi
-fi
 
 for G in `ls $3/template/`
 do
