@@ -113,29 +113,21 @@ do
   # Check testing image name is different from atlas template. If same, skip (for leave-one-out)
   if [[ ${3}/template/${NAME} != $1 ]] && [[ ${3}/template/${NAME}.nii != $1 ]] && [[ ${3}/template/${NAME}.nii.gz != $1 ]] && [[ ${3}/template/${NAME}.hdr != $1 ]]
   then
-	# 1)check if control point exists (coarse-to-fine step)
-	if [ -f temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz ]; then
-	  # 1.1）use control point to initialise for non-rigid registration (fine step)
-	  reg_f3d -flo ${3}/template/${NAME} -fmask ${3}/mask_dilate/${NAME} -ref ${1} -rmask ${MASK} -incpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz -res temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp_fine.nii.gz ${PARCELLATION_NNR}
-	  # 1.2) apply control point (fine) to transform label/mask from atlas to test image
-	  reg_resample -flo ${3}/mask/${NAME} -ref ${1} -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp_fine.nii.gz -NN -res mask/${ATLAS}/${TEST_NAME}_nrr_mask_${NAME}.nii.gz
-	  reg_resample -flo ${3}/label/${NAME} -ref ${1} -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp_fine.nii.gz -NN -res label/${ATLAS}/${TEST_NAME}_label_${NAME}.nii.gz
-    else	
-	# 2)check if affine matrix exists
+	# 1)check if affine matrix exists
 	  if [ ! -f temp/${ATLAS}/${TEST_NAME}_${NAME}_inv_aff ]; then
-	    # 2.1) if affine matrix not found, generate affine atlas->test
+	    # 1.1) if affine matrix not found, generate affine atlas->test
 	    reg_aladin -flo ${3}/template/${NAME} -ref $1 -fmask ${3}/mask_dilate/${NAME} -rmask ${MASK} -res temp/${ATLAS}/${NAME}_${TEST_NAME}_aff.nii.gz -aff temp/${ATLAS}/${NAME}_${TEST_NAME}_aff ${MASK_AFF}
 	  else
 	    echo -e "Pre-defined affine transformation matrix ${TEST_NAME}_${NAME}_inv_aff found, begin non-rigid registration now"
 	  fi
-	  # 2.2) use affine transform matrix to initialize non-rigid registration (coarse step)
+	  # 1.2) use affine transform matrix to initialize non-rigid registration (coarse step)
 	  reg_f3d -flo ${3}/template/${NAME} -fmask ${3}/mask_dilate/${NAME} -ref ${1} -rmask ${MASK} -aff temp/${ATLAS}/${NAME}_${TEST_NAME}_aff -res temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz ${PARCELLATION_NNR}
-	  # 2.3) apply control point to generate transformed label from atlas to test image
+	  # 1.3) apply control point to generate transformed label from atlas to test image
       job_resample="${jname}_resample"
 	reg_resample -flo ${3}/label/${NAME} -ref ${1} -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz -NN -res label/${ATLAS}/${TEST_NAME}_label_${NAME}.nii.gz
     fi
 	
-	# 3) prepare parameters for label fusion
+	# 2) prepare parameters for label fusion
     if (( $PARAMETER_NUMBER==0 )); then
       FIRST_TEMPLATE="temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz" 
 	  FIRST_LABEL="label/${ATLAS}/${TEST_NAME}_label_${NAME}.nii.gz"

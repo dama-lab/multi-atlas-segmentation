@@ -13,7 +13,7 @@ echo "*********************************************"
 echo "usage: mask new_image atlas_type (in_vivo/ex_vivo)"
 # $1: enquiry image
 # $2: atlas folder "in_vivo" or "ex_vivo"
-# Add $3: value to be dilated
+# $3: user-defined parameters
 # start brain extraction
 ROOT_DIR=$(pwd)
 FULL_TEST_NAME=$(basename $1)
@@ -22,6 +22,13 @@ ATLAS=$(basename $2)
 DILATE=1 # value to be dilated for the result mask
 INITIAL_AFFINE="initial_affine.txt"
 MASK_AFF=" "
+
+# Read user-defined parameters
+if [ ! -z $3 ]; then # check if there is a 4th argument
+  if [ -f $3 ]; then # check if the file specified by 4th argument exist
+    . $3 # if file of 4th argument exist, read the parameters from the file
+  fi
+fi
 
 if [ ! -f $1 ] && [ ! -f $1".nii" ] && [ ! -f $1".nii.gz" ] && [ ! -f $1".hdr" ]
 then echo "test image not exist"
