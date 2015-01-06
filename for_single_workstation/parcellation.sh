@@ -47,12 +47,9 @@ echo "Creating parcellation label for: "$TEST_NAME
 ATLAS=$(basename $3)
 MASK=$2
 
-if [ ! -d temp ]
-  then mkdir temp
-fi
-if [ ! -d temp/${ATLAS} ]
-  then mkdir temp/${ATLAS}
-fi
+if [ ! -d temp/${ATLAS} ]; then mkdir -p temp/${ATLAS}; fi
+if [ ! -d mask/${ATLAS} ]; then mkdir -p mask/${ATLAS}; fi
+
 # create dilated mask for every template image if not already exist
 if [ ! -d $3/mask ]; then
   echo "create mask for every template image if not done yet"
@@ -123,15 +120,18 @@ do
 	# 1.2) use affine transform matrix to initialize non-rigid registration (coarse step)
 	reg_f3d -flo ${3}/template/${NAME} -fmask ${3}/mask_dilate/${NAME} -ref ${1} -rmask ${MASK} -aff temp/${ATLAS}/${NAME}_${TEST_NAME}_aff -res temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz ${PARCELLATION_NNR}
 	
-	# 1.3) apply control point to generate transformed label from atlas to test image
+	# 1.3) apply control point to generate transformed mask/label from atlas to test image
+	reg_resample -flo ${3}/mask/${NAME} -ref ${1} -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz -NN -res mask/${ATLAS}/${TEST_NAME}_nrr_mask_${NAME}.nii.gz
 	reg_resample -flo ${3}/label/${NAME} -ref ${1} -cpp temp/${ATLAS}/${NAME}_${TEST_NAME}_cpp.nii.gz -NN -res label/${ATLAS}/${TEST_NAME}_label_${NAME}.nii.gz
 	
 	# 2) prepare parameters for label fusion
     if (( $PARAMETER_NUMBER==0 )); then
       FIRST_TEMPLATE="temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz" 
+	  FIRST_MASK="mask/${ATLAS}/${TEST_NAME}_nrr_mask_${NAME}.nii.gz"
 	  FIRST_LABEL="label/${ATLAS}/${TEST_NAME}_label_${NAME}.nii.gz"
     else
-      MERGE_TEMPLATE="${MERGE_TEMPLATE} temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz" 
+      MERGE_TEMPLATE="${MERGE_TEMPLATE} temp/${ATLAS}/${NAME}_${TEST_NAME}_f3d.nii.gz"
+	  MERGE_MASK="${MERGE_MASK} mask/${ATLAS}/${TEST_NAME}_nrr_mask_${NAME}.nii.gz"
 	  MERGE_LABEL="${MERGE_LABEL} label/${ATLAS}/${TEST_NAME}_label_${NAME}.nii.gz"
     fi
     let PARAMETER_NUMBER+=1
@@ -142,14 +142,19 @@ done
 let PARAMETER_NUMBER-=1
 
 # Prepare 4D images for label fusion
+seg_maths $FIRST_MASK -merge $PARAMETER_NUMBER 4 $MERGE_MASK mask/${ATLAS}/${TEST_NAME}_nrr_mask_4D.nii.gz
 seg_maths $FIRST_LABEL -merge $PARAMETER_NUMBER 4 $MERGE_LABEL label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz
+
 # Start label fusion
 # Determine which label fusion method to use
 if [[ ${LABFUSION}=="-STEPS" ]]; then
   seg_maths $FIRST_TEMPLATE -merge $PARAMETER_NUMBER 4 $MERGE_TEMPLATE label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz
   seg_LabFusion -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz -STEPS ${k} ${n} $1 label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz -out "label/${TEST_NAME}_label_${ATLAS}_STEPS_${k}_${n}.nii.gz"
   # potential suffix: _NNG_${PARCELLATION_NNR} ?
-  seg_maths label/${TEST_NAME}_label_${ATLAS}_STEPS_${k}_${n}.nii.gz -bin mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}.nii.gz
+    
+  # Creating NRR mask
+  # seg_maths label/${TEST_NAME}_label_${ATLAS}_STEPS_${k}_${n}.nii.gz -bin mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}.nii.gz
+  seg_LabFusion -in mask/${ATLAS}/${TEST_NAME}_nrr_mask_4D.nii.gz -STEPS ${k} ${n} $1 label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz ${LABFUSION_OPTION} -out mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}.nii.gz
   seg_maths mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}.nii.gz -dil ${DILATE} mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}_d${DILATE}.nii.gz
 fi
 
