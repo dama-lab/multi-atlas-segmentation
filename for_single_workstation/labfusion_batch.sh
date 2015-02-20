@@ -17,7 +17,7 @@ if [[ ! -z $3 ]] && [[ ! -z $4 ]]; then  # if STEPS parameter is set (-z: zero =
   export k=$3
   export n=$4
 else # if [[ -z "${STEPS_PARAMETER}" ]] set default STEPS parameter to: "4 6"
-  export k=5
+  export k=8
   export n=8
 fi
 export STEPS_PARAMETER="${k} ${n} "
@@ -29,7 +29,11 @@ echo "***********************************************"
 for H in `ls $1`
 do
   TEST_NAME=`echo "$H" | cut -d'.' -f1`
-  jid_LabFusion=labfusion_"$$"
-  seg_LabFusion -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz -STEPS ${STEPS_PARAMETER} $1/$H label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz -out label/${TEST_NAME}_${ATLAS}_label_STEPS_${k}_${n}.nii.gz
+  # jid_LabFusion=labfusion_"$$"
+  
+  seg_LabFusion -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz \
+  -STEPS ${STEPS_PARAMETER} $1/$H label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz \
+  -out label/${TEST_NAME}_label_${ATLAS}_STEPS_${k}_${n}.nii.gz \
+  -unc -v 1
 done
   

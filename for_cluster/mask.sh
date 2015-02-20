@@ -19,10 +19,10 @@
 # Setup default value for parameters
 ROOT_DIR=$(pwd)
 QSUB_CMD="qsub -l h_rt=2:00:00 -pe smp 4 -R y -l h_vmem=1G -l tmem=1G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" #  -l s_stack=128M
-QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -pe smp 8 -R y -l h_vmem=1G -l tmem=1G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # -l s_stack=128M
-DILATE=1 # value to be dilated for the result mask
+QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -pe smp 4 -R y -l h_vmem=2G -l tmem=2G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # -l s_stack=128M
+DILATE=3 # value to be dilated for the result mask
 INITIAL_AFFINE="initial_affine.txt"
-MASK_AFF=""
+MASK_AFF="-ln 4 -lp 4 -omp 4 -speeeeed"
 LABFUSION_OPTION="-v 1"
 # Read user defined parameters # need to add a line to check if $3 exist ...
 if [ ! -z $3 ]; then # check if there is a 3rd argument
@@ -68,7 +68,7 @@ then mkdir job_error
 fi
 
 # Mask back propagation
-echo "Creating mask for: "$TEST_NAME
+echo "Creating mask for: ${TEST_NAME}"
 PARAMETER_NUMBER=0
 jid_reg="${jid}_reg"
 for G in `ls $2/template/`
@@ -86,7 +86,7 @@ do
 	   if [ ! -f $2/mask_dilate/$G ] # if no dilated mask for atlas, create one
 		 then
 		 jdilate="${jname}_mask_dilate"
-		 ${QSUB_CMD} -N ${jdilate} seg_maths $2/mask/$G -dil 3 $2/mask_dilate/$G
+		 ${QSUB_CMD} -N ${jdilate} seg_maths $2/mask/$G -dil $DILATE $2/mask_dilate/$G
 	   fi
 	   # if mask & dilated mask exist, ready to preed to the affine registration step
 	   j_mask_ready="${jname}_mask_ready"
@@ -95,9 +95,15 @@ do
 	   job_aladin="${jname}_aladin" # start create affine registration matrix
 	   if [ ! -f ${INITIAL_AFFINE} ] # if no initial affine matrix file
 	     then
-		 ${QSUB_CMD} -hold_jid $"${jname}_mask_*" -N ${job_aladin} reg_aladin -flo $1 -ref $2/template/$G -rmask $2/mask_dilate/$G -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz ${MASK_AFF} -omp 4
+		 ${QSUB_CMD} -hold_jid $"${jname}_mask_*" -N ${job_aladin} reg_aladin \
+		 -flo $1 \
+		 -ref $2/template/$G \
+		 -rmask $2/mask_dilate/$G \
+		 -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff \
+		 -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz \
+		 ${MASK_AFF}
 	   else # if initial affine matrix file exist, use it
-	     ${QSUB_CMD} -hold_jid $"${jname}_mask_*" -N ${job_aladin} reg_aladin -flo $1 -ref $2/template/$G -rmask $2/mask_dilate/$G -inaff ${INITIAL_AFFINE} -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz ${MASK_AFF} -omp 4
+	     ${QSUB_CMD} -hold_jid $"${jname}_mask_*" -N ${job_aladin} reg_aladin -flo $1 -ref $2/template/$G -rmask $2/mask_dilate/$G -inaff ${INITIAL_AFFINE} -aff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff -res temp/${ATLAS}/${TEST_NAME}_${NAME}_aff.nii.gz ${MASK_AFF}
 	   fi
 	   job_transform="${jname}_transform"
 	   ${QSUB_CMD} -hold_jid ${job_aladin} -N ${job_transform} reg_transform -ref $2/template/$G -invAff temp/${ATLAS}/${TEST_NAME}_${NAME}_aff temp/${ATLAS}/${NAME}_${TEST_NAME}_aff
@@ -117,10 +123,14 @@ done
 let PARAMETER_NUMBER-=1
 
 # Label Fusion
-jname_merge_mask="${jid}_seg_math"
+jname_avg_mask="${jid}_mask_avg"
+${QSUB_CMD} -hold_jid ${jid_reg}_* -N ${jname_avg_mask} reg_average mask/${ATLAS}/${TEST_NAME}_mask_avg.nii.gz -avg $FIRST_PARAMETER $MERGE_PARAMETERS
+jname_bin_avg_mask="${jid}_mask_avg_bin_dil"
+${QSUB_CMD} -hold_jid ${jname_avg_mask} -N ${jname_bin_avg_mask} seg_maths mask/${ATLAS}/${TEST_NAME}_mask_avg.nii.gz -bin -dil ${DILATE} mask/${ATLAS}/${TEST_NAME}_mask_avg_bin_dil.nii.gz
+jname_merge_mask="${jid}_mask_merge"
 ${QSUB_SEG_MATH} -hold_jid ${jid_reg}_* -N ${jname_merge_mask} seg_maths $FIRST_PARAMETER -merge $PARAMETER_NUMBER 4 $MERGE_PARAMETERS mask/${ATLAS}/${TEST_NAME}_mask_4D.nii.gz
 jname_seg_LabFusion="${jid}_seg_LabFusion"
-${QSUB_SEG_MATH} -hold_jid ${jname_merge_mask} -N ${jname_seg_LabFusion} seg_LabFusion -in mask/${ATLAS}/${TEST_NAME}_mask_4D -STAPLE  ${LABFUSION_OPTION} -out mask/${TEST_NAME}_mask_${ATLAS}_STAPLE.nii.gz
+${QSUB_SEG_MATH} -hold_jid ${jid}_mask_* -N ${jname_seg_LabFusion} seg_LabFusion -in mask/${ATLAS}/${TEST_NAME}_mask_4D -STAPLE ${LABFUSION_OPTION} -mask mask/${ATLAS}/${TEST_NAME}_mask_avg_bin_dil.nii.gz -out mask/${TEST_NAME}_mask_${ATLAS}_STAPLE.nii.gz
 export jname_dilate="${jid}_dilate"
 ${QSUB_CMD} -hold_jid ${jname_seg_LabFusion} -N ${jname_dilate} seg_maths mask/${TEST_NAME}_mask_${ATLAS}_STAPLE.nii.gz -dil ${DILATE} mask/${TEST_NAME}_mask_${ATLAS}_STAPLE_d${DILATE}.nii.gz
 echo "creating mask at: mask/${TEST_NAME}_mask_${ATLAS}_STAPLE_d${DILATE}.nii.gz"

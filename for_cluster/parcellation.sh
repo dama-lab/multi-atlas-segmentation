@@ -33,18 +33,18 @@ if [[ -z $k ]] && [[ -z $n ]]; then  # if STEPS parameter is not set
 fi
 export STEPS_PARAMETER="${k} ${n} "
 
+FULL_TEST_NAME=$(basename $1)
+TEST_NAME=`echo "$FULL_TEST_NAME" | cut -d'.' -f1`
+echo "Creating parcellation label for: "$TEST_NAME
+export ATLAS=$(basename $3)
+MASK=$2
+
 # Read user-defined parameters
 if [ ! -z $4 ]; then # check if there is a 4th argument
   if [ -f $4 ]; then # check if the file specified by 4th argument exist
     . $4 # if file of 4th argument exist, read the parameters from the file
   fi
 fi
-
-FULL_TEST_NAME=$(basename $1)
-TEST_NAME=`echo "$FULL_TEST_NAME" | cut -d'.' -f1`
-echo "Creating parcellation label for: "$TEST_NAME
-ATLAS=$(basename $3)
-MASK=$2
 
 # create dilated mask for every template image if not already exist
 if [ ! -d $3/mask ]; then
@@ -147,10 +147,10 @@ let PARAMETER_NUMBER-=1
 # Prepare 4D images for label fusion
 jid_4d="merge4d_${TEST_NAME}"
 # create average rough mask to reduce memory usage for label fusion
-jid_4d_avg_mask="${jid_4d}_avg_mask"
-${QSUB_CMD} -hold_jid ${jid_reg}_* -N ${jid_4d_avg_mask} reg_average mask/${ATLAS}/${TEST_NAME}_mask_avg.nii.gz -avg $FIRST_MASK $MERGE_MASK
-jid_4d_avg_mask_bin="${jid_4d}_avg_mask_nim"
-${QSUB_CMD} -hold_jid ${jid_4d_avg_mask}_* -N ${jid_4d_avg_mask_bin} seg_maths mask/${ATLAS}/${TEST_NAME}_mask_avg.nii.gz -bin mask/${ATLAS}/${TEST_NAME}_mask_avg_bin.nii.gz
+jid_4d_nrr_mask_avg="${jid_4d}_nrr_mask_avg"
+${QSUB_CMD} -hold_jid ${jid_reg}_* -N ${jid_4d_nrr_mask_avg} reg_average mask/${ATLAS}/${TEST_NAME}_nrr_mask_avg.nii.gz -avg $FIRST_MASK $MERGE_MASK
+jid_4d_nrr_mask_avg_bin="${jid_4d}_nrr_mask_avg_bin"
+${QSUB_CMD} -hold_jid ${jid_4d_nrr_mask_avg} -N ${jid_4d_nrr_mask_avg_bin} seg_maths mask/${ATLAS}/${TEST_NAME}_nrr_mask_avg.nii.gz -bin mask/${ATLAS}/${TEST_NAME}_mask_avg_bin.nii.gz
 jid_4d_nrr_mask="${jid_4d}_nrr_mask"
 ${QSUB_SEG_MATH} -hold_jid ${jid_reg}_* -N ${jid_4d_nrr_mask} seg_maths $FIRST_MASK -merge $PARAMETER_NUMBER 4 $MERGE_MASK mask/${ATLAS}/${TEST_NAME}_nrr_mask_4D.nii.gz
 jid_4d_label="${jid_4d}_label"

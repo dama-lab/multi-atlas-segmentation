@@ -14,9 +14,6 @@ echo "usage: parcellation.sh new_image corresponding_mask atlas_folder"
 
 # setup default value for parameters
 ROOT_DIR=$(pwd)
-export QSUB_CMD="qsub -l h_rt=5:00:00 -pe smp 1 -R y -l h_vmem=2G -l tmem=2G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # old flag: -l s_stack=128M
-export QSUB_CMD_ONE_CORE="qsub -l h_rt=5:00:00 -pe smp 1 -R y -l h_vmem=2G -l tmem=2G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # old flag: -l s_stack=128M
-export QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -pe smp 1 -R y -l h_vmem=9G -l tmem=9G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # -l s_stack=128M
 PARCELLATION_NNR="-ln 4 -lp 4 -sx -3"
 DILATE=3 # value to be dilated for the result mask
 LABFUSION="-STEPS"
@@ -68,7 +65,6 @@ MERGE_LABEL=""
 for G in `ls $2/template/`
 do
   NAME=`echo "$G" | cut -d'.' -f1`
-  jname=${jid_reg}_${TEST_NAME}_${NAME}
   # Check testing image name is different from atlas template. If same, skip (for leave-one-out)
   if [[ ${3}/template/${NAME} != $1 ]] && [[ ${3}/template/${NAME}.nii != $1 ]] && [[ ${3}/template/${NAME}.nii.gz != $1 ]] && [[ ${3}/template/${NAME}.hdr != $1 ]]
   then
@@ -94,32 +90,23 @@ jid_4d="merge4d_${TEST_NAME}"
 
 # create average rough mask to reduce memory usage for label fusion
 if [ ! -f mask/${ATLAS}/${TEST_NAME}_nrr_mask_avg_bin.nii.gz ]; then
-  jid_4d_nrr_mask_avg="${jid_4d}_nrr_mask_avg"
-  ${QSUB_CMD} -hold_jid ${jid_reg}_* -N ${jid_4d_nrr_mask_avg} \
   reg_average mask/${ATLAS}/${TEST_NAME}_nrr_mask_avg.nii.gz -avg $FIRST_MASK $MERGE_MASK
-  jid_4d_nrr_mask_avg_bin="${jid_4d}_nrr_mask_avg_bin"
-  ${QSUB_CMD} -hold_jid ${jid_4d_nrr_mask_avg}_* -N ${jid_4d_nrr_mask_avg_bin} \ seg_maths mask/${ATLAS}/${TEST_NAME}_nrr_mask_avg.nii.gz -bin -dil ${DILATE} mask/${ATLAS}/${TEST_NAME}_nrr_mask_avg_bin.nii.gz
+  seg_maths mask/${ATLAS}/${TEST_NAME}_nrr_mask_avg.nii.gz -bin -dil ${DILATE} mask/${ATLAS}/${TEST_NAME}_nrr_mask_avg_bin.nii.gz
 fi
   
 MASK="mask/${ATLAS}/${TEST_NAME}_nrr_mask_avg_bin.nii.gz"
 
 # merge 4D masks if not done yet
 if [ ! -f mask/${ATLAS}/${TEST_NAME}_nrr_mask_4D.nii.gz ]; then
-  jid_4d_nrr_mask="${jid_4d}_nrr_mask";
-  ${QSUB_SEG_MATH} -N ${jid_4d_nrr_mask} \
   seg_maths $FIRST_MASK -v -merge $PARAMETER_NUMBER 4 $MERGE_MASK mask/${ATLAS}/${TEST_NAME}_nrr_mask_4D.nii.gz
 else
-  jid_4d_nrr_mask="${jid_4d}_skip"
-  ${QSUB_CMD} -N ${jid_4d_nrr_mask} echo "4D mask already exist, skip merging again"
+  echo "4D mask already exist, skip merging again"
 fi
 # merge 4D labels if not done yet
 if [ ! -f label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz ]; then
-  jid_4d_label="${jid_4d}_label"
-  ${QSUB_SEG_MATH} -N ${jid_4d_label} \
   seg_maths $FIRST_LABEL -v -merge $PARAMETER_NUMBER 4 $MERGE_LABEL label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz
 else
-  jid_4d_label="${jid_4d}_label"
-  ${QSUB_CMD} -N ${jid_4d_label} echo "4D label already exist, skip merging again"
+  echo "4D label already exist, skip merging again"
 fi
 
 # Start label fusion
@@ -128,14 +115,11 @@ export jid_LabFusion="LabFusion_${TEST_NAME}"
 if [ ${LABFUSION} == "-STEPS" ]; then
   # merge 4D template if not done yet
   if [ ! -f label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz ]; then
-    jid_4d_tempate="${jid_4d}_template"
-    ${QSUB_SEG_MATH} -N ${jid_4d_tempate} seg_maths $FIRST_TEMPLATE -v -merge $PARAMETER_NUMBER 4 $MERGE_TEMPLATE label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz
+    seg_maths $FIRST_TEMPLATE -v -merge $PARAMETER_NUMBER 4 $MERGE_TEMPLATE label/${ATLAS}/${TEST_NAME}_template_4D.nii.gz
   else
-	jid_4d_tempate="${jid_4d}_template"
-	${QSUB_CMD} -N ${jid_4d_tempate} echo "4D template already exist, skip merging again"
+	echo "4D template already exist, skip merging again"
   fi
   # create final label using label fusion
-  ${QSUB_SEG_MATH} -hold_jid ${jid_4d}_* -N ${jid_LabFusion} \
   seg_LabFusion\
   -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz \
   -mask ${MASK}\
@@ -146,21 +130,18 @@ if [ ${LABFUSION} == "-STEPS" ]; then
 #  jid_NRR_mask_dilate="dil_NRR_mask_${TEST_NAME}"
 #  ${QSUB_CMD} -hold_jid ${jid_NRR_mask} -N ${jid_NRR_mask_dilate} seg_maths mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}.nii.gz -dil ${DILATE} mask/${TEST_NAME}_mask_${ATLAS}_NRR_STEPS_${k}_${n}_d${DILATE}.nii.gz
 elif [ ${LABFUSION} == "-STAPLE" ]; then
-  ${QSUB_SEG_MATH} -hold_jid ${jid_4d}_* -N ${jid_LabFusion} \
   seg_LabFusion\
   -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz \
   -mask ${MASK}\
   -STAPLE ${LABFUSION_OPTION} \
   -out label/${TEST_NAME}_label_${ATLAS}_STAPLE.nii.gz
 elif [ ${LABFUSION} == "-SBA" ]; then
-  ${QSUB_SEG_MATH} -hold_jid ${jid_4d}_* -N ${jid_LabFusion} \
   seg_LabFusion\
   -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz \
   -mask ${MASK}\
   -SBA ${LABFUSION_OPTION} \
   -out label/${TEST_NAME}_label_${ATLAS}_SBA.nii.gz
 else # elif [[ ${LABFUSION }== "-MV" ]]; then
-  ${QSUB_SEG_MATH} -hold_jid ${jid_4d}_* -N ${jid_LabFusion} \
   seg_LabFusion\
   -in label/${ATLAS}/${TEST_NAME}_label_4D.nii.gz \
   -mask ${MASK}\
