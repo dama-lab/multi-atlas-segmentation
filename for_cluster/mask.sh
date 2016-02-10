@@ -20,7 +20,7 @@
 ROOT_DIR=$(pwd)
 QSUB_CMD="qsub -l h_rt=2:00:00 -pe smp 4 -R y -l h_vmem=1G -l tmem=1G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" #  -l s_stack=128M
 QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -pe smp 4 -R y -l h_vmem=2G -l tmem=2G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # -l s_stack=128M
-DILATE=3 # value to be dilated for the result mask
+DILATE=2 # value to be dilated for the result mask
 INITIAL_AFFINE="initial_affine.txt"
 MASK_AFF="-ln 4 -lp 4 -omp 4 -speeeeed"
 LABFUSION_OPTION="-v 1"
