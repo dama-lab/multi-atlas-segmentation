@@ -3,8 +3,8 @@
 
 # $1: enquiry image
 # $2: mask for enquiry image.  if no mask just type "no_mask"
-# $3: atlas folder "in_vivo" or "ex_vivo"
-# $4: if exist, read user defined parameters
+# $3: atlas folder. e.g. "in_vivo" or "ex_vivo"
+# $4: if exist, read the file to load user defined parameters (see file under sample_parameters for examples)
 
 #!/bin/bash
 # echo "Bash version ${BASH_VERSION}..."

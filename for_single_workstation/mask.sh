@@ -12,8 +12,8 @@ echo "*         step 1 - brain extraction         *"
 echo "*********************************************"
 echo "usage: mask new_image atlas_type (in_vivo/ex_vivo)"
 # $1: enquiry image
-# $2: atlas folder "in_vivo" or "ex_vivo"
-# $3: user-defined parameters
+# $2: atlas folder. e.g. "in_vivo" or "ex_vivo"
+# $3: if exist, read the file to load user defined parameters (see file under sample_parameters for examples)
 # start brain extraction
 ROOT_DIR=$(pwd)
 FULL_TEST_NAME=$(basename $1)

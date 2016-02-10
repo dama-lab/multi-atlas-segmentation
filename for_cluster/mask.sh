@@ -6,7 +6,7 @@
 
 # $1: enquiry image
 # $2: atlas folder "in_vivo" or "ex_vivo"
-# $3: if exist, read user defined parameters
+# $3: if exist, read the file to load user defined parameters (see file under sample_parameters for examples)
 
 # echo "*********************************************"
 # echo "* Segmentation pipeline for mouse brain MRI *"

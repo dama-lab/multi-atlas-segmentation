@@ -3,7 +3,7 @@
 
 # $1: folder include all the images to be parcellated
 # $2: atlas folder
-# $3: parcellation parameter file
+# $3: If exist, read the file to load user defined parameters (see file under sample_parameters for examples)
 
 #!/bin/bash
 # echo "Bash version ${BASH_VERSION}..."

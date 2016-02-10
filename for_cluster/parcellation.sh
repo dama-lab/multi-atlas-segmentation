@@ -7,7 +7,7 @@
 # $1: enquiry image
 # $2: mask for enquiry image.  if no mask just type "no_mask"
 # $3: atlas folder "in_vivo" or "ex_vivo"
-# $4: if exist, read user defined parameters
+# $4: if exist, read the file containing user defined parameters
 echo "***************************************************"
 echo "* CAUTION!! DO NOT use the same name as the atlas *"
 echo "*     if it is not for leave-one-out testing      *"

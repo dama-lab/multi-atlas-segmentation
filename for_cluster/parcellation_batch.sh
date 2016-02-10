@@ -4,7 +4,7 @@
 # echo "Bash version ${BASH_VERSION}..."
 # $1: folder include all the images to be parcellated
 # $2: atlas folder
-# $3: parcellation parameter file
+# $3: parcellation parameter file if exist
 
 export QSUB_CMD="qsub -l h_rt=5:00:00 -pe smp 1 -R y -l h_vmem=4G -l tmem=4G -l s_stack=1024M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
 export QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -l h_vmem=8G -l tmem=8G -l s_stack=1024M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
