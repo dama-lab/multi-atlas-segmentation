@@ -1,0 +1,40 @@
+1	Left Hippocampus
+2	Left External Capsule
+3	Left Caudate Putamen
+4	Left Ant Commissure
+5	Left Globus Pallidus
+6	Left Internal Capsule
+7	Left Thalamus
+8	Left Cerebellum
+9	Left Superior Colliculi
+10	Left Ventricles
+11	Left Hypothalamus
+12	Left Inferior Colliculi
+13	Left Central Gray
+14	Left Neocortex
+15	Left Amygdala
+16	Left Olfactory bulb
+17	Left Brain Stem
+18	Left Rest of Midbrain
+19	Left Basal Forebrain Septum
+20	Left Fimbria
+21	Right Hippocampus
+22	Right External Capsule
+23	Right Caudate Putamen
+24	Right Ant Commissure
+25	Right Globus Pallidus
+26	Right Internal Capsule
+27	Right Thalamus
+28	Right Cerebellum
+29	Right Superior Colliculi
+30	Right Ventricles
+31	Right Hypothalamus
+32	Right Inferior Colliculi
+33	Right Central Gray
+34	Right Neocortex
+35	Right Amygdala
+36	Right Olfactory bulb
+37	Right Brain Stem
+38	Right Rest of Midbrain
+39	Right Basal Forebrain Septum
+40	Right Fimbria
