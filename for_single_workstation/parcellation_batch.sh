@@ -10,10 +10,9 @@
 # export QSUB_CMD="qsub -l h_rt=2:00:00 -l h_vmem=9.9G -l tmem=9.9G -l s_stack=128M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
 # export QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -l h_vmem=14.9G -l tmem=14.9G -l s_stack=128M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
 #!/bin/bash
-DILATE=1
+DILATE=3
 ATLAS=$(basename $2)
 MASK_FOLDER="mask" # default mask folder
-MASK_SUFFIX=""
 MASK_SUFFIX="_mask_${ATLAS}_STAPLE_d${DILATE}" # default mask suffix
 
 # Read user defined parameters # need to add a line to check if $3 exist ...

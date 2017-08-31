@@ -4,6 +4,20 @@
 # echo "Bash version ${BASH_VERSION}..."
 #!/bin/bash
 
+
+if [ $# -lt 2 ]
+then
+	echo ""
+	echo "*********************************************"
+	echo "* Segmentation pipeline for mouse brain MRI *"
+	echo "*  using multi-atlas label fusion methods   *"
+	echo "*         step 1 - brain extraction         *"
+	echo "*********************************************"
+	echo "usage: mask 'new_image' 'atlas_type(in_vivo/ex_vivo)' 'parameter_file (optional)'"
+	echo ""
+	exit
+fi
+
 # $1: enquiry image
 # $2: atlas folder "in_vivo" or "ex_vivo"
 # $3: if exist, read the file to load user defined parameters (see file under sample_parameters for examples)
@@ -18,8 +32,12 @@
 
 # Setup default value for parameters
 ROOT_DIR=$(pwd)
-QSUB_CMD="qsub -l h_rt=2:00:00 -pe smp 4 -R y -l h_vmem=1G -l tmem=1G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" #  -l s_stack=128M
-QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -pe smp 4 -R y -l h_vmem=2G -l tmem=2G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # -l s_stack=128M
+# QSUB_CMD="qsub -l h_rt=2:00:00 -pe smp 4 -R y -l h_vmem=1G -l tmem=1G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" #  -l s_stack=128M
+# QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -pe smp 4 -R y -l h_vmem=2G -l tmem=2G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # -l s_stack=128M
+
+QSUB_CMD="qsub -l h_rt=2:00:00 -pe -l h_vmem=1G -l tmem=1G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" #  -l s_stack=128M
+QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -pe -l h_vmem=2G -l tmem=2G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # -l s_stack=128M
+
 DILATE=2 # value to be dilated for the result mask
 INITIAL_AFFINE="initial_affine.txt"
 MASK_AFF="-ln 4 -lp 4 -omp 4 -speeeeed"

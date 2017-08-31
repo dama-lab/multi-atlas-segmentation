@@ -3,14 +3,22 @@
 
 #!/bin/bash
 # echo "Bash version ${BASH_VERSION}..."
-export QSUB_CODE="qsub -l h_rt=1:00:00 -l h_vmem=1.9G -l tmem=1.9G -l s_stack=10240 -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error "
+# export QSUB_CODE="qsub -l h_rt=1:00:00 -l h_vmem=1.9G -l tmem=1.9G -l s_stack=10240 -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error "
 
-echo "*********************************************"
-echo "* Segmentation pipeline for mouse brain MRI *"
-echo "*  using multi-atlas label fusion methods   *"
-echo "*         step 1 - brain extraction         *"
-echo "*********************************************"
-echo "usage: mask new_image atlas_type (in_vivo/ex_vivo)"
+if [ $# -lt 2 ]
+then
+	echo ""
+	echo "*********************************************"
+	echo "* Segmentation pipeline for mouse brain MRI *"
+	echo "*  using multi-atlas label fusion methods   *"
+	echo "*         step 1 - brain extraction         *"
+	echo "*********************************************"
+	echo "usage: mask new_image atlas_type (in_vivo/ex_vivo)"
+	echo ""
+	exit
+fi
+
+
 # $1: enquiry image
 # $2: atlas folder. e.g. "in_vivo" or "ex_vivo"
 # $3: if exist, read the file to load user defined parameters (see file under sample_parameters for examples)
@@ -26,7 +34,7 @@ MASK_AFF=" "
 # Read user-defined parameters
 if [ ! -z $3 ]; then # check if there is a 4th argument
   if [ -f $3 ]; then # check if the file specified by 4th argument exist
-    . $3 # if file of 4th argument exist, read the parameters from the file
+    . $3 # if file of 3th argument exist, read the parameters from the file
   fi
 fi
 
@@ -68,7 +76,7 @@ do
 	   fi
 	   reg_aladin -flo $1 -ref $2/template/$G -rmask $2/mask_dilate/$G -aff temp/${ATLAS}/$TEST_NAME"_"$NAME"_aff" -res temp/${ATLAS}/$TEST_NAME"_"$NAME"_aff".nii.gz ${MASK_AFF}
 	   reg_transform -ref $2/template/$G -invAffine temp/${ATLAS}/$TEST_NAME"_"$NAME"_aff" temp/${ATLAS}/${NAME}_${TEST_NAME}_aff
-	   reg_resample -flo $2/mask/$G -ref $1 -aff temp/${ATLAS}/${NAME}_${TEST_NAME}_aff -NN -res mask/${ATLAS}/$TEST_NAME"_mask_"$G
+	   reg_resample -flo $2/mask/$G -ref $1 -aff temp/${ATLAS}/${NAME}_${TEST_NAME}_aff -res mask/${ATLAS}/$TEST_NAME"_mask_"$G -NN 
 	   
 	   # change non-rigid registration for more accurate masking (not always working)
 	   # reg_f3d -flo $2/template/$G -ref $1 -aff temp/$TEST_NAME"_"$NAME"_inv_aff" -res temp/${TEST_NAME}_${NAME}_NRR.nii.gz -cpp temp/${TEST_NAME}_${NAME}_NRR_cpp.nii.gz

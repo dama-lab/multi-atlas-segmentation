@@ -8,11 +8,17 @@
 
 #!/bin/bash
 # echo "Bash version ${BASH_VERSION}..."
-echo "***************************************************"
-echo "* CAUTION!! DO NOT use the same name as the atlas *"
-echo "*     if it is not for leave-one-out testing      *"
-echo "***************************************************"
-echo "usage: parcellation.sh new_image corresponding_mask atlas_folder"
+if [ $# -lt 3 ]
+then
+  echo ""
+  echo "********************************************************************"
+  echo "* CAUTION!! DO NOT use the same subject name as the atlas template *"
+  echo "*           if it is not for leave-one-out testing                 *"
+  echo "********************************************************************"
+  echo "usage: parcellation.sh new_image corresponding_mask atlas_folder"
+  echo ""
+  exit
+fi
 
 # if [ ! -d job_output ]; then mkdir job_output; fi
 # if [ ! -d job_error ]; then mkdir job_error; fi

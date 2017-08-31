@@ -8,17 +8,25 @@
 # $2: mask for enquiry image.  if no mask just type "no_mask"
 # $3: atlas folder "in_vivo" or "ex_vivo"
 # $4: if exist, read the file containing user defined parameters
-echo "***************************************************"
-echo "* CAUTION!! DO NOT use the same name as the atlas *"
-echo "*     if it is not for leave-one-out testing      *"
-echo "***************************************************"
-echo "usage: parcellation.sh new_image corresponding_mask atlas_folder"
+if [ $# -lt 4 ]
+then
+  echo "********************************************************************"
+  echo "* CAUTION!! DO NOT use the same subject name as the atlas template *"
+  echo "*           if it is not for leave-one-out testing                 *"
+  echo "********************************************************************"
+  echo "usage: parcellation.sh new_image corresponding_mask atlas_folder"
+fi
 
 # setup default value for parameters
 ROOT_DIR=$(pwd)
-export QSUB_CMD="qsub -l h_rt=5:00:00 -pe smp 4 -R y -l h_vmem=1G -l tmem=1G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # old flag: -l s_stack=128M
-export QSUB_CMD_ONE_CORE="qsub -l h_rt=5:00:00 -pe smp 1 -R y -l h_vmem=2G -l tmem=2G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # old flag: -l s_stack=128M
-export QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -pe smp 4 -R y -l h_vmem=2G -l tmem=2G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # -l s_stack=128M
+# export QSUB_CMD="qsub -l h_rt=5:00:00 -pe smp 4 -R y -l h_vmem=1G -l tmem=1G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # old flag: -l s_stack=128M
+# export QSUB_CMD_ONE_CORE="qsub -l h_rt=5:00:00 -pe smp 1 -R y -l h_vmem=2G -l tmem=2G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # old flag: -l s_stack=128M
+# export QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -pe smp 4 -R y -l h_vmem=2G -l tmem=2G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # -l s_stack=128M
+
+export QSUB_CMD="qsub -l h_rt=5:00:00 -pe -R y -l h_vmem=1G -l tmem=1G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # old flag: -l s_stack=128M
+export QSUB_CMD_ONE_CORE="qsub -l h_rt=5:00:00 -pe -R y -l h_vmem=2G -l tmem=2G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # old flag: -l s_stack=128M
+export QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -pe -R y -l h_vmem=2G -l tmem=2G -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error" # -l s_stack=128M
+
 PARCELLATION_NNR="-ln 4 -lp 4 -sx -3"
 DILATE=1 # value to be dilated for the result mask
 LABFUSION="-STEPS"
