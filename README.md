@@ -1,13 +1,17 @@
-multi-atlas-segmentation
-========================
+
+================================================
+multi-atlas-segmentation for mouse brain (MASMB)
+================================================
+
+Author: Da Ma d.ma.11@ucl.ac.uk
 
 **Description**
 
 This bash scripts is created for "Multi-atlas based automatic brain structural parcellation" for mouse brain MRI. Prerequisite: NityReg and NitySeg packages (both open-source, details can be found on page: http://cmictig.cs.ucl.ac.uk/research/software/software-nifty).
 
-The bash script should be compatible on Linux/Windows/Mac, with proper setup. For detailed description of the pipeline and to download the mouse brain parcellation atlas, please go the the website: http://cmic.cs.ucl.ac.uk/staff/da_ma/Multi_Atlas/
+The bash script is compatible on Linux/Windows/Mac, with proper setup. For detailed description of the pipeline and to download the mouse brain parcellation atlas, please go the the website: http://cmic.cs.ucl.ac.uk/staff/da_ma/Multi_Atlas/
 
-** Folders **
+**Folders**
 - for_single_workstation: to be used on a single PC.
 - for_cluster: to be run on computer cluster, use parallel image registration to speed-up the process.
 - parameter_samples: sample parameter files that can be fed to the command when running the script [optional].
