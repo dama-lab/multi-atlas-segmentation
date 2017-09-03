@@ -3,15 +3,24 @@ multi-atlas-segmentation
 
 **Description**
 
-This scriptis is created for "Multi-atlas based automatic brain structural parcellation" for mouse brain MRI.
+This bash scripts is created for "Multi-atlas based automatic brain structural parcellation" for mouse brain MRI. Prerequisite: NityReg and NitySeg packages (both open-source, details can be found on page: http://cmictig.cs.ucl.ac.uk/research/software/software-nifty).
 
-For detailed description of the pipeline and to download the mouse brain parcellation atlas, please go the the website: http://cmic.cs.ucl.ac.uk/staff/da_ma/Multi_Atlas/
+The bash script should be compatible on Linux/Windows/Mac, with proper setup. For detailed description of the pipeline and to download the mouse brain parcellation atlas, please go the the website: http://cmic.cs.ucl.ac.uk/staff/da_ma/Multi_Atlas/
 
+** Folders **
+- for_single_workstation: to be used on a single PC.
+- for_cluster: to be run on computer cluster, use parallel image registration to speed-up the process.
+- parameter_samples: sample parameter files that can be fed to the command when running the script [optional].
 
 **Q/A**
 
-- What image orientation should my test image be?
-The orientation of the default atlas is: RAS. This script orient_nii.m uses the Matlab NIfTI toolbox (https://www.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image) to visualize and determine the orientation, as well as reorient it. 
+- Q. What image orientation should my test image be?
+A. The orientation of the default atlas is: RAS. This script orient_nii.m uses the Matlab NIfTI toolbox (https://www.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image) to visualize and determine the orientation, as well as reorient it. 
+
+- Q. Why is my parcellation not properly overlayed with the original image?
+A. First check if your MR image has been properly oriented to RAS (See the Q/A above). If that's not the problem, then make sure your MR image has been preprocessed to correct the bias field correction (also called bias field). There are several tools that can perform the bias field correction:
+
+The ANTs tools also provide a handy bias field correction function N4BiasFieldCorrection which used an upgrade version of the N3 algorithm as used in the FreeSurfer's nu_correct, and it can handle the nifti format out-of-the-box as it's using the ITK framework. You can check that out  as well.
 
 **Reference**
 
