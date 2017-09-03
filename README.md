@@ -32,7 +32,7 @@ The bash script is compatible on Linux/Windows/Mac, with proper setup. For detai
     
     (4) The 3D-slicer (https://www.slicer.org/wiki/Documentation/4.3/Modules/N4ITKBiasFieldCorrection) also provide the N4ITK through command line interface (CLI) (**N4BiasFieldCorrection**).
 
-**Reference**
+**Citation**
 
 Ma, D., Cardoso, M. J., Modat, M., Powell, N., Wells, J., Holmes, H., … Ourselin, S. (2014). Automatic Structural Parcellation of Mouse Brain MRI Using Multi-Atlas Label Fusion. PLoS ONE, 9(1), e86576.
 [http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0086576]
