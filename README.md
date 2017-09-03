@@ -30,7 +30,7 @@ The bash script is compatible on Linux/Windows/Mac, with proper setup. For detai
     
     (3) The ANTs tools (http://stnava.github.io/ANTs/) provide a handy bias field correction function (**N4BiasFieldCorrection**) which used an upgrade version of the N3 algorithm as used in the FreeSurfer's nu_correct, and it can handle the nifti format out-of-the-box as it's using the ITK framework. You can check that out  as well.
     
-    (4) The 3D-slicer also provide the N4ITK through command line interface (CLI) - N4BiasFieldCorrection: https://www.slicer.org/wiki/Documentation/4.3/Modules/N4ITKBiasFieldCorrection
+    (4) The 3D-slicer (https://www.slicer.org/wiki/Documentation/4.3/Modules/N4ITKBiasFieldCorrection) also provide the N4ITK through command line interface (CLI) (**N4BiasFieldCorrection**).
 
 **Reference**
 
