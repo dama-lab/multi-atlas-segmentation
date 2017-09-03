@@ -1,4 +1,5 @@
 
+
 Multi Atlas Brain Segmentation (MABS)
 ================================================
 
@@ -18,6 +19,7 @@ The bash script is compatible on Linux/Windows/Mac, with proper setup. For detai
 **Q/A**
 
 - Q. What image orientation should my test image be?
+
 A. The orientation of the default atlas is: RAS. This script orient_nii.m uses the Matlab NIfTI toolbox (https://www.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image) to visualize and determine the orientation, as well as reorient it. 
 
 - Q. Why is my parcellation not properly overlayed with the original image?
