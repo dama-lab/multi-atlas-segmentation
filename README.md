@@ -21,10 +21,15 @@ The bash script is compatible on Linux/Windows/Mac, with proper setup. For detai
   A. The orientation of the default atlas is: RAS. This script orient_nii.m uses the Matlab NIfTI toolbox (https://www.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image) to visualize and determine the orientation, as well as reorient it. 
 
 - Q. Why is my parcellation not properly overlayed with the original image?
+
   A. First check if your MR image has been properly oriented to RAS (See the Q/A above). If that's not the problem, then make sure your MR image has been preprocessed to correct the bias field correction (also called bias field). There are several tools that can perform the bias field correction:
+  
     The FreeSurfer package (https://surfer.nmr.mgh.harvard.edu/) provide a tool (**nu_correct**) which uses N3 bias field correction algorithm.
+    
     The NiftySeg package (http://cmic.cs.ucl.ac.uk/staff/da_ma/Multi_Atlas/) provide bias field correction using automatic tissue segmentation (**seg_EM**).
+    
     The ANTs tools (http://stnava.github.io/ANTs/) provide a handy bias field correction function (**N4BiasFieldCorrection**) which used an upgrade version of the N3 algorithm as used in the FreeSurfer's nu_correct, and it can handle the nifti format out-of-the-box as it's using the ITK framework. You can check that out  as well.
+    
     The 3D-slicer also provide the N4ITK through command line interface (CLI) - N4BiasFieldCorrection: https://www.slicer.org/wiki/Documentation/4.3/Modules/N4ITKBiasFieldCorrection
 
 **Reference**
