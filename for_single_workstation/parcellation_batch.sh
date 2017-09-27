@@ -26,5 +26,5 @@ for G in `ls $1`
 do
   TEST_NAME=`echo "$G" | cut -d'.' -f1`
   NAME=`echo "$G" | cut -d'.' -f1`
-  bash ./parcellation.sh $1/$G "${MASK_FOLDER}/${TEST_NAME}${MASK_SUFFIX}.nii.gz" $2 $3
+  parcellation.sh $1/$G "${MASK_FOLDER}/${TEST_NAME}${MASK_SUFFIX}.nii.gz" $2 $3
 done
