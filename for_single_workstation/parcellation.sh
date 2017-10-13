@@ -27,8 +27,8 @@ fi
 ROOT_DIR=$(pwd)
 export QSUB_CMD="qsub -l h_rt=5:00:00 -l h_vmem=4G -l tmem=4G -l s_stack=1024M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
 export QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -l h_vmem=8G -l tmem=8G -l s_stack=1024M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
-PARCELLATION_NNR="-ln 4 -lp 4"
-DILATE=1 # value to be dilated for the result mask
+PARCELLATION_NNR="-vel"
+DILATE=2 # value to be dilated for the result mask
 LABFUSION="-STEPS"
 MASK_AFF="-ln 4 -lp 4"
 

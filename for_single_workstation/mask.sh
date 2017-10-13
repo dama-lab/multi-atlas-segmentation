@@ -27,7 +27,7 @@ ROOT_DIR=$(pwd)
 FULL_TEST_NAME=$(basename $1)
 TEST_NAME=`echo "$FULL_TEST_NAME" | cut -d'.' -f1`
 ATLAS=$(basename $2)
-DILATE=1 # value to be dilated for the result mask
+DILATE=2 # value to be dilated for the result mask
 INITIAL_AFFINE="initial_affine.txt"
 MASK_AFF=" "
 
