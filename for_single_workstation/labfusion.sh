@@ -1,16 +1,22 @@
-# Structural Parcellation shell script (SGE)
-# Author: Ma Da (d.ma.11@ucl.ac.uk)
 #!/bin/bash
 # echo "Bash version ${BASH_VERSION}..."
+
+# Structural Parcellation shell script (SGE)
+# Author: Da Ma (d.ma.11@ucl.ac.uk)
 
 # $1: enquiry image
 # $2: atlas folder "in_vivo" or "ex_vivo"
 # $3: if exist, read user defined parameters
-echo "***************************************************"
-echo "* CAUTION!! DO NOT use the same name as the atlas *"
-echo "*     if it is not for leave-one-out testing      *"
-echo "***************************************************"
-echo "usage: parcellation.sh new_image corresponding_mask atlas_folder"
+
+if [[ $# -lt 2 ]]
+then
+  echo "***************************************************"
+  echo "* CAUTION!! DO NOT use the same name as the atlas *"
+  echo "*     if it is not for leave-one-out testing      *"
+  echo "***************************************************"
+  echo "usage: labfusion.sh new_image atlas_folder"
+  exit
+fi
 
 # setup default value for parameters
 ROOT_DIR=$(pwd)
@@ -34,7 +40,7 @@ echo "Creating parcellation label for: "$TEST_NAME
 ATLAS=$(basename $2)
 
 # Read user-defined parameters
-if [ ! -z $3 ]; then # check if there is a 4th argument
+if [ ! -z $3 ]; then # check if there is a 3rd argument
   if [ -f $3 ]; then # check if the file specified by 4th argument exist
     . $3 # if file of 4th argument exist, read the parameters from the file
   fi

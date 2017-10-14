@@ -13,7 +13,7 @@ then
 	echo "*  using multi-atlas label fusion methods   *"
 	echo "*         step 1 - brain extraction         *"
 	echo "*********************************************"
-	echo "usage: mask new_image atlas_type (in_vivo/ex_vivo)"
+	echo "usage: bash/sh mask.sh <new_image> <atlas_folder> <[optional] user-specified-parameter-file>"
 	echo ""
 	exit
 fi

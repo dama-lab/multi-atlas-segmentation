@@ -15,7 +15,7 @@ then
   echo "* CAUTION!! DO NOT use the same subject name as the atlas template *"
   echo "*           if it is not for leave-one-out testing                 *"
   echo "********************************************************************"
-  echo "usage: parcellation.sh new_image corresponding_mask atlas_folder"
+  echo "usage: bash/sh parcellation.sh <new_image> <brain_mask (type \"no_mask\" if no brainmask exist)> <atlas_folder> <[optional] user-specified-parameter-file>"
   echo ""
   exit
 fi
@@ -27,8 +27,8 @@ fi
 ROOT_DIR=$(pwd)
 export QSUB_CMD="qsub -l h_rt=5:00:00 -l h_vmem=4G -l tmem=4G -l s_stack=1024M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
 export QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -l h_vmem=8G -l tmem=8G -l s_stack=1024M -j y -S /bin/sh -b y -cwd -V -o job_output -e job_error"
-PARCELLATION_NNR="-vel"
-DILATE=2 # value to be dilated for the result mask
+PARCELLATION_NNR="-vel" # -ln 4 -lp 4 -sx 0.6 would take much longer time
+DILATE=3 # value to be dilated for the result mask
 LABFUSION="-STEPS"
 MASK_AFF="-ln 4 -lp 4"
 
@@ -81,7 +81,7 @@ if [ ! -d label/${ATLAS} ]; then mkdir label/${ATLAS}; fi
 if [ ! -d mask ]; then mkdir mask; fi
 
 # if no mask has been created yet, evoke mask.sh
-if [ ! -f $2 ] && [ ! -f $2".nii" ] && [ ! -f $2".nii.gz" ] && [ ! -f $2".hdr" ]
+if [ ! -f $3 ] && [ ! -f $3".nii" ] && [ ! -f $3".nii.gz" ] && [ ! -f $3".hdr" ]
 then
   echo -e "Pre-defined mask ${MASK} NOT found, parcellation will start after the mask is generated"
   # create mask for the test image first
