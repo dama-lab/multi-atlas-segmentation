@@ -12,7 +12,7 @@ export QSUB_SEG_MATH="qsub -l h_rt=1:00:00 -pe smp 1 -R y -l h_vmem=12G -l tmem=
 #######################################################################
 # Recommendedecommended parameters for images with high resolution (e.g. ~50µm), normally for ex vivo high resolution images
 export MASK_AFF="-ln 4 -lp 4"
-export PARCELLATION_NNR="-ln 4 -lp 4 -sx 0.6"
+export PARCELLATION_NNR="-vel -ln 4 -lp 4 -sx 0.6"
 # Recommended parameters for images with high resolution (e.g. ~100µm) normally for in vivo lower resolution images
 # export PARCELLATION_NNR="-ln 3 -lp 3 -sx 0.4"
 
