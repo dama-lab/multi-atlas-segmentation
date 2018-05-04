@@ -1,3 +1,6 @@
+#!/bin/bash
+# echo "Bash version ${BASH_VERSION}..."
+
 # Structural Parcellation shell script (SGE)
 # Author: Ma Da (d.ma.11@ucl.ac.uk)
 
@@ -6,8 +9,6 @@
 # $3: atlas folder. e.g. "in_vivo" or "ex_vivo"
 # $4: if exist, read the file to load user defined parameters (see file under sample_parameters for examples)
 
-#!/bin/bash
-# echo "Bash version ${BASH_VERSION}..."
 if [ $# -lt 3 ]
 then
   echo ""
@@ -81,7 +82,7 @@ if [ ! -d label/${ATLAS} ]; then mkdir label/${ATLAS}; fi
 if [ ! -d mask ]; then mkdir mask; fi
 
 # if no mask has been created yet, evoke mask.sh
-if [ ! -f $3 ] && [ ! -f $3".nii" ] && [ ! -f $3".nii.gz" ] && [ ! -f $3".hdr" ]
+if [ ! -f $MASK ] && [ ! -f $MASK".nii" ] && [ ! -f $MASK".nii.gz" ] && [ ! -f $MASK".hdr" ]
 then
   echo -e "Pre-defined mask ${MASK} NOT found, parcellation will start after the mask is generated"
   # create mask for the test image first

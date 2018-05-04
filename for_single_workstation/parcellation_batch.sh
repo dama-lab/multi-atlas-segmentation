@@ -12,8 +12,9 @@
 #!/bin/bash
 DILATE=3
 ATLAS=$(basename $2)
-MASK_FOLDER="mask" # default mask folder
+MASK_FOLDER="mask_f3d_manual_correct_d1/wildtype" # default mask folder
 MASK_SUFFIX="_mask_${ATLAS}_STAPLE_d${DILATE}" # default mask suffix
+MASK_SUFFIX=""
 
 # Read user defined parameters # need to add a line to check if $3 exist ...
 if [ ! -z $3 ]; then # check if there is a 3rd argument
@@ -26,5 +27,5 @@ for G in `ls $1`
 do
   TEST_NAME=`echo "$G" | cut -d'.' -f1`
   NAME=`echo "$G" | cut -d'.' -f1`
-  parcellation.sh $1/$G "${MASK_FOLDER}/${TEST_NAME}${MASK_SUFFIX}.nii.gz" $2 $3
+  bash parcellation.sh $1/$G "${MASK_FOLDER}/${TEST_NAME}${MASK_SUFFIX}.nii.gz" $2 $3
 done
