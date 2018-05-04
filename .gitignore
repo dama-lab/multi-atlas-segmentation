@@ -161,3 +161,9 @@ pip-log.txt
 
 # Mac crap
 .DS_Store
+for_single_workstation/depreciated/mas_fusion_batch_pbs_qsub.sh
+for_single_workstation/depreciated/mas_quickcheck.sh
+for_single_workstation/depreciated/mas_fusion.sh
+for_single_workstation/depreciated/mas_mapping.sh
+for_single_workstation/depreciated/mas_mapping.sh
+for_single_workstation/depreciated/mas_mapping_batch_pbs_qsub.sh

@@ -178,7 +178,7 @@ function mas_quickcheck(){
 
 	# check if FSL is installed (by checking variable $FSLDIR)
 	if [[ -z $FSLDIR ]]; then
-		echo "[mas_quickcheck] variable \$FSLDIR not set, please specify FSL installed location"
+		echo "[mas_quickcheck] variable \$FSLDIR not set, cannot determine FSL installed location, exitng ..."
 		return 1
 	fi
 
