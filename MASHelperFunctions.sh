@@ -2,7 +2,7 @@
 
 # Multi-Atlas-Segmentation, parcellation, and label fusion
 
-# Author: Da Ma (d.ma.11@ucl.ac.uk, da_ma@sfu.ca)
+# Author: Da Ma (da_ma@sfu.ca, d.ma.11@ucl.ac.uk)
 
 # -------------------------------------------------
 # define some global variables, (if not predefined)
@@ -36,9 +36,9 @@ mas_script_file = $mas_script_file
 =======================
 """
 
-# -----------------------------------
+# ---------------------------------
 #  function: check_image_file_exist
-# ----------------------------------
+# ---------------------------------
 function check_image_file_exist(){
 	local file_name=$1 # with or without image extension
 	local function_name=${FUNCNAME[0]}
