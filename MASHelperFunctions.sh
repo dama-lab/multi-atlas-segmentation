@@ -1,8 +1,9 @@
 #!/bin/bash
-
 # Multi-Atlas-Segmentation, parcellation, and label fusion
+# To report any bugs/request, please contact: Da Ma (da_ma@sfu.ca)
 
-# Author: Da Ma (da_ma@sfu.ca, d.ma.11@ucl.ac.uk)
+source $MIAL_TOOLS_DEVTOOLS/libCommonBash
+source $MIAL_TOOLS_SCRIPTS/MialHelperFunctions
 
 # -------------------------------------------------
 # define some global variables, (if not predefined)
@@ -11,7 +12,7 @@ mas_script_path="$BASH_SOURCE"
 mas_script_dir=${mas_script_path%/*}
 mas_script_file="$(basename $mas_script_path)"
 # Alternatively: mas_script_name=${mas_script_path##*/}
-mas_script_name=$(echo $mas_script_file | rev | cut -d. -f2- | rev)
+mas_script_name=$(echo $mas_script_file | cut -d. -f1 )
 
 echo """
 =======================
@@ -20,11 +21,16 @@ mas_script_dir  = $mas_script_dir
 mas_script_file = $mas_script_file
 
 [ Basic functions ]:
-# - check_image_file_exist
-# - mas_label_volume (prerequisite: NiftySeg)
-# - mas_quickcheck (prerequisite: FSL)
+# - check_variable (to-do)
+# - check_image_file
+# - check_atlas_file
+# - check_mapping_file
+# - check_label_fusion_file
+
 # - mas_mapping (prerequisite: NiftyReg)
 # - mas_fusion (prerequisite: NiftySeg)
+# - mas_quickcheck (prerequisite: FSL)
+# - mas_label_volume (prerequisite: NiftySeg)
 # - mas_create_atlas (prerequisite: NiftyReg for mask dilation, to-do)
 # - mas_template_function (template functions for developer)
 
@@ -32,30 +38,247 @@ mas_script_file = $mas_script_file
 # - mas_mapping_batch
 # - mas_fusion_batch
 # - mas_quickcheck_batch
-# - mas_parcellation (to-do)
+# - mas_parcellation_batch
 =======================
 """
 
+# define some default global variable value
+AtlasListFileName=template_list.cfg
+
+
 # ---------------------------------
-#  function: check_image_file_exist
+#  function: check_variable
 # ---------------------------------
-function check_image_file_exist(){
-	local file_name=$1 # with or without image extension
-	local function_name=${FUNCNAME[0]}
+function check_variable(){
 	local exist_flag=0
+	local function_name=${FUNCNAME[0]}
+	if [[ $# -lt 1 ]]; then
+		echo "[$function_name] check the existance of variables ..."
+		return 1
+	fi
+	# determine variable number, for each variable
+	checkForExistenceOfVariable
+}
+
+# ---------------------------------
+#  function: check_image_file
+# ---------------------------------
+function check_image_file(){
+	local exist_flag=0
+	local function_name=${FUNCNAME[0]}
+	if [[ $# -lt 1 ]]; then
+		echo "[$function_name] please specify image file to check the existence"
+		return 1
+	fi
+	local file_path=$1 # with or without image extension
+	local function_name=${FUNCNAME[0]}
+	
 	# check existence with any valid extension
 	for ext in "" .nii .nii.gz .img .hdr; do
-		if [[ -f $file_name$ext ]]; then
+		if [[ -f $file_path$ext ]]; then
 			exist_flag=1
 			break
 		fi
 	done
 	# if find no file with any extension:
 	if [[ $exist_flag -eq 0 ]]; then
-		echo "[$function_name] cannot find file ($target_id)"
-		return $exist_flag
+		echo "[$function_name] cannot find file ($file_path)"
+		return 1
 	fi
-	return $exist_flag
+	return 0
+}
+
+# ---------------------------------
+#  function: check_atlas_file
+# ---------------------------------
+function check_atlas_file(){
+	local return_flag=0
+	local function_name=${FUNCNAME[0]}
+	if [[ $# -lt 2 ]]; then
+		echo "[$function_name] <atlas_dir> <atlas_id>"
+		return_flag=1
+		return $return_flag
+	fi
+
+	local atlas_dir=$1
+	local atlas_id=$2
+
+	local seg_type
+
+	for seg_type in template label mask;do
+		check_image_file "$atlas_dir/$seg_type/$atlas_id"
+		if [[ $? -ne 0 ]]; then
+			echo "[$function_name] ($atlas_id) atlas $seg_type missing "
+			return_flag=1
+			return $return_flag
+		fi
+	done
+
+	return $return_flag
+}
+
+# functions to be implemented and used
+function check_mapping_input(){
+	local return_flag=0
+	local function_name=${FUNCNAME[0]}
+}
+function check_mapping_output(){
+	local return_flag=0
+	local function_name=${FUNCNAME[0]}
+}
+function check_fusion_input(){
+	local return_flag=0
+	local function_name=${FUNCNAME[0]}
+}
+function check_fusion_output(){
+	local return_flag=0
+	local function_name=${FUNCNAME[0]}
+}
+
+# ---------------------------------
+#  function: check_mapping_file
+# ---------------------------------
+function check_mapping_file(){
+	local return_flag=0
+	local function_name=${FUNCNAME[0]}
+	if [[ $# -lt 4 ]]; then
+		echo "[$function_name] <target_dir> <target_id> <atlas_dir> <atlas_list> <(Optional)result_dir> <(Optional)targetmask_dir> (Optional)targetmask_suffix>"
+		return_flag=1
+		return $return_flag
+	fi
+
+	local target_dir=$1
+	local target_id=$2
+	local atlas_dir=$3
+	local atlas_list=$4
+	local result_dir=$5
+	local targetmask_dir=$6
+	local targetmask_suffix=$7
+
+	local target_id
+	local atlas_name=$(basename $atlas_dir)
+	local atlas_id
+
+	# check if output file already exist
+	local mapped_file_all_exist=1
+	for atlas_id in $(cat $atlas_list);do
+		if [[ ! -f "$result_dir/label/$atlas_name/$target_id.label.$atlas_id.nii.gz" ]] || \
+		   [[ ! -f "$result_dir/mask/$atlas_name/$target_id.mask.$atlas_id.nii.gz" ]] || \
+		   [[ ! -f "$result_dir/mapping/$atlas_name/$atlas_id.$target_id.f3d.nii.gz" ]]; then
+		   # found missing output files
+		   mapped_file_all_exist=0
+		   continue
+		fi
+	done
+	# if all file exist (no missing files found)
+	if [[ $mapped_file_all_exist -eq 1 ]]; then
+	   echo "[$function_name] all mapping output files exist"
+	   return_flag=2
+	   return $return_flag
+	fi
+
+	# check if input target file missing
+	check_image_file $target_dir/$target_id
+	if [[ $? -ne 0 ]]; then
+		echo "[$function_name] cannot find target ($target_dir/$target_id)"
+		return_flag=3
+		return $return_flag
+	fi
+	# check if specified target mask file exist
+	if [[ ! -z $targetmask_dir ]]; then
+		local targetmask_name="$targetmask_dir/$target_id$targetmask_suffix"
+		check_image_file $targetmask_name
+		if [[ $? -ne 0 ]]; then
+			echo "[$function_name] cannot find target mask $targetmask_name"
+			return_flag=4
+			return $return_flag
+		fi
+	fi
+	
+
+	return $return_flag
+}
+
+# ---------------------------------
+#  function: check_label_fusion_file
+# ---------------------------------
+function check_label_fusion_file(){
+	local return_flag=0
+	local function_name=${FUNCNAME[0]}
+	if [[ $# -lt 5 ]]; then
+		echo "[$function_name] <target_dir> <target_id> <atlas_name> <atlas_list> <result_dir>"
+		return_flag=1
+		return $return_flag
+	fi
+
+	local target_dir=$1
+	local target_id=$2
+	local atlas_name=$3
+	local atlas_list=$4
+	local result_dir=$5
+
+	# check output file
+	if [[ -f $result_dir/label/$target_id.label.$atlas_name.nii.gz ]]; then
+		echo "[$function_name] fusion output exist for target: $target_id, skipping ..."
+		return_flag=2
+		return $return_flag
+	fi
+	# check if input target file missing
+	check_image_file $target_dir/$target_id
+	local target_exist=$?
+	if [[ $target_exist -ne 0 ]]; then
+		echo "[$function_name] cannot find target ($target_dir/$target_id)"
+		return_flag=3
+		return $return_flag
+	fi
+	# check if the input 4D file has already been created
+	local seg_file
+	local seg_file_flag=1
+	for seg_file in mapping label; do
+		local merged_4d_file="$result_dir/$seg_file/$atlas_name/$target_id.4D.nii.gz"
+		if [[ ! -f $merged_4d_file ]]; then
+			seg_file_flag=0
+			break			
+		fi
+	done
+	if [[ $seg_file_flag -eq 1 ]]; then
+		echo "[$function_name] ($target_id) both 4D mapping and label file, ready for fusion ..."
+		return_flag=0
+		return $return_flag
+	fi
+
+
+	# check if input mapped atlas file missing
+	local atlas_flag=0
+	local atlas_seg_flag=0
+	local atlas_id
+	for atlas_id in $(cat $atlas_list);do
+		if [[ ! -f "$result_dir/mapping/$atlas_name/$atlas_id.$target_id.f3d.nii.gz" ]]; then
+			echo "[$function_name] ($target_id) Mapping file for atlas ($atlas_id) not pre-exist"
+			#location:  $result_dir/mapping/$atlas_name/$atlas_id.$target_id.f3d.nii.gz"
+			atlas_flag=1
+			break
+		fi
+		local seg_file
+		for seg_file in label; do # no need to check mapped mask
+			if [[ ! -f "$result_dir/$seg_file/$atlas_name/$target_id.$seg_file.$atlas_id.nii.gz" ]]; then
+				echo "[$function_name] ($target_id) Cannot find mapped $seg_file of atlas ($atlas_id): $result_dir/$seg_file/$atlas_name/$target_id.$seg_file.$atlas_id.nii.gz"
+				atlas_seg_flag=1
+				break 2
+			fi
+		done
+	done
+	# skip current $target_id if input file missing
+	if [[ $atlas_flag -eq 1 ]]; then
+		# echo "[$function_name] cannot fine input mapped atlas template file"
+		return_flag=4
+		return $return_flag
+	elif [[ $atlas_seg_flag -eq 1 ]]; then
+		# echo "[$function_name] cannot fine input mapped $seg_file file"
+		return_flag=5
+		return $return_flag
+	fi
+	return $return_flag
 }
 
 # ------------------------------
@@ -66,7 +289,8 @@ function mas_label_volume(){
 	usage() {
 		echo ""
 		echo "Multi Atlas Segmentation - Part 4: volume extraction"
-		echo "Usage: $function_name [-l target_list] [-a atlas_name] [-s seg_dir] [-t seg_type] [-v vol_csv (file path)]"
+		echo "Usage: $function_name [-l target_list] [-s seg_dir] [-v vol_csv (file path)]"
+		echo "       (optional file name suffix) [-t seg_type] [-a atlas_name] "
 		echo ""
 		return 1
 	}
@@ -114,11 +338,17 @@ function mas_label_volume(){
 		return $error_flag
 	fi
 
-	# check existance of $target_id id
+	# check existance of $target_id
 	for target_id in $(cat $target_list); do
-		local seg_file="$seg_dir/$target_id.$seg_type.$atlas_name"
-		check_image_file_exist $seg_file
-		if [[ $? -eq 0 ]]; then
+		seg_file="$seg_dir/$target_id"
+		if [[ ! -z $seg_type ]]; then
+			seg_file="$seg_file.$seg_type"
+			if [[ ! -z $atlas_name ]]; then
+				seg_file="$seg_file.$atlas_name"
+			fi
+		fi
+		check_image_file $seg_file
+		if [[ $? -ne 0 ]]; then
 			echo "[$function_name] cannot find $seg_type file: $seg_file"
 			error_flag=1
 			return $error_flag
@@ -141,7 +371,15 @@ function mas_label_volume(){
 	mkdir -p $tmp_dir
 
 	for target_id in $(cat $target_list); do
-		local seg_file="$seg_dir/$target_id.$seg_type.$atlas_name"
+		# input image file
+		seg_file="$seg_dir/$target_id"
+		if [[ ! -z $seg_type ]]; then
+			seg_file="$seg_file.$seg_type"
+			if [[ ! -z $atlas_name ]]; then
+				seg_file="$seg_file.$atlas_name"
+			fi
+		fi
+		# output csv file
 		local target_csv="$tmp_dir/$target_id.$seg_type.$atlas_name.csv"
 		seg_stats $seg_file -Vl $target_csv
 		# exclude the first colume, which is the background volume
@@ -178,7 +416,7 @@ function mas_quickcheck(){
 
 	# check if FSL is installed (by checking variable $FSLDIR)
 	if [[ -z $FSLDIR ]]; then
-		echo "[mas_quickcheck] variable \$FSLDIR not set, cannot determine FSL installed location, exitng ..."
+		echo "[$function_name] variable \$FSLDIR not set, cannot determine FSL installed location, exitng ..."
 		return 1
 	fi
 
@@ -187,15 +425,21 @@ function mas_quickcheck(){
 
 	local bg_name=$(basename $bg_img | cut -d. -f1)
 	local overlay_name=$(basename $overlay_img | cut -d. -f1)
+	local overlay_nan=$tmp_dir/masknan.$bg_name.$overlay_name
 	local overlay_tmp=$tmp_dir/overlay.$bg_name.$overlay_name
 
 	# determine label range
-	local label_range=$(seg_stats $overlay_img -r)
-	local label_min=$(( $(echo $label_range | cut -d' ' -f1) +1 ))
-	local label_max=$(echo $label_range | cut -d' ' -f2)
-	echo "label_range = $label_min $label_max"
+	seg_maths $overlay_img -masknan $overlay_img $overlay_nan
+	local label_range=$(seg_stats $overlay_nan -r)
+	echo "label_range = $label_range"
 	# generate overlay nifti file using FSL's overlay
-	overlay 1 0 $bg_img -a $overlay_img $label_min $label_max $overlay_tmp
+	overlay 1 0 $bg_img -a $overlay_nan $label_range $overlay_tmp
+
+	# local label_min=$(( $(echo $label_range | cut -d' ' -f1) +1 ))
+	# local label_max=$(echo $label_range | cut -d' ' -f2)
+	# echo "label_range = $label_min $label_max"
+	# # generate overlay nifti file using FSL's overlay
+	# overlay 1 0 $bg_img -a $overlay_img $label_min $label_max $overlay_tmp
 
 	# create png
 	local LUT_file="$FSLDIR/etc/luts/renderjet.lut"
@@ -247,7 +491,7 @@ function mas_quickcheck(){
 	  pngappend $tmp_dir/z_1.png - 2 $tmp_dir/z_2.png - 2 $tmp_dir/z_3.png $tmp_dir/z.png
 	
 	# append png files -xyz
-	  pngappend $tmp_dir/x.png + 2 $tmp_dir/y.png + 2 $tmp_dir/z.png $qc_dir/$qc_filename.png
+	  pngappend $tmp_dir/x.png - 2 $tmp_dir/y.png + 2 $tmp_dir/z.png $qc_dir/$qc_filename.png
 
 	rm -rf $tmp_dir
 
@@ -298,8 +542,8 @@ function mas_create_atlas(){
 	# check the existance of input files
 	for target_id in $(cat $target_list); do
 		# checking target file
-		check_image_file_exist $target_dir/$target_id
-		if [[ $? -eq 0 ]]; then
+		check_image_file $target_dir/$target_id
+		if [[ $? -ne 0 ]]; then
 			echo "[$function_name] cannot find target file: $target_dir/$target_id"
 			return 1
 		fi
@@ -338,7 +582,7 @@ function mas_mapping(){
 				local atlas_dir=$OPTARG;;
 			a ) echo "Atlas ID: $OPTARG"
 				local atlas_id=$OPTARG;;
-			r ) echo "Result rirectory: $OPTARG"
+			r ) echo "Result directory: $OPTARG"
 				local result_dir=$OPTARG;;
 			p ) echo "Parameter config file: $OPTARG"
 				local parameter_cfg=$OPTARG;;
@@ -356,32 +600,34 @@ function mas_mapping(){
 		usage; return 1
 	fi 
 
-	echo "[mas_mapping] beging mapping template $atlas_id to $target_id"
+	echo "[mas_mapping] begin mapping template $atlas_id to $target_id"
 	local error_flag=0
 
-	# checking target_file existance
-	check_image_file_exist $target_dir/$target_id
-	if [[ $? -eq 0 ]]; then
-		echo "[mas_mapping] cannot find target ($target_id)"
-		return 1
-	fi
+	# check mapping input/output file existance 
+	# check_mapping_file $target_dir $target_id $atlas_dir $atlas_list $result_dir
+	# local file_tag=$?
+	# if [[ $file_tag -eq 2 ]]; then
+	# 	echo "[mas_mapping] Mapping file already exist: $target_dir/$target_id "
+	# 	return 0
+	# elif [[ $file_tag -ne 0 ]]; then
+	# 	echo "[mas_mapping] cannot find target ($target_id)"
+	# 	return 1
+	# fi
+
 	# check target_mask existance
 	if [[ ! -z $target_mask ]]; then
-		check_image_file_exist $target_mask
-		if [[ $? -eq 0 ]]; then
+		check_image_file $target_mask
+		if [[ $? -ne 0 ]]; then
 			echo "[mas_mapping] cannot find target mask for ($target_id): $target_mask"
 			return 1
 		fi
 	fi
 	# checking atlas_file existance
-	local atlas_file_type
-	for atlas_file_type in template label mask; do
-		check_image_file_exist $atlas_dir/template/$atlas_id
-		if [[ $? -eq 0 ]]; then
-			echo "[mas_mapping] cannot find atlas $atlas_file_type: $atlas_dir/template/$atlas_id"
-			return 1
-		fi
-	done
+	check_atlas_file $atlas_dir $atlas_id
+	if [[ $? -ne 0 ]]; then
+		echo "[mas_mapping] cannot find atlas $atlas_file_type: $atlas_dir/template/$atlas_id"
+		return 1
+	fi
 
 	# eliminate .ext from id
 	local target_id=$(echo $target_id | cut -d. -f1)
@@ -398,17 +644,19 @@ function mas_mapping(){
 	local mask_dir="$result_dir/mask/$atlas_name"
 	local label_dir="$result_dir/label/$atlas_name"
 	local tmp_dir="$result_dir/tmp/$atlas_name"
-	# mkdir -p $mapping_dir
-	# mkdir -p $mask_dir
-	# mkdir -p $label_dir
-	# mkdir -p $tmp_dir
+	mkdir -p $mapping_dir
+	mkdir -p $mask_dir
+	mkdir -p $label_dir
+	mkdir -p $tmp_dir
 
 	# generate affine matrix (atlas >> target), if no affine matrix found
-	if [[ ! -f $tmp_dir/$atlas_id.$target_id.aff ]]; then
+	if [[ -f $tmp_dir/$atlas_id.$target_id.aff ]]; then
+		echo "[$function_name] affine matrix already exist: $tmp_dir/$atlas_id.$target_id.aff, skipping affine step ..."
+	else
 		local affine_param=""
 		affine_param="$affine_param -speeeeed -ln 4 -lp 4"
 		affine_param="$affine_param -flo $atlas_dir/template/$atlas_id"
-		affine_param="$affine_param -fmask $atlas_dir/mask_dilate/$atlas_id"
+		affine_param="$affine_param -fmask $atlas_dir/mask/$atlas_id"
 		affine_param="$affine_param -ref $target_dir/$target_id"
 		affine_param="$affine_param -res $tmp_dir/$atlas_id.$target_id.aff.nii.gz"
 		affine_param="$affine_param -aff $tmp_dir/$atlas_id.$target_id.aff"
@@ -420,7 +668,9 @@ function mas_mapping(){
 	fi
 
 	# generate nrr cpp (atlas >> target), if no cpp found
-	if [[ ! -f $tmp_dir/$atlas_id.$target_id.cpp.nii.gz ]]; then
+	if [[ -f $tmp_dir/$atlas_id.$target_id.cpp.nii.gz ]]; then
+		echo "[$function_name] non-rigid control point already exist: $tmp_dir/$atlas_id.$target_id.cpp.nii.gz, skipping non-rigid step ..."
+	else
 		# check if affine matrix successfully generated
 		if [[ ! -f $tmp_dir/$atlas_id.$target_id.aff ]]; then
 			echo "[mas_mapping] failed to generate affine matrix"
@@ -431,7 +681,7 @@ function mas_mapping(){
 			local nrr_param="$nrr_param -smooR 0.04 -vel -nogce" #  -ln 4 lp 4
 		fi
 		nrr_param="$nrr_param -flo $atlas_dir/template/$atlas_id"
-		nrr_param="$nrr_param -fmask $atlas_dir/mask_dilate/$atlas_id"
+		nrr_param="$nrr_param -fmask $atlas_dir/mask/$atlas_id"
 		nrr_param="$nrr_param -ref $target_dir/$target_id"
 		# use affine transform matrix to initialize non-rigid registration
 		nrr_param="$nrr_param -aff $tmp_dir/$atlas_id.$target_id.aff"
@@ -445,13 +695,19 @@ function mas_mapping(){
 		reg_f3d $nrr_param
 	fi
 
-	# resample the label, as well as mask
+	# check if cpp file generated successfully
 	if [[ ! -f $tmp_dir/$atlas_id.$target_id.cpp.nii.gz ]]; then
 		echo "[mas_mapping] failed to generate control point cpp file"
 		return 1
 	fi
+	# resample the label, as well as mask
+	local seg_file
 	for seg_file in label mask; do
 		local result_file="$result_dir/$seg_file/$atlas_name/$target_id.$seg_file.$atlas_id.nii.gz"
+		if [[ -f $result_file ]]; then
+			echo "[$function_name] ($target_id) $seg_file file already exist: $result_file, skipping ..."
+			continue
+		fi
 		local resamp_param=""
 		resamp_param="$resamp_param -flo $atlas_dir/$seg_file/$atlas_id"
 		resamp_param="$resamp_param -ref $target_dir/$target_id"
@@ -481,7 +737,8 @@ function mas_fusion(){
 	usage() {
 		echo ""
 		echo "Multi Atlas Segmentation - Part 2: Fusion"
-		echo "Usage: $function_name [-T target_dir] [-t target_list] [-m target_mask] [-A atlas_name] [-a atlas_list] [-r result_dir] [-p parameter_cfg] [-c cleanup_flag (optional)]"
+		echo "Usage: $function_name [-T target_dir] [-t target_id] [-m target_mask] [-A atlas_name] [-a atlas_list] [-r result_dir]"
+		echo "       (optional) [-p parameter_cfg] [-c cleanup_flag]"
 		echo ""
 		return 1
 	}
@@ -520,26 +777,19 @@ function mas_fusion(){
 
 	local target_id=$(echo $target_id | cut -d. -f1)
 
-	echo -e "\n [mas_fusion] fuse mapped template $atlas_name to parcellate $target_id ..."
-
 	local mapping_dir="$result_dir/mapping/$atlas_name"
 	local mask_dir="$result_dir/mask/$atlas_name"
 	local label_dir="$result_dir/label/$atlas_name"
 	local tmp_dir="$result_dir/tmp/$atlas_name"
 	local error_flag=0
-	local k=3
+	local k=5
 	local n=8
 
+
 	# checking target_file existance
-	local target_flag=0
-	for ext in "" .nii .nii.gz .img .hdr; do
-		if [[ -f $target_dir/$target_id$ext ]]; then
-			target_flag=1
-			break
-		fi
-	done
-	if [[ $target_flag -eq 0 ]]; then
-		echo "[mas_fusion] cannot find target file"
+	check_image_file $target_dir/$target_id
+	if [[ $? -ne 0 ]]; then
+		echo "[$function_name] cannot find target file $target_dir/$target_id"
 		return 1
 	fi
 
@@ -548,6 +798,22 @@ function mas_fusion(){
 		local cleanup_flag=1
 	fi
 
+	# check if $atlas_list file exist
+	if [[ ! -f $atlas_list ]]; then
+		echo "[$function_name] Cannot find atlas list file at: $atlas_list"
+		return 1
+	fi
+
+	# check label fusion input file
+	check_label_fusion_file $target_dir $target_id $atlas_name $atlas_list $result_dir
+	local file_tag=$?
+	if [[ $file_tag -eq 2 ]]; then
+		echo "[$function_name] ($target_id) label fusion output file already exist, exiting ..."
+		return 0
+	elif [[ $file_tag -ne 0 ]]; then
+		echo "[$function_name] ($target_id) cannot find label fusion input file"
+		return 1
+	fi
 	# prepare parameters for label fusion
 	local atlas_no=0
 	for atlas_id in $(cat $atlas_list); do
@@ -565,35 +831,58 @@ function mas_fusion(){
 	let atlas_no-=1
 
 	# prepare 4D images for label fusion if not precomputed
+	local seg_file
 	for seg_file in mapping label; do
 		local merged_4d_file="$result_dir/$seg_file/$atlas_name/$target_id.4D.nii.gz"
 		if [[ -f $merged_4d_file ]]; then
-			echo "[$function_name] 4D images exist: $merged_4d_file, skipping ..."
+			echo "[$function_name] 4D $seg_file file exist: $merged_4d_file, skipping ..."
 		else
-			echo "[$function_name] prepare 4D images for label fusion ..."
-			local merge_cmd="seg_maths \$${seg_file}_1 -merge $atlas_no 4 \$${seg_file}_n $ merged_4d_file"
+			echo "[$function_name] prepare 4D $seg_file file for label fusion ..."
+			local merge_cmd="seg_maths \$${seg_file}_1 -merge $atlas_no 4 \$${seg_file}_n $merged_4d_file"
 			# echo $merge_command
 			eval $merge_cmd
 		fi
 	done
 
 	# label fusion
-	echo " [mas_fusion] label fusion ..."
 	local labfusion_param="-unc"
 	labfusion_param="$labfusion_param -in $result_dir/label/$atlas_name/$target_id.4D.nii.gz"
 	labfusion_param="$labfusion_param -out $result_dir/label/$target_id.label.$atlas_name.nii.gz"
+	# labfusion_param="$labfusion_param -SBA"
 	labfusion_param="$labfusion_param -STEPS $k $n $target_dir/$target_id $result_dir/mapping/$atlas_name/$target_id.4D.nii.gz"
-	if [[ ! -z $target_mask ]]; then
+	# use mask file reduce computational time for label fusion
+	local merged_4d_label="$label_dir/$atlas_name/$target_id.4D.nii.gz"
+	local merged_4d_mask="$mask_dir/$atlas_name/$target_id.4D.nii.gz"
+	if [[ ! -z $target_mask ]] && [[ -f $target_mask ]]; then
+		# use predifined mask 
 		labfusion_param="$labfusion_param -mask $target_mask"
+	elif [[ -f $merged_4d_label ]]; then
+		# use dilated mapped labels to generate mask (majority voting)
+		local targetmask_mv="$mask_dir/$target_id.mask.mv.nii.gz"
+		seg_maths $merged_4d_label -tmean -bin $mask_majority_voting
+		labfusion_param="$labfusion_param -mask $targetmask_mv"
 	fi
+	echo -e "\n [$function_name] fuse mapped template $atlas_name to parcellate $target_id ..."
 	seg_LabFusion $labfusion_param
 
 	# generate quickcheck for label
+	check_image_file $result_dir/label/$target_id.label.$atlas_name.nii.gz
+	if [[ $? -ne 0 ]]; then
+		echo "[$function_name] ($target_id) failed to generate label file: $result_dir/label/$target_id.label.$atlas_name.nii.gz , skip quickcheck ..."
+		return 1
+	fi
+	echo "[$function_name] generating label quickcheck for: $target_id ..."
 	mas_quickcheck $target_dir/$target_id $result_dir/label/$target_id.label.$atlas_name.nii.gz $result_dir/quickcheck/ $target_id.label.$atlas_name
 
 	# generate mask
 	seg_maths $result_dir/label/$target_id.label.$atlas_name.nii.gz -bin $result_dir/mask/$target_id.mask.$atlas_name.nii.gz
+	check_image_file $result_dir/mask/$target_id.mask.$atlas_name.nii.gz
+	if [[ $? -ne 0 ]]; then
+		echo "[$function_name] ($target_id) failed to generate mask file: $result_dir/mask/$target_id.mask.$atlas_name.nii.gz , skip quickcheck ..."
+		return 1
+	fi
 	# generate quickcheck for mask
+	echo "[$function_name] generating mask quickcheck for: $target_id ..."
 	mas_quickcheck $target_dir/$target_id $result_dir/mask/$target_id.mask.$atlas_name.nii.gz $result_dir/quickcheck/ $target_id.mask.$atlas_name
 
 	# remove tmp files
@@ -609,8 +898,8 @@ function mas_mapping_batch(){
 	usage() {
 		echo ""
 		echo "Multi Atlas Segmentation - Part 1: Mapping (pbs generater)"
-		echo "Usage: $function_name [-T target_dir] [-t target_list] [-A atlas_dir] [-a atlas_list] [-r result_dir]"
-		echo "       (optional) [-M targetmask_dir] [-f targetmask_suffix] [-p parameter_cfg] [-e execution mode (cluster/local)]"
+		echo "Usage: $function_name [-T target_dir] [-t target_list] [-A atlas_dir] [-r result_dir]"
+		echo "       (optional) [-M targetmask_dir] [-f targetmask_suffix] [-a atlas_list] [-p parameter_cfg] [-e execution mode (cluster/local)]"
 		echo "       for [-e] option: (cluster) will submit parallel pbs jobs to cluster; (local) will run job sequentially on local machine. cluster is set by default"
 		echo ""
 		return 1
@@ -654,7 +943,7 @@ function mas_mapping_batch(){
 	# predefine some essential local variable
 	local target_id
 	local atlas_id
-	local mas_param
+	local mas_mapping_param
 	
 	# check necessary input
 	if [[ -z $result_dir ]]; then
@@ -668,11 +957,16 @@ function mas_mapping_batch(){
 		local atlas_name=$(basename $atlas_dir)
 	fi
 	if [[ ! -f $target_list ]]; then
-		echo "[mas_quickcheck] cannot find target list: $target_list"
+		echo "[$function_name] cannot find target list: $target_list"
 		return 1
 	fi
+	# set default $atlas_list if not defined
+	if [[ -z $atlas_list ]]; then
+		local atlas_list=$atlas_dir/$AtlasListFileName
+	fi
+	# check if $atlas_list file exist
 	if [[ ! -f $atlas_list ]]; then
-		echo "[mas_quickcheck] cannot find atlas list: $atlas_list"
+		echo "[$function_name] Cannot find atlas list file at: $atlas_list"
 		return 1
 	fi
 	# set execution mode as cluster by default
@@ -684,37 +978,14 @@ function mas_mapping_batch(){
 		return 1
 	fi
 
-	# check input image file existance
-	for target_id in $(cat $target_list); do
-		# check if input target file missing
-		check_image_file_exist $target_dir/$target_id
-		if [[ $? -eq 0 ]]; then
-			echo "[$function_name] cannot find target ($target_dir/$target_id)"
+	# check atlas file
+	local atlas_name=$(basename $atlas_dir)
+	for atlas_id in $(cat $atlas_list);do
+		check_atlas_file $atlas_dir $atlas_id
+		if [[ $? -ne 0 ]]; then
+			echo "[$function_name] atlas ($atlas_name: $atlas_id) file missing, exiting ..."
 			return 1
 		fi
-		# check if specified target mask file exist
-		if [[ ! -z $targetmask_dir ]]; then
-			local targetmask_name="$targetmask_dir/$target_id$targetmask_suffix"
-			check_image_file_exist $targetmask_name
-			if [[ $? -eq 0 ]]; then
-				echo "[$function_name] cannot find target mask $targetmask_name"
-				return 1
-			fi
-		fi
-
-		# check if output file already exist
-		for atlas_id in $(cat $atlas_list);do
-			if [[ ! -f "$result_dir/label/$atlas_name/$target_id.label.$atlas_id.nii.gz" ]] || \
-			   [[ ! -f "$result_dir/mask/$atlas_name/$target_id.mask.$atlas_id.nii.gz" ]] || \
-			   [[ ! -f "$result_dir/mapping/$atlas_name/$atlas_id.$target_id.f3d.nii.gz" ]]; then
-				# check if input atlas file missing
-				check_image_file_exist "$atlas_dir/template/$atlas_id"
-				if [[ $? -eq 0 ]]; then
-					echo "[$function_name] cannot find atlas ($atlas_dir/template/$atlas_id)"
-					return 1
-				fi
-			fi
-		done
 	done
 
 	# if in cluster mode, generate pbs related parameters/folders
@@ -723,7 +994,7 @@ function mas_mapping_batch(){
 		local LOG_DIR=$result_dir/log
 		local JOB_DIR=$result_dir/job
 		local MEM="4gb"
-		local WALLTIME="7:00:00"
+		local WALLTIME="12:00:00"
 
 		mkdir -p $PBS_DIR
 		mkdir -p $LOG_DIR
@@ -734,34 +1005,41 @@ function mas_mapping_batch(){
 		rm -f $job_list
 	fi
 
-	# start mapping
+	# start mapping loop
 	for target_id in $(cat $target_list); do
+		# check mapping input/output file existance
+		check_mapping_file $target_dir $target_id $atlas_dir $atlas_list $result_dir
+		local file_exist=$?
+		if [[ $file_exist -eq 2 ]]; then
+			echo "[$function_name] output for target $target_id exist, skipping ..."
+			continue
+		elif [[ $file_exist -ne 0 ]]; then
+			echo "[$function_name] target $target_id file missing, skipping ..."
+			continue
+		fi
+		# star individual mapping
+		echo "[$function_name] target ($target_id) file checking success, start mapping .."
 		if [[ "$exe_mode" == "local" ]]; then
 			for atlas_id in $(cat $atlas_list); do
-				mas_param=""
-				mas_param="$mas_param -T $target_dir"
-				mas_param="$mas_param -t $target_id"
-				mas_param="$mas_param -A $atlas_dir"
-				mas_param="$mas_param -a $atlas_id"
-				mas_param="$mas_param -r $result_dir"
+				mas_mapping_param=""
+				mas_mapping_param="$mas_mapping_param -T $target_dir"
+				mas_mapping_param="$mas_mapping_param -t $target_id"
+				mas_mapping_param="$mas_mapping_param -A $atlas_dir"
+				mas_mapping_param="$mas_mapping_param -a $atlas_id"
+				mas_mapping_param="$mas_mapping_param -r $result_dir"
 				# Add Optional parameters if specified
 				if [[ ! -z $targetmask_dir ]]; then
-					local targetmask_name="$targetmask_dir/$target_id$targetmask_suffix"
-					check_image_file_exist $targetmask_name
-					if [[ $? -eq 0 ]]; then
-						echo "[mas_mapping_pbs] cannot find target mask $targetmask_name"
-
-					fi
-					mas_param="$mas_param -m $targetmask_dir/$target_id$targetmask_suffix"
+					# targetmask existance already checked
+					mas_mapping_param="$mas_mapping_param -m $targetmask_dir/$target_id$targetmask_suffix"
 				fi
 				if [[ ! -z $parameter_cfg ]]; then
-					mas_param="$mas_param -p $parameter_cfg"
+					mas_mapping_param="$mas_mapping_param -p $parameter_cfg"
 				fi
 				if [[ ! -z $cleanup_flag ]]; then
-					mas_param="$mas_param -c $cleanup_flag"
+					mas_mapping_param="$mas_mapping_param -c $cleanup_flag"
 				fi
 
-				mas_mapping $mas_param
+				mas_mapping $mas_mapping_param
 			done
 			# potential final step: cleanup unwanted files
 		elif [[ "$exe_mode" == "cluster" ]]; then
@@ -793,35 +1071,35 @@ function mas_mapping_batch(){
 			done
 			# add lines to determine atlas_id from ${PBS_ARRAYID}
 			echo "$pbs_array_prefix" >> $pbs_file
-			echo "source $mas_script_dir/mas_helperfunction.sh" >> $pbs_file
+			echo "source $mas_script_path" >> $pbs_file
 			echo "readarray atlas_array < $atlas_list" >> $pbs_file
 			echo "atlas_id=\${atlas_array[\${PBS_ARRAYID}]}" >> $pbs_file
 		
-			mas_param=""
-			mas_param="$mas_param -T $target_dir"
-			mas_param="$mas_param -t $target_id"
-			mas_param="$mas_param -A $atlas_dir"
-			mas_param="$mas_param -a \$atlas_id"
-			mas_param="$mas_param -r $result_dir"
+			mas_mapping_param=""
+			mas_mapping_param="$mas_mapping_param -T $target_dir"
+			mas_mapping_param="$mas_mapping_param -t $target_id"
+			mas_mapping_param="$mas_mapping_param -A $atlas_dir"
+			mas_mapping_param="$mas_mapping_param -a \$atlas_id"
+			mas_mapping_param="$mas_mapping_param -r $result_dir"
 			
 			# Add Optional parameters if specified
 			if [[ ! -z $targetmask_dir ]]; then
 				local targetmask_name="$targetmask_dir/$target_id$targetmask_suffix"
-				check_image_file_exist $targetmask_name
-				if [[ $? -eq 0 ]]; then
-					echo "[mas_mapping_pbs] cannot find target mask $targetmask_name"
+				check_image_file $targetmask_name
+				if [[ $? -ne 0 ]]; then
+					echo "[$function_name] cannot find target mask $targetmask_name"
 
 				fi
-				mas_param="$mas_param -m $targetmask_dir/$target_id$targetmask_suffix"
+				mas_mapping_param="$mas_mapping_param -m $targetmask_dir/$target_id$targetmask_suffix"
 			fi
 			if [[ ! -z $parameter_cfg ]]; then
-				mas_param="$mas_param -p $parameter_cfg"
+				mas_mapping_param="$mas_mapping_param -p $parameter_cfg"
 			fi
 			if [[ ! -z $cleanup_flag ]]; then
-				mas_param="$mas_param -c $cleanup_flag"
+				mas_mapping_param="$mas_mapping_param -c $cleanup_flag"
 			fi
 
-			echo -e "mas_mapping $mas_param" >> $pbs_file
+			echo -e "mas_mapping $mas_mapping_param" >> $pbs_file
 			# potential final step: cleanup unwanted files
 
 			# submit pbs job and store at joblist 
@@ -832,9 +1110,9 @@ function mas_mapping_batch(){
 
 	if [[ "$exe_mode" == "cluster" ]]; then
 		if [[ -f $job_list ]]; then
-			echo -e "\n [mas_mapping_pbs] joblist created under: $job_list \n"
+			echo -e "\n [$function_name] joblist created under: $job_list \n"
 		else
-			echo -e "\n [mas_mapping_pbs] all output exist, no job submitted \n"
+			echo -e "\n [$function_name] all output exist, no job submitted \n"
 		fi
 	fi
 }
@@ -848,7 +1126,7 @@ function mas_fusion_batch(){
 	usage() {
 		echo ""
 		echo "Multi Atlas Segmentation - Part 2: fusion (pbs generater)"
-		echo "Usage: $function_name [-T target_dir] [-t target_list] [-A atlas_dir] [-a atlas_list] [-r result_dir]"
+		echo "Usage: $function_name [-T target_dir] [-t target_list] [-A atlas_name] [-a atlas_list] [-r result_dir]"
 		echo "                       (optional) [-M targetmask_dir] [-f targetmask_suffix] [-p parameter_cfg] [-c cleanup_flag] [-e execution mode (cluster/local)]"
 		echo "       for [-e] option: (cluster) will submit parallel pbs jobs to cluster; (local) will run job sequentially on local machine. cluster is set by default"
 		echo ""
@@ -891,11 +1169,16 @@ function mas_fusion_batch(){
 		usage; return 1
 	fi 
 	if [[ -z $result_dir ]]; then
-		echo "[mas_pbs] result directory not specified"
+		echo "[$function_name] result directory not specified"
 		return 1
 	fi
 	if [[ ! -f $target_list ]]; then
-		echo "[mas_quickcheck] cannot find target list: $target_list"
+		echo "[$function_name] cannot find target list: $target_list"
+		return 1
+	fi
+	# check if $atlas_list file exist
+	if [[ ! -f $atlas_list ]]; then
+		echo "[$function_name] Cannot find atlas list file at: $atlas_list"
 		return 1
 	fi
 	# set execution mode as cluster by default
@@ -913,7 +1196,7 @@ function mas_fusion_batch(){
 		local LOG_DIR=$result_dir/log
 		local JOB_DIR=$result_dir/job
 		local MEM="4gb"
-		local WALLTIME="2:00:00"
+		local WALLTIME="3:00:00"
 
 		mkdir -p $PBS_DIR
 		mkdir -p $LOG_DIR
@@ -928,80 +1211,52 @@ function mas_fusion_batch(){
 	local error_flag=0
 
 	for target_id in $(cat $target_list); do
-		# start label fusion loop
-		if [[ -f $result_dir/label/$target_id.label.$atlas_name.nii.gz ]]; then
-			echo "[$function_name] fusion exist for target: $target_id, skipping ..."
+		# check input/output files
+		check_label_fusion_file $target_dir $target_id $atlas_name $atlas_list $result_dir
+		local label_fusion_file_exist=$?
+		if [[ $label_fusion_file_exist -eq 2 ]]; then
+			echo "[$function_name] ($target_id) output file exist, skipping ..."
 			continue
-		else
-			# check if input target file missing
-			check_image_file_exist $target_dir/$target_id
-			local target_exist=$?
-			if [[ $target_exist -eq 0 ]]; then
-				echo "[$function_name] cannot find target ($target_dir/$target_id$ext)"
-				continue
-			fi
-			# check if input mapped atlas file missing
-			local atlas_flag=0
-			local atlas_seg_flag=0
-			local atlas_id
-			for atlas_id in $(cat $atlas_list);do
-				if [[ ! -f "$result_dir/mapping/$atlas_name/$atlas_id.$target_id.f3d.nii.gz" ]]; then
-					echo "[$function_name] ($target_id) Cannot find mapping file for atlas ($atlas_id): $result_dir/mapping/$atlas_name/$atlas_id.$target_id.f3d.nii.gz"
-					atlas_flag=1
-					break
-				fi
-				for seg_file in label mask; do
-					if [[ ! -f "$result_dir/$seg_file/$atlas_name/$target_id.$seg_file.$atlas_id.nii.gz" ]]; then
-						echo "[$function_name] ($target_id) Cannot find mapped $seg_file of atlas ($atlas_id): $result_dir/$seg_file/$atlas_name/$target_id.$seg_file.$atlas_id.nii.gz"
-						atlas_seg_flag=1
-						break 2
-					fi
-				done
-			done
-			# skip current $target_id if input file missing
-			if [[ $atlas_flag -eq 1 ]]; then
-				continue
-			fi
-			if [[ $atlas_seg_flag -eq 1 ]]; then
-				continue
-			fi
-			echo "[$function_name] Input checking success, start label fusion for $target_id ..."
+		elif [[ $label_fusion_file_exist -ne 0 ]]; then
+			echo "[$function_name] ($target_id) input mapping file missing, skipping ..."
+			continue
+		fi
+		# pass file checking stage
+		echo "[$function_name] Input checking success, start label fusion for $target_id ..."
 
-			# preparing label fusion parameter for $target_id
-			local mas_param=""
-			mas_param="$mas_param -T $target_dir"
-			mas_param="$mas_param -t $target_id"
-			mas_param="$mas_param -A $atlas_name"
-			mas_param="$mas_param -a $atlas_list"
-			mas_param="$mas_param -r $result_dir"
-			# Add Optional parameters if specified
-			if [[ ! -z $targetmask_dir ]]; then
-				target_mask=$targetmask_dir/$target_id$targetmask_suffix
-				mas_param="$mas_param -m $target_mask"
-			fi
-			if [[ ! -z $parameter_cfg ]]; then
-				mas_param="$mas_param -p $parameter_cfg"
-			fi
-			if [[ ! -z $cleanup_flag ]]; then
-				mas_param="$mas_param -c $cleanup_flag"
-			fi
+		# preparing label fusion parameter for $target_id
+		local mas_fusion_param=""
+		mas_fusion_param="$mas_fusion_param -T $target_dir"
+		mas_fusion_param="$mas_fusion_param -t $target_id"
+		mas_fusion_param="$mas_fusion_param -A $atlas_name"
+		mas_fusion_param="$mas_fusion_param -a $atlas_list"
+		mas_fusion_param="$mas_fusion_param -r $result_dir"
+		# Add Optional parameters if specified
+		if [[ ! -z $targetmask_dir ]]; then
+			target_mask=$targetmask_dir/$target_id$targetmask_suffix
+			mas_fusion_param="$mas_fusion_param -m $target_mask"
+		fi
+		if [[ ! -z $parameter_cfg ]]; then
+			mas_fusion_param="$mas_fusion_param -p $parameter_cfg"
+		fi
+		if [[ ! -z $cleanup_flag ]]; then
+			mas_fusion_param="$mas_fusion_param -c $cleanup_flag"
+		fi
 
-			# start label fusion based on the $exe_mode
-			if [[ "$exe_mode" == "local" ]]; then
-				echo "$function_name run locally: mas_fusion $mas_param"
-				mas_fusion "$mas_param"
-			elif [[ "$exe_mode" == "cluster" ]]; then
-				local job_name=$jid.$target_id
-				local pbs_file=$PBS_DIR/$job_name.pbs
-				local log_file=$LOG_DIR/$job_name.log
-				pbsBoilerPlate -n $job_name -m $MEM -w $WALLTIME -j -O $log_file -f $pbs_file # -O /dev/null
-				echo "source $mas_script_dir/mas_helperfunction.sh" >> $pbs_file
-				echo -e "mas_fusion $mas_param" >> $pbs_file
-				# submit pbs job and store at joblist 
-				# qsub $pbs_file
-				echo "1,qsub $pbs_file" >> $job_list
-			fi
-
+		# start label fusion based on the $exe_mode
+		if [[ "$exe_mode" == "local" ]]; then
+			echo "[$function_name] run label fusion locally"
+			mas_fusion "$mas_fusion_param"
+		elif [[ "$exe_mode" == "cluster" ]]; then
+			local job_name=$jid.$target_id
+			local pbs_file=$PBS_DIR/$job_name.pbs
+			local log_file=$LOG_DIR/$job_name.log
+			pbsBoilerPlate -n $job_name -m $MEM -w $WALLTIME -j -O $log_file -f $pbs_file # -O /dev/null
+			echo "source $mas_script_path" >> $pbs_file
+			echo -e "mas_fusion $mas_fusion_param" >> $pbs_file
+			# submit pbs job and store at joblist 
+			qsub $pbs_file
+			echo "1,qsub $pbs_file" >> $job_list
 		fi
 	done
 
@@ -1009,7 +1264,7 @@ function mas_fusion_batch(){
 		if [[ -f $job_list ]]; then
 			echo -e "\n [mas_fusion_pbs] joblist created under: $job_list \n"
 		else
-			echo -e "\n [mas_fusion_pbs] all output exist, no job submitted \n"
+			echo -e "\n [mas_fusion_pbs] no job to submit \n"
 		fi
 	fi
 	
@@ -1017,14 +1272,338 @@ function mas_fusion_batch(){
 	return $error_flag
 }
 
+#-----------------------------------
+# function: mas_parcellation_batch
+# ----------------------------------
+function mas_parcellation_batch(){
+	# printout function help 
+	local function_name=${FUNCNAME[0]}
+	usage() {
+		echo ""
+		echo "Multi Atlas Segmentation - Part 1+2 pipeline: multi-atlas parcellation (= mapping + label fusion)"
+		echo "Usage: $function_name [-T target_dir] [-t target_list] [-A atlas_dir] [-r result_dir]"
+		echo "                       (optional) [-M targetmask_dir] [-f targetmask_suffix] [-a atlas_list] [-p parameter_cfg] [-c cleanup_flag] [-e execution mode (cluster/local)]"
+		echo "       for [-e] option: (cluster) will submit parallel pbs jobs to cluster; (local) will run job sequentially on local machine. cluster is set by default"
+		echo ""
+		return 1
+	}
+	# get options
+	local OPTIND
+	local options
+	while getopts "T:t:M:m:A:a:r:p:c:e:h" options; do
+		case $options in
+			T ) echo "Target directory:      $OPTARG"
+				local target_dir=$OPTARG;;
+			t ) echo "Target list:           $OPTARG"
+				local target_list=$OPTARG;;
+			M ) echo "Target mask directory: $OPTARG"
+				local targetmask_dir=$OPTARG;;
+			m ) echo "Target mask suffix:    $OPTARG"
+				local targetmask_suffix=$OPTARG;;
+			A ) echo "Atlas directory:       $OPTARG"
+				local atlas_dir=$OPTARG;;
+			a ) echo "Atlas list:            $OPTARG"
+				local atlas_list=$OPTARG;;
+			r ) echo "Result directory:      $OPTARG"
+				local result_dir=$OPTARG;;
+			e ) echo "Execution mode:        $OPTARG"
+				local exe_mode=$OPTARG;;
+			p ) echo "Parameter config file: $OPTARG"
+				local parameter_cfg=$OPTARG;;
+			c ) echo "Cleanup flag:          $OPTARG"
+				local cleanup_flag=$OPTARG;;
+			h ) usage;;
+			\?) echo "Unknown option"
+				usage
+				return 1;;
+		esac
+	done
+
+	# check necessary input
+	if [[ $OPTIND -eq 1 ]]; then
+		echo "[$function_name] no option specified"
+		usage; return 1
+	fi 
+
+	# check compulsary variables
+	check_variable 
+
+	if [[ -z $atlas_dir ]]; then
+		echo "[$function_name] no Atlas Directory specified"
+		return 1
+	fi
+	local atlas_name=$(basename $atlas_dir)
+
+	# check necessary input
+	if [[ $OPTIND -eq 1 ]]; then
+		echo "[$function_name] no option specified"
+		usage; return 1
+	fi 
+	if [[ -z $result_dir ]]; then
+		echo "[$function_name] result directory not specified"
+		return 1
+	fi
+	if [[ ! -f $target_list ]]; then
+		echo "[$function_name] cannot find target list: $target_list"
+		return 1
+	fi
+	# set default $atlas_list if not defined
+	if [[ -z $atlas_list ]]; then
+		local atlas_list=$atlas_dir/$AtlasListFileName
+	fi
+	# check if $atlas_list file exist
+	if [[ ! -f $atlas_list ]]; then
+		echo "[$function_name] Cannot find atlas list file at: $atlas_list"
+		return 1
+	fi
+
+	# check atlas file
+	for atlas_id in $(cat $atlas_list);do
+		check_atlas_file $atlas_dir $atlas_id
+		if [[ $? -ne 0 ]]; then
+			echo "[$function_name] atlas ($atlas_name: $atlas_id) file missing, exiting ..."
+			return 1
+		fi
+	done
+
+	# set execution mode as cluster by default
+	if [[ -z "$exe_mode" ]]; then
+		local exe_mode="cluster"
+	fi
+	if [[ "$exe_mode" != "cluster" ]] && [[ "$exe_mode" != "local" ]]; then
+		echo "[$function_name] \$exe_mode should be either \"cluster\" or \"local\" "
+		return 1
+	fi
+
+	# if in cluster mode, generate pbs related parameters/folders
+	if [[ "$exe_mode" == "cluster" ]]; then
+		local PBS_DIR=$result_dir/pbs
+		local LOG_DIR=$result_dir/log
+		local JOB_DIR=$result_dir/job
+		local MEM_MAPPING="4gb"
+		local MEM_FUSION="8gb"
+		local WALLTIME_MAPPING="12:00:00"
+		local WALLTIME_FUSION="12:00:00"
+
+		mkdir -p $PBS_DIR
+		mkdir -p $LOG_DIR
+		mkdir -p $JOB_DIR
+
+		local jid="${RANDOM}_parcellation" # generate random number as job ID, alternatively, use: $$
+		local job_list=$JOB_DIR/$USER.$jid.$(date +%y%m%d%H%M%S).txt
+		rm -f $job_list
+	fi
+
+	local target_id
+	local atlas_id
+	local error_flag=0
+
+	# start parcellation (mapping+fusion) loop
+	for target_id in $(cat $target_list); do
+		# check if output file already exist
+		check_label_fusion_file $target_dir $target_id $atlas_name $atlas_list $result_dir
+		local label_fusion_file_exist=$?
+		if [[ $label_fusion_file_exist -eq 2 ]]; then
+			echo "[$function_name] label fusion output file exist, skipping ..."
+			continue
+		fi
+		# fusion parameter generated (for both local/cluster) prior to loop
+		# mapping parameter generated inside the loop for local/cluster seperately)
+		local mas_fusion_param=""
+		mas_fusion_param="$mas_fusion_param -T $target_dir"
+		mas_fusion_param="$mas_fusion_param -t $target_id"
+		mas_fusion_param="$mas_fusion_param -A $atlas_name"
+		mas_fusion_param="$mas_fusion_param -a $atlas_list"
+		mas_fusion_param="$mas_fusion_param -r $result_dir"
+		# Add Optional parameters if specified
+		if [[ ! -z $targetmask_dir ]]; then
+			target_mask=$targetmask_dir/$target_id$targetmask_suffix
+			mas_fusion_param="$mas_fusion_param -m $target_mask"
+		fi
+		if [[ ! -z $parameter_cfg ]]; then
+			mas_fusion_param="$mas_fusion_param -p $parameter_cfg"
+		fi
+		if [[ ! -z $cleanup_flag ]]; then
+			mas_fusion_param="$mas_fusion_param -c $cleanup_flag"
+		fi
+
+		# start parcellation (mapping+fusion) for target $target_id
+		if [[ "$exe_mode" == "local" ]]; then
+			echo "[$function_name] start local parcellation for target ($target_id) ..."
+			####################
+			# mapping step
+			for atlas_id in $(cat $atlas_list); do
+				# check mapping input/output file
+				check_mapping_file $target_dir $target_id $atlas_dir $atlas_list $result_dir $targetmask_dir $targetmask_suffix
+				local mapping_file_exist=$?
+				if [[ $mapping_file_exist -eq 2 ]]; then
+					echo "[mas_mapping] Mapping output file already exist: ($target_id), skipping ..."
+					continue
+				elif [[ $mapping_file_exist -ne 0 ]]; then
+					echo "[mas_mapping] Mapping input file missing: ($target_id), skipping"
+					continue
+				fi
+				# start template/label mapping step
+				mas_mapping_param=""
+				mas_mapping_param="$mas_mapping_param -T $target_dir"
+				mas_mapping_param="$mas_mapping_param -t $target_id"
+				mas_mapping_param="$mas_mapping_param -A $atlas_dir"
+				mas_mapping_param="$mas_mapping_param -a $atlas_id"
+				mas_mapping_param="$mas_mapping_param -r $result_dir"
+				# Add Optional parameters if specified
+				if [[ ! -z $targetmask_dir ]]; then
+					# file exsitance already checked
+					targetmask_name="$targetmask_dir/$target_id$targetmask_suffix"
+					mas_mapping_param="$mas_mapping_param -m $targetmask_name"
+				fi
+				if [[ ! -z $parameter_cfg ]]; then
+					mas_mapping_param="$mas_mapping_param -p $parameter_cfg"
+				fi
+				if [[ ! -z $cleanup_flag ]]; then
+					mas_mapping_param="$mas_mapping_param -c $cleanup_flag"
+				fi
+				# start mapping
+				echo "[$function_name] run mapping locally for target: $target_id"
+				mas_mapping $mas_mapping_param
+			done
+			###############################
+			# label fusion step
+			echo -e "\n [$function_name] run label fusion locally for target: $target_id \n"
+			echo "mas_fusion $mas_fusion_param"
+			mas_fusion $mas_fusion_param
+			# potential final step: cleanup unwanted files
+		elif [[ "$exe_mode" == "cluster" ]]; then
+			echo "[$function_name] start cluster parcellation for target: ($target_id) ..."
+			####################
+			# mapping step
+			# check mapping input/output file
+			check_mapping_file $target_dir $target_id $atlas_dir $atlas_list $result_dir $targetmask_dir $targetmask_suffix
+			local mapping_file_exist=$?
+			# start file checking
+			if [[ $mapping_file_exist -eq 2 ]]; then
+				echo "[$function_name] All mapping output file exist: ($target_id), go to fusion directly ..."
+			else
+				# not all mapping file pre-exist, need to run mapping step first
+				if [[ $mapping_file_exist -ne 0 ]]; then
+					echo "[$function_name] Mapping input file missing: ($target_id), skipping ..."
+					continue
+				fi
+				# pass file checking, preparing qsub pbs job parameters
+				local job_name_mapping=$jid.$target_id.mapping
+				local pbs_file=$PBS_DIR/$job_name_mapping.pbs
+				local log_file=$LOG_DIR/$job_name_mapping.log
+				# clean up files if pre-exist
+				rm -f $pbs_file
+				rm -f $log_file
+				# add pbs header info
+				pbsBoilerPlate -n $job_name_mapping -m $MEM_MAPPING -w $WALLTIME_MAPPING -j -O $log_file -f $pbs_file # -O /dev/null
+				# determine the unmapped atlas to be added to pbs job array
+				local pbs_array_prefix="#PBS -t " 
+				# calculate atlas number for job array
+				readarray atlas_array < $atlas_list
+				local atlas_no=${#atlas_array[@]}
+				for ((idx=0;idx<$atlas_no;idx+=1));do
+					atlas_id=${atlas_array[$idx]}
+					# if output files already exist, don't include from job array
+					if [[ ! -f "$result_dir/label/$atlas_name/$target_id.label.$atlas_id.nii.gz" ]] || \
+					   [[ ! -f "$result_dir/mask/$atlas_name/$target_id.mask.$atlas_id.nii.gz" ]] || \
+					   [[ ! -f "$result_dir/mapping/$atlas_name/$atlas_id.$target_id.f3d.nii.gz" ]]; then
+					    pbs_array_prefix="${pbs_array_prefix}$idx,"
+					    # add comma beforehand if not the first atlas
+					  #   if [[ $idx -lt (( $atlas_no - 1 )) ]]; then
+							# pbs_array_prefix="${pbs_array_prefix},"
+					  #   fi
+					fi
+				done
+				# cut the last comma ','
+				pbs_array_prefix=$(echo $pbs_array_prefix | rev | cut -c 2- | rev)
+
+				# add lines to determine atlas_id from ${PBS_ARRAYID}
+				echo "$pbs_array_prefix" >> $pbs_file
+				echo "source $mas_script_path" >> $pbs_file
+				echo "readarray atlas_array < $atlas_list" >> $pbs_file
+				echo "atlas_id=\${atlas_array[\${PBS_ARRAYID}]}" >> $pbs_file
+			
+				mas_mapping_param=""
+				mas_mapping_param="$mas_mapping_param -T $target_dir"
+				mas_mapping_param="$mas_mapping_param -t $target_id"
+				mas_mapping_param="$mas_mapping_param -A $atlas_dir"
+				mas_mapping_param="$mas_mapping_param -a \$atlas_id"
+				mas_mapping_param="$mas_mapping_param -r $result_dir"
+				
+				# Add Optional parameters if specified
+				if [[ ! -z $targetmask_dir ]]; then
+					local targetmask_name="$targetmask_dir/$target_id$targetmask_suffix"
+					check_image_file $targetmask_name
+					if [[ $? -ne 0 ]]; then
+						echo "[$function_name] cannot find target mask $targetmask_name"
+
+					fi
+					mas_mapping_param="$mas_mapping_param -m $targetmask_dir/$target_id$targetmask_suffix"
+				fi
+				if [[ ! -z $parameter_cfg ]]; then
+					mas_mapping_param="$mas_mapping_param -p $parameter_cfg"
+				fi
+				if [[ ! -z $cleanup_flag ]]; then
+					mas_mapping_param="$mas_mapping_param -c $cleanup_flag"
+				fi
+
+				echo -e "mas_mapping $mas_mapping_param" >> $pbs_file
+				# potential final step: cleanup unwanted files
+
+				# submit pbs job and store at joblist 
+				local job_id_mapping=$(qsub $pbs_file)
+				echo "1,qsub $pbs_file" >> $job_list
+			fi
+
+			###############################
+			# label fusion step
+			local job_name_fusion=$jid.$target_id.fusion
+			local pbs_file=$PBS_DIR/$job_name_fusion.pbs
+			local log_file=$LOG_DIR/$job_name_fusion.log
+			pbsBoilerPlate -n $job_name_fusion -m $MEM_FUSION -w $WALLTIME_FUSION -j -O $log_file -f $pbs_file # -O /dev/null
+			if [[ ! -z $job_id_mapping ]]; then
+				# if mapping job array submitted, then add job dependency
+				echo "#PBS -W depend=afterokarray:$job_id_mapping" >> $pbs_file
+			else
+				if [[ $label_fusion_file_exist -eq 0 ]]; then
+					# all mapping already done previously, start fusion step without dependency
+					echo "[$function_name] ($target_id): all mapping file pre-exist, start fusion job directly without job array dependency ..."
+				else
+					echo "[$function_name] ($target_id): no mapping job submitted, and not all mapping file pre-exist, skipping ..."
+					continue
+				fi
+			fi
+
+			echo "source $mas_script_path" >> $pbs_file
+			echo "mas_fusion $mas_fusion_param" >> $pbs_file
+			# submit pbs job and store at joblist 
+			qsub $pbs_file
+			echo "1,qsub $pbs_file" >> $job_list
+		fi
+	done
+
+	if [[ "$exe_mode" == "cluster" ]]; then
+		if [[ -f $job_list ]]; then
+			echo -e "\n [$function_name] joblist created under: $job_list \n"
+		else
+			echo -e "\n [$function_name] no job submitted \n"
+		fi
+	fi
+
+}
+
+#-----------------------------------
+# function: mas_quickcheck_batch
+# ----------------------------------
 function mas_quickcheck_batch(){
 	# printout function help 
 	local function_name=${FUNCNAME[0]}
 	usage() {
 	echo ""
 	echo "Multi Atlas Segmentation - Part 3: Quality control (QC - Quickcheck)"
-	echo "Usage: $function_name [-T target_dir][-A atlas_name] [-a atlas_list] [-s segmentation_dir] [-t seg_type(label/mask)] [-q quickcheck_dir]"
-	echo "       (optional)  [-l target_list (quickcheck for mapping images)]"
+	echo "Usage: $function_name [-T target_dir] [-l target_list] [-s segmentation_dir] [-q quickcheck_dir]"
+	echo "       (optional) [-t seg_type(label/mask)] [-A atlas_name] [-a atlas_list (quickcheck for mapping images)]"
 	echo ""
 	return 1
 	}
@@ -1060,7 +1639,7 @@ function mas_quickcheck_batch(){
 		echo "[$function_name] no option specified"
 		usage; return 1
 	fi
-	echo -e "\n [mas_quickcheck] start generating quickchecks \n"
+	echo "[mas_quickcheck] start generating quickchecks"
 	if [[ ! -f $target_list ]]; then
 		echo "[$function_name] cannot find target list: $target_list"
 		return 1
@@ -1068,34 +1647,42 @@ function mas_quickcheck_batch(){
 
 	# start generating quickcheck images
 	for target_id in $(cat $target_list); do
-		echo -e "\n [@function_name] overlay mapped template $atlas_id to $target_id ..."
+		echo "[$function_name] overlay mapped template $atlas_id to $target_id ..."
 		local bg_img="$target_dir/$target_id"
 		# check existence of background image
-		check_image_file_exist $bg_img
-		if [[ $? -eq 0 ]]; then
-			echo "[@function_name] cannot find background image: $target_dir/$target_id"
+		check_image_file $bg_img
+		if [[ $? -ne 0 ]]; then
+			echo "[$function_name] cannot find background image: $target_dir/$target_id"
 			return 1
 		fi
 		# quickcheck the fusion/mapping images depending on $atlas_list
-		if [[ -z $atlas_list ]]; then # quickcheck for fusion 
-			local overlay_img="$segmentation_dir/$target_id.$seg_type.$atlas_name"
+		local overlay_img
+		if [[ -z $atlas_list ]]; then # quickcheck for fusion
+			local quickcheck_name="$target_id"
+			overlay_img="$segmentation_dir/$target_id"
+			# additional file suffix for quickcheck if specified
+			if [[ ! -z $seg_type ]]; then
+				overlay_img="$overlay_img.$seg_type"
+				if [[ ! -z $atlas_name ]]; then
+					overlay_img="$overlay_img.$atlas_name"
+				fi
+			fi
 			# check existence of overlay image
-			check_image_file_exist $overlay_img
-			if [[ $? -eq 0 ]]; then
+			check_image_file $overlay_img
+			if [[ $? -ne 0 ]]; then
 				echo "[$function_name] cannot find overlay image: $segmentation_dir/$target_id.$seg_type.$atlas_name"
 				return 1
 			fi
-			local quickcheck_name="$target_id.$seg_type.$atlas_name"
 			mas_quickcheck $bg_img $overlay_img $quickcheck_dir $quickcheck_name
 		else # quickcheck for all mapped atlas
 			local atlas_id
 			for atlas_id in $(cat $atlas_list); do
 				local quickcheck_subdir="$quickcheck_dir/$atlas_name"
 				mkdir -p $quickcheck_subdir
-				local overlay_img="$segmentation_dir/$atlas_name/$target_id.$seg_type.$atlas_id"
-				check_image_file_exist $overlay_img
-				if [[ $? -eq 0 ]]; then
-					echo "[mas_quickcheck] cannot find overlay image: $segmentation_dir/$atlas_name/$target_id.$seg_type.$atlas_id"
+				overlay_img="$segmentation_dir/$atlas_name/$target_id.$seg_type.$atlas_id"
+				check_image_file $overlay_img
+				if [[ $? -ne 0 ]]; then
+					echo "[$function_name] cannot find overlay image: $segmentation_dir/$atlas_name/$target_id.$seg_type.$atlas_id"
 					continue
 				fi
 				local quickcheck_name="$target_id.$seg_type.$atlas_id"
@@ -1148,7 +1735,7 @@ function mas_template_function(){
 		esac
 
 		if [[ $OPTIND -eq 1 ]]; then
-			echo "[@function_name] no option specified"
+			echo "[$function_name] no option specified"
 			return 1
 		fi 
 
