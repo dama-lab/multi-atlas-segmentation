@@ -1,7 +1,7 @@
 Multi Atlas Segmentation (MAS) for mouse brain
 ================================================
 
-Author: Da Ma d.ma.11@ucl.ac.uk
+Author: Da Ma d.ma.11@ucl.ac.uk, da_ma@sfu.ca
 
 **Description**
 
@@ -10,10 +10,13 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
 The bash script is compatible on Linux/Windows/Mac, with proper setup. For detailed description of the pipeline and to download the mouse brain parcellation atlas, please go the the website: http://cmic.cs.ucl.ac.uk/staff/da_ma/Multi_Atlas/
 
 **Usage**
-There is only one main script: *MultiAtlasSegmentation*. To use the script, simply type `source MultiAtlasSegmentation`
 
+There is only one main script: *MultiAtlasSegmentation*. To use the script, simply type `source MultiAtlasSegmentation` to load all corresponding functions.
 
-[List of functions]
+To get help for each function, type `function_name -h`.
+For example: `mas_mapping -h`
+
+**List of functions**
 
 [Basic functions]
 - check_image_file
@@ -22,11 +25,11 @@ There is only one main script: *MultiAtlasSegmentation*. To use the script, simp
 - check_label_fusion_file
 
 [Single image processing functions]
-- mas_mapping (prerequisite: NiftyReg)
-- mas_fusion (prerequisite: NiftySeg)
-- mas_quickcheck (prerequisite: FSL)
-- mas_label_volume (prerequisite: NiftySeg)
-- mas_template_function (template functions for developer)
+- mas_mapping (prerequisite: NiftyReg): single atlas label propagation
+- mas_fusion (prerequisite: NiftySeg): multi atlas label fusion
+- mas_quickcheck (prerequisite: FSL): quality control (quickcheck) image generator
+- mas_label_volume (prerequisite: NiftySeg): extract label volume (into a .csv file)
+- mas_template_function: template functions for advanced user to develop your own additional functions
 
 [Batch image processing functions]:
 - mas_mapping_batch
@@ -35,6 +38,7 @@ There is only one main script: *MultiAtlasSegmentation*. To use the script, simp
 - mas_parcellation_batch
 
 **Older version**
+
 - for_single_workstation: to be used on a single PC.
 - for_cluster: to be run on computer cluster, use parallel image registration to speed-up the process.
 - parameter_samples: sample parameter files that can be fed to the command when running the script [optional].
@@ -43,7 +47,9 @@ There is only one main script: *MultiAtlasSegmentation*. To use the script, simp
 
 - Q. What image orientation should my test image be?
 
-  A. The orientation of the default atlas is: RAS. This script orient_nii.m uses the Matlab NIfTI toolbox (https://www.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image) to visualize and determine the orientation, as well as reorient it. 
+  A. The orientation of the default atlas is: RAS.
+  If you have FreeSurfer installed, `use mri_convert --in_orientation $input_orientation --out_orientation $output_orientation -ot nifti -odt float $input_image $output_image`.
+  Alternatively, if you use matlab, the script orient_nii.m uses the Matlab NIfTI toolbox (https://www.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image) to visualize and determine the orientation, as well as reorient it. 
 
 - Q. Why is my parcellation not properly overlayed with the original image?
 
