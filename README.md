@@ -1,4 +1,4 @@
-Multi Atlas Segmentation (MAS) for mouse brain
+Multi Atlas Segmentation (MAS) for mouse brain MRI
 ================================================
 
 Author: Da Ma d.ma.11@ucl.ac.uk, da_ma@sfu.ca
@@ -9,7 +9,7 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
 
 The bash script is compatible on Linux/Windows/Mac, with proper setup. For detailed description of the pipeline and to download the mouse brain parcellation atlas, please go the the website: http://cmic.cs.ucl.ac.uk/staff/da_ma/Multi_Atlas/
 
-(This script can also be used for multi-atlas-based human brain parcellation, with appropriate human-brain atlas.)
+(This script is also capable of handelling for multi-atlas-based human brain parcellation, with appropriate human-brain atlas.)
 
 **Usage**
 
