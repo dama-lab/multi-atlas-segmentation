@@ -9,9 +9,12 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
 
 The bash script is compatible on Linux/Windows/Mac, with proper setup. For detailed description of the pipeline and to download the mouse brain parcellation atlas, please go the the website: http://cmic.cs.ucl.ac.uk/staff/da_ma/Multi_Atlas/
 
+(This script can also be used for multi-atlas-based human brain parcellation, with appropriate human-brain atlas.)
+
 **Usage**
 
-There is only one main script: *MASHelperFunctions.sh*. To use the script, simply type `source MASHelperFunctions.sh` to load all corresponding functions.
+There is only one main script: *MASHelperFunctions.sh* which is capable of handling batch brain parcellation (functions with suffix `_batch`) either on the local workstation or on PBS cluster (by simply specifying the `-e` flag as either `local` or `cluster`).  
+To use the script, simply type `source MASHelperFunctions.sh` to load all corresponding functions.
 
 To get help for each function, type `function_name -h`.
 For example: `mas_mapping -h`
@@ -36,6 +39,7 @@ For example: `mas_mapping -h`
 - mas_fusion_batch
 - mas_quickcheck_batch
 - mas_parcellation_batch (label propogations + label fusions)
+(The parallel brain structure parcellation on PBS cluster is achieved through PBS array and PBS dependency.)
 
 **Older version**
 
