@@ -11,7 +11,7 @@ The bash script is compatible on Linux/Windows/Mac, with proper setup. For detai
 
 **Usage**
 
-There is only one main script: *MultiAtlasSegmentation*. To use the script, simply type `source MultiAtlasSegmentation` to load all corresponding functions.
+There is only one main script: *MultiAtlasSegmentation*. To use the script, simply type `source MASHelperFunctions.sh` to load all corresponding functions.
 
 To get help for each function, type `function_name -h`.
 For example: `mas_mapping -h`
