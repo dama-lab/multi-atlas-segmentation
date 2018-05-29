@@ -7,7 +7,7 @@ Author: Da Ma d.ma.11@ucl.ac.uk, da_ma@sfu.ca
 
 This bash scripts is created for "Multi-atlas based automatic brain structural parcellation", mainly for mouse brain MRI. Prerequisite: NityReg and NitySeg packages (both open-source, details can be found on page: http://cmictig.cs.ucl.ac.uk/research/software/software-nifty).
 
-The bash script is compatible on Linux/Windows/Mac, with proper setup. For detailed description of the pipeline and to download the mouse brain parcellation atlas, please go the the website: http://cmic.cs.ucl.ac.uk/staff/da_ma/Multi_Atlas/
+The bash script is compatible to Linux/Windows/Mac. For detailed description of the pipeline, with proper setup, and download link for the mouse brain atlas, please go the the website: http://cmic.cs.ucl.ac.uk/staff/da_ma/Multi_Atlas/
 
 (This script is also capable of handelling for multi-atlas-based human brain parcellation, with appropriate human-brain atlas.)
 
