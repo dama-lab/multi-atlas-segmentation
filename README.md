@@ -1,4 +1,4 @@
-Multi Atlas Brain Segmentation (MABS)
+Multi Atlas Segmentation (MAS) for mouse brain
 ================================================
 
 Author: Da Ma d.ma.11@ucl.ac.uk
@@ -9,7 +9,31 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
 
 The bash script is compatible on Linux/Windows/Mac, with proper setup. For detailed description of the pipeline and to download the mouse brain parcellation atlas, please go the the website: http://cmic.cs.ucl.ac.uk/staff/da_ma/Multi_Atlas/
 
-**Folders**
+**Usage**
+There is only one main script: *MultiAtlasSegmentation*. To use the script, simply type `source MultiAtlasSegmentation`
+
+
+List of functions:
+
+[ Basic functions ]:
+ - check_image_file
+ - check_atlas_file
+ - check_mapping_file
+ - check_label_fusion_file
+
+- mas_mapping (prerequisite: NiftyReg)
+ - mas_fusion (prerequisite: NiftySeg)
+ - mas_quickcheck (prerequisite: FSL)
+ - mas_label_volume (prerequisite: NiftySeg)
+ - mas_template_function (template functions for developer)
+
+[ Batch processing functions ]:
+ - mas_mapping_batch
+ - mas_fusion_batch
+ - mas_quickcheck_batch
+ - mas_parcellation_batch
+
+**Older version**
 - for_single_workstation: to be used on a single PC.
 - for_cluster: to be run on computer cluster, use parallel image registration to speed-up the process.
 - parameter_samples: sample parameter files that can be fed to the command when running the script [optional].
@@ -22,7 +46,7 @@ The bash script is compatible on Linux/Windows/Mac, with proper setup. For detai
 
 - Q. Why is my parcellation not properly overlayed with the original image?
 
-  A. First check if your MR image has been properly oriented to RAS (See the Q/A above). If that's not the problem, then make sure your MR image has been preprocessed to correct the bias field correction (also called bias field). There are several tools that can perform the bias field correction:
+  A. Check if your MR image has been properly oriented to RAS (See the Q/A above). If that's not the problem, then make sure your MR image has been preprocessed to correct the bias field correction (also called bias field). There are several tools that can perform the bias field correction:
     
     (1) The FreeSurfer package (https://surfer.nmr.mgh.harvard.edu/) provide a tool (**nu_correct**) which uses N3 bias field correction algorithm.
     
