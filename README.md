@@ -1,4 +1,4 @@
-Multi Atlas Segmentation (MAS) for mouse brain
+Multi Atlas Segmentation (MAS) for mouse brain MRI
 ================================================
 
 Author: Da Ma d.ma.11@ucl.ac.uk, da_ma@sfu.ca
@@ -7,11 +7,14 @@ Author: Da Ma d.ma.11@ucl.ac.uk, da_ma@sfu.ca
 
 This bash scripts is created for "Multi-atlas based automatic brain structural parcellation", mainly for mouse brain MRI. Prerequisite: NityReg and NitySeg packages (both open-source, details can be found on page: http://cmictig.cs.ucl.ac.uk/research/software/software-nifty).
 
-The bash script is compatible on Linux/Windows/Mac, with proper setup. For detailed description of the pipeline and to download the mouse brain parcellation atlas, please go the the website: http://cmic.cs.ucl.ac.uk/staff/da_ma/Multi_Atlas/
+The bash script is compatible to Linux/Windows/Mac. For detailed description of the pipeline, with proper setup, and download link for the mouse brain atlas, please go the the website: http://cmic.cs.ucl.ac.uk/staff/da_ma/Multi_Atlas/
+
+(This script is also capable of handelling for multi-atlas-based human brain parcellation, with appropriate human-brain atlas.)
 
 **Usage**
 
-There is only one main script: *MultiAtlasSegmentation*. To use the script, simply type `source MultiAtlasSegmentation` to load all corresponding functions.
+There is only one main script: *MASHelperFunctions.sh* which is capable of handling batch brain parcellation (functions with suffix `_batch`) either on the local workstation or on PBS cluster (by simply specifying the `-e` flag as either `local` or `cluster`).  
+To use the script, simply type `source MASHelperFunctions.sh` to load all corresponding functions.
 
 To get help for each function, type `function_name -h`.
 For example: `mas_mapping -h`
@@ -19,25 +22,26 @@ For example: `mas_mapping -h`
 **List of functions**
 
 [Basic functions]
-- check_image_file
-- check_atlas_file
-- check_mapping_file
-- check_label_fusion_file
+- `check_image_file`
+- `check_atlas_file`
+- `check_mapping_file`
+- `check_label_fusion_file`
 
 [Single image processing functions]
-- mas_mapping (prerequisite: NiftyReg): single atlas label propagation
-- mas_fusion (prerequisite: NiftySeg): multi atlas label fusion
-- mas_quickcheck (prerequisite: FSL): quality control (quickcheck) image generator
-- mas_label_volume (prerequisite: NiftySeg): extract label volume (into a .csv file)
-- mas_template_function: template functions for advanced user to develop your own additional functions
+- `mas_mapping` (prerequisite: NiftyReg): single atlas label propagation
+- `mas_fusion` (prerequisite: NiftySeg): multi atlas label fusion
+- `mas_quickcheck` (prerequisite: FSL): quality control (quickcheck) image generator
+- `mas_label_volume` (prerequisite: NiftySeg): extract label volume (into a .csv file)
+- `mas_template_function`: template functions for advanced user to develop your own additional functions
 
 [Batch image processing functions]:
-- mas_mapping_batch
-- mas_fusion_batch
-- mas_quickcheck_batch
-- mas_parcellation_batch
+- `mas_mapping_batch`
+- `mas_fusion_batch`
+- `mas_quickcheck_batch`
+- `mas_parcellation_batch` (label propogations + label fusions)
+(The parallel brain structure parcellation on PBS cluster is achieved through PBS array and PBS dependency.)
 
-**Older version**
+**Older implementation in previous version (will be removed in future release)**
 
 - for_single_workstation: to be used on a single PC.
 - for_cluster: to be run on computer cluster, use parallel image registration to speed-up the process.
