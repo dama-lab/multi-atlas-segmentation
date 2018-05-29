@@ -35,7 +35,7 @@ For example: `mas_mapping -h`
 - mas_mapping_batch
 - mas_fusion_batch
 - mas_quickcheck_batch
-- mas_parcellation_batch
+- mas_parcellation_batch (label propogations + label fusions)
 
 **Older version**
 
