@@ -22,26 +22,26 @@ For example: `mas_mapping -h`
 **List of functions**
 
 [Basic functions]
-- check_image_file
-- check_atlas_file
-- check_mapping_file
-- check_label_fusion_file
+- `check_image_file`
+- `check_atlas_file`
+- `check_mapping_file`
+- `check_label_fusion_file`
 
 [Single image processing functions]
-- mas_mapping (prerequisite: NiftyReg): single atlas label propagation
-- mas_fusion (prerequisite: NiftySeg): multi atlas label fusion
-- mas_quickcheck (prerequisite: FSL): quality control (quickcheck) image generator
-- mas_label_volume (prerequisite: NiftySeg): extract label volume (into a .csv file)
-- mas_template_function: template functions for advanced user to develop your own additional functions
+- `mas_mapping` (prerequisite: NiftyReg): single atlas label propagation
+- `mas_fusion` (prerequisite: NiftySeg): multi atlas label fusion
+- `mas_quickcheck` (prerequisite: FSL): quality control (quickcheck) image generator
+- `mas_label_volume` (prerequisite: NiftySeg): extract label volume (into a .csv file)
+- `mas_template_function`: template functions for advanced user to develop your own additional functions
 
 [Batch image processing functions]:
-- mas_mapping_batch
-- mas_fusion_batch
-- mas_quickcheck_batch
-- mas_parcellation_batch (label propogations + label fusions)
+- `mas_mapping_batch`
+- `mas_fusion_batch`
+- `mas_quickcheck_batch`
+- `mas_parcellation_batch` (label propogations + label fusions)
 (The parallel brain structure parcellation on PBS cluster is achieved through PBS array and PBS dependency.)
 
-**Older version**
+**Older implementation in previous version (will be removed in future release)**
 
 - for_single_workstation: to be used on a single PC.
 - for_cluster: to be run on computer cluster, use parallel image registration to speed-up the process.
