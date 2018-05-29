@@ -41,7 +41,7 @@ For example: `mas_mapping -h`
 - `mas_parcellation_batch` (label propogations + label fusions)
 (The parallel brain structure parcellation on PBS cluster is achieved through PBS array and PBS dependency.)
 
-[![Sample output](docs/quickcheckdemo.png) "Click for sample quality control image of the parcellation output (generated using mas_quickcheck)"](docs/quickcheckdemo.png)
+[![Sample output](docs/quickcheckdemo.png) "Click for sample quality control image of the parcellation output (generated using mas_quickcheck). The similar color between the olfactory bulb and the cortex is due to the limited colormap of `jet`."](docs/quickcheckdemo.png)
 
 **Older implementation in previous version (will be removed in future release)**
 
