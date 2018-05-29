@@ -13,25 +13,26 @@ The bash script is compatible on Linux/Windows/Mac, with proper setup. For detai
 There is only one main script: *MultiAtlasSegmentation*. To use the script, simply type `source MultiAtlasSegmentation`
 
 
-List of functions:
+[List of functions]
 
-[ Basic functions ]:
- - check_image_file
- - check_atlas_file
- - check_mapping_file
- - check_label_fusion_file
+[Basic functions]
+- check_image_file
+- check_atlas_file
+- check_mapping_file
+- check_label_fusion_file
 
+[Single image processing functions]
 - mas_mapping (prerequisite: NiftyReg)
- - mas_fusion (prerequisite: NiftySeg)
- - mas_quickcheck (prerequisite: FSL)
- - mas_label_volume (prerequisite: NiftySeg)
- - mas_template_function (template functions for developer)
+- mas_fusion (prerequisite: NiftySeg)
+- mas_quickcheck (prerequisite: FSL)
+- mas_label_volume (prerequisite: NiftySeg)
+- mas_template_function (template functions for developer)
 
-[ Batch processing functions ]:
- - mas_mapping_batch
- - mas_fusion_batch
- - mas_quickcheck_batch
- - mas_parcellation_batch
+[Batch image processing functions]:
+- mas_mapping_batch
+- mas_fusion_batch
+- mas_quickcheck_batch
+- mas_parcellation_batch
 
 **Older version**
 - for_single_workstation: to be used on a single PC.
