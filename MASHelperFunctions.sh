@@ -17,18 +17,19 @@ echo """
 mas_script_dir  = $mas_script_dir
 mas_script_file = $mas_script_file
 
-[ Basic functions ]:
-# - check_variable (to-do)
+[ Base functions ]
 # - check_image_file
 # - check_atlas_file
 # - check_mapping_file
 # - check_label_fusion_file
 
+[ single processing functions ]
+# - mas_masking (prerequisite: NiftyReg)
+# - mas_N4 (prerequisite: ANT)
 # - mas_mapping (prerequisite: NiftyReg)
 # - mas_fusion (prerequisite: NiftySeg)
 # - mas_quickcheck (prerequisite: FSL)
 # - mas_label_volume (prerequisite: NiftySeg)
-# - mas_create_atlas (prerequisite: NiftyReg for mask dilation, to-do)
 # - mas_template_function (template functions for developer)
 
 [ Batch processing functions ]:
@@ -41,21 +42,6 @@ mas_script_file = $mas_script_file
 
 # define some default global variable value
 AtlasListFileName=template_list.cfg
-
-
-# ---------------------------------
-#  function: check_variable
-# ---------------------------------
-function check_variable(){
-	local exist_flag=0
-	local function_name=${FUNCNAME[0]}
-	if [[ $# -lt 1 ]]; then
-		echo "[$function_name] check the existance of variables ..."
-		return 1
-	fi
-	# determine variable number, for each variable
-	checkForExistenceOfVariable
-}
 
 # ---------------------------------
 #  function: check_image_file
@@ -114,7 +100,7 @@ function check_atlas_file(){
 	return $return_flag
 }
 
-# functions to be implemented and used
+# functions to be implemented and used for input/output file checking with accurate control
 function check_mapping_input(){
 	local return_flag=0
 	local function_name=${FUNCNAME[0]}
@@ -286,7 +272,7 @@ function mas_label_volume(){
 	usage() {
 		echo ""
 		echo "Multi Atlas Segmentation - Part 4: volume extraction"
-		echo "Usage: $function_name [-l target_list] [-s seg_dir] [-v vol_csv (file path)]"
+		echo "[$function_name] $function_name [-l target_list] [-s seg_dir] [-v vol_csv (file path)]"
 		echo "       (optional file name suffix) [-t seg_type] [-a atlas_name] "
 		echo ""
 		return 1
@@ -497,35 +483,38 @@ function mas_quickcheck(){
 }
 
 #-----------------------------------
-# function: mas_create_atlas
+# function: mas_masking
 # ----------------------------------
-function mas_create_atlas(){
+function mas_masking(){
 	local function_name=${FUNCNAME[0]}
-	usage(){
-		echo """
-		Creating atlas direcotory from the Multi-Atlas-Segmentation result
-		Usage: $function_name [-T target_dir] [-t target_list] [-O old_atlas_name] [-L label_dir] [-M mask_dir] [-N new_atlas_dir]
-		"""
+	usage() {
+		echo ""
+		echo "Multi Atlas Segmentation - Preprocssing: Brain masking (brain extraction). Only affine transformation is used"
+		echo "Usage: $function_name [-T target_dir] [-t target_id] [-A atlas_dir] [-a atlas_id] [-r result_dir] [-p parameter_cfg]"
+		echo ""
 		return 1
 	}
+	
 	local OPTIND
 	local options
-	while getopts ":T:t:O:L:M:N" options; do
+	while getopts ":T:t:A:a:r:p:c:h" options; do
 		case $options in
-			T ) echo "Target directory:    $OPTARG"
+			T ) echo "Target directory: $OPTARG"
 				local target_dir=$OPTARG;;
-			t ) echo "Target list:         $OPTARG"
-				local target_list=$OPTARG;;
-			O ) echo "Old atlas name:      $OPTARG"
-				local old_atlas_name=$OPTARG;;
-			L ) echo "Label directory:     $OPTARG"
-				local label_dir=$OPTARG;;
-			M ) echo "Mask directory:      $OPTARG"
-				local mask_dir=$OPTARG;;
-			N ) echo "New atlas directory: $OPTARG"
-				local new_atlas_dir=$OPTARG;;
+			t ) echo "Target ID: $OPTARG"
+				local target_id=$OPTARG;;
+			A ) echo "Atlas directory: $OPTARG"
+				local atlas_dir=$OPTARG;;
+			a ) echo "Atlas ID: $OPTARG"
+				local atlas_id=$OPTARG;;
+			r ) echo "Result directory: $OPTARG"
+				local result_dir=$OPTARG;;
+			p ) echo "Parameter config file: $OPTARG"
+				local parameter_cfg=$OPTARG;;
+			c ) echo "Cleanup flag: $OPTARG"
+				local cleanup_flag=$OPTARG;;
 			h ) usage; return 1;;
-			\?) echo "Unkown option"
+			\?) echo "Unknown option"
 				usage; return 1;;
 			: ) usage; return 1;;
 		esac
@@ -534,23 +523,100 @@ function mas_create_atlas(){
 	if [[ $OPTIND -eq 1 ]]; then
 		echo "[$function_name] no option specified"
 		usage; return 1
+	fi 
+
+	echo "[mas_mapping] begin mapping template $atlas_id to $target_id"
+	local error_flag=0
+
+	# check mapping input/output file existance 
+	# check_mapping_file $target_dir $target_id $atlas_dir $atlas_list $result_dir
+	# local file_tag=$?
+	# if [[ $file_tag -eq 2 ]]; then
+	# 	echo "[mas_mapping] Mapping file already exist: $target_dir/$target_id "
+	# 	return 0
+	# elif [[ $file_tag -ne 0 ]]; then
+	# 	echo "[mas_mapping] cannot find target ($target_id)"
+	# 	return 1
+	# fi
+
+	# checking atlas_file existance
+	check_atlas_file $atlas_dir $atlas_id
+	if [[ $? -ne 0 ]]; then
+		echo "[mas_mapping] cannot find atlas $atlas_file_type: $atlas_dir/template/$atlas_id"
+		return 1
 	fi
 
-	# check the existance of input files
-	for target_id in $(cat $target_list); do
-		# checking target file
-		check_image_file $target_dir/$target_id
-		if [[ $? -ne 0 ]]; then
-			echo "[$function_name] cannot find target file: $target_dir/$target_id"
-			return 1
-		fi
-		local seg_type
-		# checking label/masking files
-			# to be completed
+	# eliminate .ext from id
+	local target_id=$(echo $target_id | cut -d. -f1)
+	local atlas_id=$(echo $atlas_id | cut -d. -f1)
+
+	# creat folders
+	local atlas_name=$(basename $atlas_dir)
+	for subdir in tmp mapping mask label quickcheck; do
+		local subdir_path="$result_dir/$subdir/$atlas_name"
+		mkdir -p $subdir_path
 	done
 
-}
+	local mapping_dir="$result_dir/mapping/$atlas_name"
+	local mask_dir="$result_dir/mask/$atlas_name"
+	local label_dir="$result_dir/label/$atlas_name"
+	local tmp_dir="$result_dir/tmp/$atlas_name"
+	mkdir -p $mapping_dir
+	mkdir -p $mask_dir
+	mkdir -p $label_dir
+	mkdir -p $tmp_dir
 
+	# generate affine matrix (atlas >> target), if no affine matrix found
+	if [[ -f $tmp_dir/$atlas_id.$target_id.aff ]]; then
+		echo "[$function_name] affine matrix already exist: $tmp_dir/$atlas_id.$target_id.aff, skipping affine step ..."
+	else
+		local affine_param=""
+		affine_param="$affine_param -speeeeed -ln 4 -lp 4"
+		affine_param="$affine_param -flo $atlas_dir/template/$atlas_id"
+		affine_param="$affine_param -fmask $atlas_dir/mask/$atlas_id"
+		affine_param="$affine_param -ref $target_dir/$target_id"
+		affine_param="$affine_param -res $tmp_dir/$atlas_id.$target_id.aff.nii.gz"
+		affine_param="$affine_param -aff $tmp_dir/$atlas_id.$target_id.aff"
+		# use target mask if specified
+		if [[ ! -z $target_mask ]]; then
+			affine_param="$affine_param -rmask $target_mask"
+		fi
+		reg_aladin $affine_param
+	fi
+
+	# check if affine matrix file generated successfully
+	if [[ ! -f $tmp_dir/$atlas_id.$target_id.aff ]]; then
+		echo "[mas_mapping] failed to generate affine matrix file"
+		return 1
+	fi
+	# resample the label, as well as mask
+	local seg_file
+	for seg_file in mask; do
+		local result_file="$result_dir/$seg_file/$atlas_name/$target_id.$seg_file.$atlas_id.affine.nii.gz"
+		if [[ -f $result_file ]]; then
+			echo "[$function_name] ($target_id) $seg_file file already exist: $result_file, skipping ..."
+			continue
+		fi
+		local resamp_param=""
+		resamp_param="$resamp_param -flo $atlas_dir/$seg_file/$atlas_id"
+		resamp_param="$resamp_param -ref $target_dir/$target_id"
+		resamp_param="$resamp_param -trans $tmp_dir/$atlas_id.$target_id.aff"
+		resamp_param="$resamp_param -inter 0"
+		resamp_param="$resamp_param -res $result_file"
+		reg_resample $resamp_param 
+
+		# generating quickcheck for mask and label
+		mas_quickcheck $target_dir/$target_id $result_file $result_dir/quickcheck/$atlas_name $target_id.$seg_file.affine.$atlas_id
+	done
+
+	# remove tmp files
+	if [[ $cleanup_flag -eq 1 ]]; then
+		rm -rf $tmp_dir
+		error_flag=$?
+	fi
+
+	return $error_flag
+}
 
 #-----------------------------------
 # function: mas_mapping
@@ -1692,7 +1758,63 @@ function mas_quickcheck_batch(){
 }
 
 #-----------------------------------
-# function: mas_test
+# function: mas_create_atlas
+# ----------------------------------
+function mas_create_atlas(){
+	# - mas_create_atlas (prerequisite: NiftyReg for mask dilation, to-do)
+	local function_name=${FUNCNAME[0]}
+	usage(){
+		echo """
+		Creating atlas folders from the Multi-Atlas-Segmentation result (TBA)
+		Usage: $function_name [-T target_dir] [-t target_list] [-O old_atlas_name] [-L label_dir] [-M mask_dir] [-N new_atlas_dir]
+		"""
+		return 1
+	}
+	local OPTIND
+	local options
+	while getopts ":T:t:O:L:M:N" options; do
+		case $options in
+			T ) echo "Target directory:    $OPTARG"
+				local target_dir=$OPTARG;;
+			t ) echo "Target list:         $OPTARG"
+				local target_list=$OPTARG;;
+			O ) echo "Old atlas name:      $OPTARG"
+				local old_atlas_name=$OPTARG;;
+			L ) echo "Label directory:     $OPTARG"
+				local label_dir=$OPTARG;;
+			M ) echo "Mask directory:      $OPTARG"
+				local mask_dir=$OPTARG;;
+			N ) echo "New atlas directory: $OPTARG"
+				local new_atlas_dir=$OPTARG;;
+			h ) usage; return 1;;
+			\?) echo "Unkown option"
+				usage; return 1;;
+			: ) usage; return 1;;
+		esac
+	done
+
+	if [[ $OPTIND -eq 1 ]]; then
+		echo "[$function_name] no option specified"
+		usage; return 1
+	fi
+
+	# check the existance of input files
+	for target_id in $(cat $target_list); do
+		# checking target file
+		check_image_file $target_dir/$target_id
+		if [[ $? -ne 0 ]]; then
+			echo "[$function_name] cannot find target file: $target_dir/$target_id"
+			return 1
+		fi
+		local seg_type
+		# checking label/masking files
+			# to be completed
+	done
+
+}
+
+#-----------------------------------
+# function: mas_template_function
 # ----------------------------------
 function mas_template_function(){
 	# printout function help 
