@@ -908,7 +908,7 @@ function mas_fusion(){
 	done
 
 	# label fusion
-	local labfusion_param="-unc"
+	local labfusion_param="-unc -v 1"
 	labfusion_param="$labfusion_param -in $result_dir/label/$atlas_name/$target_id.4D.nii.gz"
 	labfusion_param="$labfusion_param -out $result_dir/label/$target_id.label.$atlas_name.nii.gz"
 	# labfusion_param="$labfusion_param -SBA"
@@ -1387,9 +1387,6 @@ function mas_parcellation_batch(){
 		echo "[$function_name] no option specified"
 		usage; return 1
 	fi 
-
-	# check compulsary variables
-	check_variable 
 
 	if [[ -z $atlas_dir ]]; then
 		echo "[$function_name] no Atlas Directory specified"
