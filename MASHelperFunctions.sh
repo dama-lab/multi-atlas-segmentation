@@ -237,7 +237,7 @@ function check_label_fusion_file(){
 	local atlas_id
 	for atlas_id in $(cat $atlas_list);do
 		if [[ ! -f "$result_dir/mapping/$atlas_name/$atlas_id.$target_id.f3d.nii.gz" ]]; then
-			echo "[$function_name] ($target_id) Mapping file for atlas ($atlas_id) not pre-exist"
+			# echo "[$function_name] ($target_id) Mapping file for atlas ($atlas_id) not pre-exist"
 			#location:  $result_dir/mapping/$atlas_name/$atlas_id.$target_id.f3d.nii.gz"
 			atlas_flag=1
 			break
@@ -270,11 +270,16 @@ function check_label_fusion_file(){
 function mas_label_volume(){
 	local function_name=${FUNCNAME[0]}
 	usage() {
-		echo ""
-		echo "Multi Atlas Segmentation - Part 4: volume extraction"
-		echo "[$function_name] $function_name [-l target_list] [-s seg_dir] [-v vol_csv (file path)]"
-		echo "       (optional file name suffix) [-t seg_type] [-a atlas_name] "
-		echo ""
+		echo """
+Multi Atlas Segmentation - Part 4: volume extraction
+[$function_name] [-l target_list] [-s seg_dir] [-v vol_csv (file path)]
+       (optional file name suffix) [-t seg_type] [-a atlas_name]
+
+example usage 1: To extract the label volume for the parcellated results:
+	mas_label_volume -l target_list -s result_dir/\"label\" -v vol_csv -t \"label\" -a atlas_name
+example usage 2: To extract the mask volume for the parcellated results:
+	mas_label_volume -l target_list -s result_dir/\"mask\" -v vol_csv -t \"mask\" -a atlas_name
+		 """
 		return 1
 	}
 	
@@ -571,7 +576,7 @@ function mas_masking(){
 		echo "[$function_name] affine matrix already exist: $tmp_dir/$atlas_id.$target_id.aff, skipping affine step ..."
 	else
 		local affine_param=""
-		affine_param="$affine_param -speeeeed -ln 4 -lp 4"
+		affine_param="$affine_param -ln 4 -lp 4" #  -speeeeed
 		affine_param="$affine_param -flo $atlas_dir/template/$atlas_id"
 		affine_param="$affine_param -fmask $atlas_dir/mask/$atlas_id"
 		affine_param="$affine_param -ref $target_dir/$target_id"
@@ -717,7 +722,7 @@ function mas_mapping(){
 		echo "[$function_name] affine matrix already exist: $tmp_dir/$atlas_id.$target_id.aff, skipping affine step ..."
 	else
 		local affine_param=""
-		affine_param="$affine_param -speeeeed -ln 4 -lp 4"
+		affine_param="$affine_param -ln 4 -lp 4" #  -speeeeed
 		affine_param="$affine_param -flo $atlas_dir/template/$atlas_id"
 		affine_param="$affine_param -fmask $atlas_dir/mask/$atlas_id"
 		affine_param="$affine_param -ref $target_dir/$target_id"
@@ -800,8 +805,8 @@ function mas_fusion(){
 	usage() {
 		echo ""
 		echo "Multi Atlas Segmentation - Part 2: Fusion"
-		echo "Usage: $function_name [-T target_dir] [-t target_id] [-m target_mask] [-A atlas_name] [-a atlas_list] [-r result_dir]"
-		echo "       (optional) [-p parameter_cfg] [-c cleanup_flag]"
+		echo "Usage: $function_name [-T target_dir] [-t target_id] [-A atlas_name] [-a atlas_list] [-r result_dir]"
+		echo "       (optional) [-m target_mask] [-p parameter_cfg] [-c cleanup_flag]"
 		echo ""
 		return 1
 	}
