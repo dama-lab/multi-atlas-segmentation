@@ -167,3 +167,4 @@ for_single_workstation/depreciated/mas_fusion.sh
 for_single_workstation/depreciated/mas_mapping.sh
 for_single_workstation/depreciated/mas_mapping.sh
 for_single_workstation/depreciated/mas_mapping_batch_pbs_qsub.sh
+mas_masking_batch.sh
