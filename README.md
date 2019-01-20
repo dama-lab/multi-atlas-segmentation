@@ -28,6 +28,8 @@ For example: `mas_mapping -h`
 - `check_label_fusion_file`
 
 [Single image processing functions]
+- `mas_masking` (prerequisite: NiftyReg): single atlas brain masking
+- `mas_masking` (prerequisite: NiftySeg): multi atlas brain masking
 - `mas_mapping` (prerequisite: NiftyReg): single atlas label propagation
 - `mas_fusion` (prerequisite: NiftySeg): multi atlas label fusion
 - `mas_quickcheck` (prerequisite: FSL): quality control (quickcheck) image generator
@@ -35,11 +37,25 @@ For example: `mas_mapping -h`
 - `mas_template_function`: template functions for advanced user to develop your own additional functions
 
 [Batch image processing functions]:
+- `mas_masking_batch`
+- `mas_mask_dilate_batch`
 - `mas_mapping_batch`
 - `mas_fusion_batch`
-- `mas_quickcheck_batch`
 - `mas_parcellation_batch` (label propogations + label fusions)
+- `mas_quickcheck_batch`
 (The parallel brain structure parcellation on PBS cluster is achieved through PBS array and PBS dependency.)
+
+[ Pre-processing functions ]:
+- `mas_fix_header_info`
+- `mas_smooth_batch`
+- `mas_N4_batch` (prerequisite: ANT)
+
+[ Post-processing functions ]:
+- `mas_extract_label`
+- `mas_extract_label_batch`
+- `mas_extract_volume`
+- `mas_extract_volume_batch`
+- `mas_quickcheck_panorama`
 
 [![Sample output](docs/quickcheckdemo.png) "Click for sample quality control image of the parcellation output (generated using mas_quickcheck). The similar color between the olfactory bulb and the cortex is due to the limited colormap of `jet`."](docs/quickcheckdemo.png)
 
