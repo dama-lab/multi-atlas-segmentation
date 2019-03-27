@@ -32,8 +32,8 @@ For example: `mas_mapping -h`
 - `check_label_fusion_file`
 
 [Single image processing functions]
-- `mas_masking` (prerequisite: NiftyReg): single atlas brain masking
-- `mas_masking` (prerequisite: NiftySeg): multi atlas brain masking
+- `mas_masking` (prerequisite: NiftyReg): single atlas brain masking (affine image registration)
+- `mas_masking_fusion` (prerequisite: NiftySeg): multi atlas brain masking (fuse the result from mas_masking)
 - `mas_mapping` (prerequisite: NiftyReg): single atlas label propagation
 - `mas_fusion` (prerequisite: NiftySeg): multi atlas label fusion
 - `mas_quickcheck` (prerequisite: FSL): quality control (quickcheck) image generator
