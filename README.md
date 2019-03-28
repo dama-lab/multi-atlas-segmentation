@@ -9,7 +9,7 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
 
 - [[Respsitory]](https://github.com/dancebean/mouse-brain-atlas) of mouse brain MRI atlas is also downloadable.
 
-- Pre-requisite package installation: [[NityReg]](https://sourceforge.net/projects/niftyreg/) [NitySeg]](https://sourceforge.net/projects/niftyseg/), and [[FSL]](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki).
+- Pre-requisite package installation: [[NityReg]](https://sourceforge.net/projects/niftyreg/), [[NitySeg]](https://sourceforge.net/projects/niftyseg/), and [[FSL]](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki).
 
 The bash script is compatible to Linux/Windows/Mac. For detailed description of the pipeline, with proper setup, and download link for the mouse brain atlas, please refer to the papers [[1]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0086576) [[2]](https://www.frontiersin.org/articles/10.3389/fnins.2019.00011). Citation of the two papers are listed at the bottom of this page.
 
