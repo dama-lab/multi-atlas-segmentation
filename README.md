@@ -24,7 +24,11 @@ To get help for each function, type `function_name -h`.
 For example: `mas_mapping -h`
 
 **Pipeline example**
-- 1. Step 1: brain extraction (masking)
+- Load script:
+
+  `source MASHelperFunctions.sh`
+
+- Step 1: brain extraction (masking)
 
   `mas_masking_batch -T “targe  t_dir” -t “target_list” -A “atlas_dir” -r “result_dir”`
   - `-h`: Use mas_masking_batch -h to show help for usage
