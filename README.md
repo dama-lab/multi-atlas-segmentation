@@ -7,9 +7,9 @@ Author: Da Ma d.ma.11@ucl.ac.uk, da_ma@sfu.ca
 
 This bash scripts is created for "Multi-atlas based automatic brain structural parcellation", mainly for mouse brain MRI.
 
-- [[Respsitory]](https://github.com/dancebean/mouse-brain-atlas) of mouse brain MRI atlas is also downloadable.
+- [Respsitory](https://github.com/dancebean/mouse-brain-atlas) of mouse brain MRI atlas is also downloadable.
 
-- Pre-requisite package installation: [[NityReg]](https://sourceforge.net/projects/niftyreg/), [[NitySeg]](https://sourceforge.net/projects/niftyseg/), and [[FSL]](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki).
+- Pre-requisite package installation: [NityReg](https://sourceforge.net/projects/niftyreg/), [NitySeg](https://sourceforge.net/projects/niftyseg/), and [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki).
 
 The bash script is compatible to Linux/Windows/Mac. For detailed description of the pipeline, with proper setup, and download link for the mouse brain atlas, please refer to the papers [[1]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0086576) [[2]](https://www.frontiersin.org/articles/10.3389/fnins.2019.00011). Citation of the two papers are listed at the bottom of this page.
 
@@ -18,10 +18,13 @@ The bash script is compatible to Linux/Windows/Mac. For detailed description of 
 **Usage**
 
 There is only one main script: *MASHelperFunctions.sh* which is capable of handling batch brain parcellation (functions with suffix `_batch`) either on the local workstation or on PBS cluster (by simply specifying the `-e` flag as either `local` or `cluster`).  
-To use the script, simply type `source MASHelperFunctions.sh` to load all corresponding functions.
+To load the script, simply type `source MASHelperFunctions.sh` to load all corresponding functions.
 
 To get help for each function, type `function_name -h`.
 For example: `mas_mapping -h`
+
+**Pipeline**
+1. Brain extraction (masking)
 
 **List of functions**
 
