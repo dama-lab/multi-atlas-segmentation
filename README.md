@@ -24,7 +24,17 @@ To get help for each function, type `function_name -h`.
 For example: `mas_mapping -h`
 
 **Pipeline**
-1. Brain extraction (masking)
+- 1. Brain extraction (masking  )
+
+  `mas_masking_batch -T “targe  t_dir” -t “target_list” -A “atlas_dir” -r “result_dir” -a “atlas_list” -p “parameter_cfg” -e “execution mode (cluster/local  )"`
+  - `-h`: Use mas_masking_batch -h to show usage
+  - `-T`: specify folder contain the target image to be segmented
+  - `-t`: specify text file contain a list of target image file names inside the target_dir (in nifty format: nii or nii.gz, can only provide file name without extension)
+  - `-A`: folder contains the atlas (sample atlas containing multiple templates can be downloaded here)
+  - [Optional argument 1] `-a`: text file list the templates inside the atlas folder to be used (default:  `template_list.cfg` file within the atlas folder)
+  - [Optional argument 2] `-p`: configuration file to tune the parameters for the registration and label fusion algorithms
+  - [Optional argument 3] `-e`: specify to run locally (`local`) on on `cluster` . Specify `cluster` will submit parallel pbs jobs to cluster; specify `local` will run job sequentially on local machine. cluster is set by default
+
 
 **List of functions**
 
