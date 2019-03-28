@@ -23,18 +23,35 @@ To load the script, simply type `source MASHelperFunctions.sh` to load all corre
 To get help for each function, type `function_name -h`.
 For example: `mas_mapping -h`
 
-**Pipeline**
-- 1. Brain extraction (masking  )
+**Pipeline example**
+- 1. Step 1: brain extraction (masking)
 
-  `mas_masking_batch -T “targe  t_dir” -t “target_list” -A “atlas_dir” -r “result_dir” -a “atlas_list” -p “parameter_cfg” -e “execution mode (cluster/local  )"`
-  - `-h`: Use mas_masking_batch -h to show usage
+  `mas_masking_batch -T “targe  t_dir” -t “target_list” -A “atlas_dir” -r “result_dir”`
+  - `-h`: Use mas_masking_batch -h to show help for usage
   - `-T`: specify folder contain the target image to be segmented
   - `-t`: specify text file contain a list of target image file names inside the target_dir (in nifty format: nii or nii.gz, can only provide file name without extension)
   - `-A`: folder contains the atlas (sample atlas containing multiple templates can be downloaded here)
-  - [Optional argument 1] `-a`: text file list the templates inside the atlas folder to be used (default:  `template_list.cfg` file within the atlas folder)
-  - [Optional argument 2] `-p`: configuration file to tune the parameters for the registration and label fusion algorithms
-  - [Optional argument 3] `-e`: specify to run locally (`local`) on on `cluster` . Specify `cluster` will submit parallel pbs jobs to cluster; specify `local` will run job sequentially on local machine. cluster is set by default
+  
+    [Optional argument]
+  - `-a`: text file list the templates inside the atlas folder to be used (default:  `template_list.cfg` file within the atlas folder)
+  - `-p`: configuration file to tune the parameters for the registration and label fusion algorithms
+  - `-e`: specify to run locally (`local`) on on `cluster` . Specify `cluster` will submit parallel pbs jobs to cluster; specify `local` will run job sequentially on local machine. cluster is set by default
 
+- Step 2. brain structure parcellation
+
+  `mas_parcellation_batch -T "target_dir" -t "target_list" -A "atlas_dir" -r "result_dir" -M "targetmask_dir"`
+  - `-h`: Use mas_masking_batch -h to show help for usage
+  - `-T`: specify folder contain the test image to be segmented
+  - `-t`: specify text file contain a list of target image file names inside the target_dir (in nifty format: nii or nii.gz, can only provide file name without extension)
+  - `-A`: folder contains the atlas (sample atlas containing multiple templates can be downloaded here)
+  
+  [optional argument]
+  - `-M`: folder containing the brainmask file of the test images
+  - `-m`: suffix (e.g. for `test1.nii.gz` with mask file `test1.mask.nii.gz`: `-m ".mask"`)
+  - `-a`: text file list the templates inside the atlas folder to be used (default:  `template_list.cfg` file within the atlas folder)
+  - `-p`: configuration file to tune the parameters for the registration and label fusion algorithms
+  - `-a`: text file list the templates inside the atlas folder to be used (default:  `template_list.cfg` file within the atlas folder)
+  - `-p`: configuration file to tune the parameters for the registration and label fusion algorithms
 
 **List of functions**
 
@@ -58,7 +75,7 @@ For example: `mas_mapping -h`
 - `mas_mask_dilate_batch`
 - `mas_mapping_batch`
 - `mas_fusion_batch`
-- `mas_parcellation_batch` (label propogations + label fusions)
+- `mas_parcellation_batch` (label propogations + fusions)
 - `mas_quickcheck_batch`
 (The parallel brain structure parcellation on PBS cluster is achieved through PBS array and PBS dependency.)
 
