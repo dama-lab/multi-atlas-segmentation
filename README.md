@@ -96,7 +96,7 @@ For example: `mas_mapping -h`
 - `mas_quickcheck_panorama`
 
 **Sample image of the pipeline output**
-[![Sample output](docs/quickcheckdemo.png) "Click for sample quality control image of the parcellation output (generated using mas_quickcheck). The similar color between the olfactory bulb and the cortex is due to the limited colormap of `jet`."](docs/quickcheckdemo.png)
+[![Sample output](docs/quickcheckdemo.png) "Click for sample quality control image of the parcellation output (generated using mas_quickcheck)."](docs/quickcheckdemo.png) The similar color between the olfactory bulb and the cortex is due to the limited colormap of `jet`.
 
 **Older implementation in previous version (will be removed in future release)**
 
