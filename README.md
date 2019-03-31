@@ -32,8 +32,8 @@ For example: `mas_mapping -h`
 
   `mas_masking_batch -T “targe  t_dir” -t “target_list” -A “atlas_dir” -r “result_dir”`
   - `-h`: Use mas_masking_batch -h to show help for usage
-  - `-T`: specify folder contain the target image to be segmented
-  - `-t`: specify text file contain a list of target image file names inside the target_dir (in nifty format: nii or nii.gz, can only provide file name without extension)
+  - `-T`: specify folder contain the target image to be segmented (images should be in nifty format: nii or nii.gz. The image orientation should be correctly indicated in the nifti header. Please refer to the Q&A section `What image orientation should my test image be?`for more details about image orientation.) 
+  - `-t`: specify text file contain a list of target image file names inside the target_dir. (Each line contains the name of one image file. User can just provide file name without the `.nii` or '.nii.gz' extension. The algorithm will automatically figure out the correct file extension.) 
   - `-A`: folder contains the atlas (sample atlas containing multiple templates can be downloaded here)
   
     [Optional argument]
@@ -108,7 +108,7 @@ For example: `mas_mapping -h`
 
 - Q. What image orientation should my test image be?
 
-  A. The orientation of the default atlas is: RAS.
+  A. The orientation of the default atlas is: RAS, although the algorithms should be able to identify any correctly oriented images.
   If you have FreeSurfer installed, `use mri_convert --in_orientation $input_orientation --out_orientation $output_orientation -ot nifti -odt float $input_image $output_image`.
   Alternatively, if you use matlab, the script `orient_nii.m` uses the Matlab NIfTI toolbox (https://www.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image) to visualize and determine the orientation, as well as reorient it. 
 
