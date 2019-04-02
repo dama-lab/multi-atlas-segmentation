@@ -27,7 +27,7 @@ For example: `mas_mapping -h`
 
   `source MASHelperFunctions.sh`
 
-- Step 1: brain extraction (masking)
+- Step 1: __*brain extraction*__ (masking)
 
   `mas_masking_batch -T “targe  t_dir” -t “target_list” -A “atlas_dir” -r “result_dir”`
   - `-h`: Use mas_masking_batch -h to show help for usage
@@ -40,7 +40,7 @@ For example: `mas_mapping -h`
   - `-p`: configuration file to tune the parameters for the registration and label fusion algorithms
   - `-e`: specify to run locally (`local`) on on `cluster` . Specify `cluster` will submit parallel pbs jobs to cluster; specify `local` will run job sequentially on local machine. cluster is set by default
 
-- Step 2. brain structure parcellation
+- Step 2. __*brain structure parcellation*__
 
   `mas_parcellation_batch -T "target_dir" -t "target_list" -A "atlas_dir" -r "result_dir" -M "targetmask_dir"`
   - `-h`: Use mas_masking_batch -h to show help for usage
