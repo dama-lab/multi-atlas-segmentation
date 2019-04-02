@@ -7,17 +7,16 @@ Author: Da Ma d.ma.11@ucl.ac.uk, da_ma@sfu.ca
 
 This bash scripts is created for "Multi-atlas based automatic brain structural parcellation", mainly for mouse brain MRI.
 
-- The __mouse brain MRI atlases__ can be downloadable from the Github respsitory [here](https://github.com/dancebean/mouse-brain-atlas).
+- This script achieve automatic brain MRI image segmentation with given __mouse brain MRI atlases__ - which is a set of pairs of template images along with their manually labells. Sample atlases can be downloadable from the Github respsitory [here](https://github.com/dancebean/mouse-brain-atlas). (This script should also be capable of handelling for multi-atlas-based human brain parcellation, providing appropriate human-brain atlases are givien.)
 
 - Pre-requisite package installation: [NityReg](https://sourceforge.net/projects/niftyreg/), [NitySeg](https://sourceforge.net/projects/niftyseg/), and [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki). (Please make sure you've added into the system `$PATH` variable the directories of the executable files for all thre packages - which is the *bin* subdirectory within directory where ther packages are installed)
 
-The bash script is compatible with Linux/Windows/Mac system. For detailed description of the pipeline, with proper setup, and download link for the mouse brain atlas, please refer to the papers [[1]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0086576) [[2]](https://www.frontiersin.org/articles/10.3389/fnins.2019.00011). Citation of the two papers are listed at the bottom of this page.
+- The bash script is compatible with Linux/Windows/Mac system. For detailed description of the pipeline, please refer to the papers [[1]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0086576) [[2]](https://www.frontiersin.org/articles/10.3389/fnins.2019.00011). Citation of the two papers are listed at the bottom of this page.
 
-(This script is also capable of handelling for multi-atlas-based human brain parcellation, with appropriate human-brain atlas.)
 
 **Usage**
 
-There is only one main script: *MASHelperFunctions.sh* which is capable of handling batch brain parcellation (functions with suffix `_batch`) either on the local workstation or on PBS cluster by simply specifying the `-e` flag as either `local` or `cluster`).  (suport for Slurm cluster is also under development.)
+There is only one main script: *MASHelperFunctions.sh*, which is capable of handling batch brain parcellation (functions with suffix `_batch`) either on the local workstation or on PBS cluster by simply specifying the `-e` flag as either `local` or `cluster`).
 To load the script, simply type `source MASHelperFunctions.sh` to load all corresponding functions.
 
 To get help for each function, type `function_name -h`.
@@ -97,6 +96,9 @@ For example: `mas_mapping -h`
 
 **Sample image of the pipeline output**
 [![Sample output](docs/quickcheckdemo.png) "Click for sample quality control image of the parcellation output (generated using mas_quickcheck)."](docs/quickcheckdemo.png) The similar color between the olfactory bulb and the cortex is due to the limited colormap of `jet`.
+
+**Roadmap**
+- Future release will also provide suport for Slurm-based clusters.
 
 **Older implementation in previous version (will be removed in future release)**
 
