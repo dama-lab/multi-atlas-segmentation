@@ -99,7 +99,7 @@ For example: `mas_mapping -h`
 
 **History and Roadmap**
 - Older implementation in previous version (will be removed in future release)
-  (Code repository moved from the original place that is stated in the paper: http://cmic.cs.ucl.ac.uk/staff/da_ma/multi_atlas/)
+  (Code repository move from the [original page](http://cmic.cs.ucl.ac.uk/staff/da_ma/multi_atlas/) that is stated in the paper.)
   - for_single_workstation: to be used on a single PC.
   - for_cluster: to be run on computer cluster, use parallel image registration to speed-up the process.
   - parameter_samples: sample parameter files that can be fed to the command when running the script [optional].
