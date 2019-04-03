@@ -97,14 +97,13 @@ For example: `mas_mapping -h`
 **Sample image of the pipeline output**
 [![Sample output](docs/quickcheckdemo.png) "Click for sample quality control image of the parcellation output (generated using mas_quickcheck)."](docs/quickcheckdemo.png) The similar color between the olfactory bulb and the cortex is due to the limited colormap of `jet`.
 
-**Roadmap**
+**History and Roadmap**
+- Older implementation in previous version (will be removed in future release)
+  (Code repository moved from the original place that is stated in the paper: http://cmic.cs.ucl.ac.uk/staff/da_ma/multi_atlas/)
+  - for_single_workstation: to be used on a single PC.
+  - for_cluster: to be run on computer cluster, use parallel image registration to speed-up the process.
+  - parameter_samples: sample parameter files that can be fed to the command when running the script [optional].
 - Future release will also provide suport for Slurm-based clusters.
-
-**Older implementation in previous version (will be removed in future release)**
-
-- for_single_workstation: to be used on a single PC.
-- for_cluster: to be run on computer cluster, use parallel image registration to speed-up the process.
-- parameter_samples: sample parameter files that can be fed to the command when running the script [optional].
 
 **Q/A**
 
