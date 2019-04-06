@@ -9,7 +9,7 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
 
 - This script achieve automatic brain MRI image segmentation with given __mouse brain MRI atlases__ - which is a set of pairs of template images along with their manually labells. Sample atlases can be downloadable from the Github respsitory [here](https://github.com/dancebean/mouse-brain-atlas). (This script should also be capable of handelling for multi-atlas-based human brain parcellation, providing appropriate human-brain atlases are givien.)
 
-- Pre-requisite package installation: [NityReg](https://sourceforge.net/projects/niftyreg/), [NitySeg](https://sourceforge.net/projects/niftyseg/), and [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki). (Please make sure you've added into the system `$PATH` variable the directories of the executable files for all thre packages - which is the *bin* subdirectory within directory where ther packages are installed)
+- Pre-requisite package installation: [NityReg](https://github.com/KCL-BMEIS/niftyreg/wiki), [NitySeg](https://github.com/KCL-BMEIS/NiftySeg), and [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki). (Please make sure you've added into the system `$PATH` variable the directories of the executable files for all thre packages - which is the *bin* subdirectory within directory where ther packages are installed)
 
 - The bash script is compatible with Linux/Windows/Mac system. For detailed description of the pipeline, please refer to the papers [[1]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0086576) [[2]](https://www.frontiersin.org/articles/10.3389/fnins.2019.00011). Citation of the two papers are listed at the bottom of this page.
 
