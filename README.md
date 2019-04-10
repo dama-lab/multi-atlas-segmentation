@@ -120,7 +120,8 @@ For example: `mas_mapping -h`
   **Convert image orientation**:
   - If you have FSL installed, use `fslswapdim` to change the image orientation
   - If you have FreeSurfer installed, use `mri_convert --in_orientation $input_orientation --out_orientation $output_orientation -ot nifti -odt float $input_image $output_image`.
-  Alternatively, if you use matlab, the script `orient_nii.m` uses the Matlab NIfTI toolbox (https://www.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image) to visualize and determine the orientation, as well as reorient it. 
+  
+  Alternatively, if you use matlab, the script `orient_nii.m` uses the Matlab NIfTI toolbox (https://www.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image) to interactively visualize and determine the orientation, as well as reorient it. 
 
 - Q. Why is my parcellation not properly overlayed with the original image?
 
