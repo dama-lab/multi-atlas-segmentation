@@ -22,6 +22,8 @@ To load the script, simply type `source MASHelperFunctions.sh` to load all corre
 To get help for each function, type `function_name -h`.
 For example: `mas_mapping -h`
 
+**[Important] Please make sure the orientation information in the header of your test image is correct before process**. Please see the detailed information in the answer of the first question in the Q/A session.
+
 **Pipeline example**
 - Load script:
 
