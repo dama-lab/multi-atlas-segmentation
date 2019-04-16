@@ -125,7 +125,7 @@ For example: `mas_mapping -h`
 
 - Q. Why is my parcellation not properly overlayed with the original image?
 
-  A. Check if your MR image has been properly oriented to RAS (See the Q/A above). If that's not the problem, then make sure your MR image has been preprocessed to correct the bias field correction (also called bias field). There are several tools that can perform the bias field correction:
+  A. Check if your MR image has been properly oriented to RAS (See the Q/A above). If that's not the problem, then make sure your MR image has been preprocessed to correct for the intensity inhomogeneity (also called bias field correction). There are several tools that can perform the bias field correction:
     
     (1) If you have the [ANTs](http://stnava.github.io/ANTs/) tools installed, the function `mas_N4_batch` used the handy bias field correction function `N4BiasFieldCorrection`  provide by ANTs package, which used an upgrade version of the N3 algorithm as used in the FreeSurfer's nu_correct, and it can handle the nifti format out-of-the-box as it's using the ITK framework.
 
