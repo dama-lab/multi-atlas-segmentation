@@ -22,7 +22,7 @@ To load the script, simply type `source MASHelperFunctions.sh` to load all corre
 To get help for each function, type `function_name -h`.
 For example: `mas_mapping -h`
 
-**[Important] Please make sure the orientation information in the header of your test image is correct before process**. It is a bit tricky to get the correct orientation for nifty images (please see the detailed explanation at FSL website [Ref1](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Orientation%20Explained) and [Ref 2](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Fslutils#Orientation-related_Utilities). Additional information in the answer of the first question in the Q/A session.
+**[Important] Please make sure the orientation information in the header of your test image is correct before process**. Sometimes, it is a bit tricky to get the correct orientation for nifty images (please see the detailed explanation at FSL website [Ref1](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Orientation%20Explained) and [Ref 2](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Fslutils#Orientation-related_Utilities). Additional information in the answer of the first question in the Q/A session.
 
 **Pipeline example**
 - Load script:
