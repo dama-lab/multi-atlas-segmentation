@@ -26,7 +26,13 @@ For example: `mas_mapping -h`
 
 **Please make sure the orientation information in the header of your test image is correct before process**. Sometimes, it is a bit tricky to get the correct orientation for nifty images (please see the detailed explanation at FSL website [Ref1](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Orientation%20Explained) and [Ref 2](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Fslutils#Orientation-related_Utilities). Additional information in the answer of the first question in the Q/A session.
 
-**Please make sure the voxel dimension (voxel size) of the image is correct**. If the images are reconstructed using tools for human brian MRI, sometimes the voxel dimension will be set to 1mm isotropic, which is incorrect and will affect the registration algorithm. A typical resolution for *in vivo* mouse brain MRI would be around 0.1-0.2mm, and for *ex vivo* can be as small as 0.05mm. You can check the voxel dimension using the `fslinfo` command in the [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki) package (field name: `pixdim`), or the `mri_info` command in the [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/) package (field name: `voxel sizes`), or other GUI tools such as [ITK-SNAP](http://www.itksnap.org/pmwiki/pmwiki.php) (in: Tools - Image Information).
+**Please make sure the voxel dimension (voxel size) of the image is correct**. If the images are reconstructed using tools for human brian MRI, sometimes the voxel dimension will be set to 1mm isotropic, which is incorrect and will affect the registration algorithm. A typical resolution for *in vivo* mouse brain MRI would be around 0.1-0.2mm, and for *ex vivo* can be as small as 0.05mm. 
+- You can check the voxel dimension using:
+  - the `fslinfo` command in the [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki) package (field name: `pixdim`); 
+  - the `mri_info` command in the [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/) package (field name: `voxel sizes`), 
+  - the `nifti_tool` command in the [AFNI](https://afni.nimh.nih.gov/)package: `nifti_tool -disp_hdr -infiles $input_filename`.
+  - or other GUI tools such as [ITK-SNAP](http://www.itksnap.org/pmwiki/pmwiki.php) (in: Tools - Image Information).
+- A convenient tool to change the voxel dimension (field name: `pixeldim`) is: [`nifti_tool`](https://afni.nimh.nih.gov/pub/dist/doc/program_help/nifti_tool.html) from the [AFNI](https://afni.nimh.nih.gov/) package. Here is an example to change the input with incorrected voxel size (e.g. 1mm) into the correct one (0.1mm): `nifti_tool -mod_hdr -mod_field pixdim '0.0 0.1 0.1 0.1 0.1 0.1 0.1 0.1' -infiles $input_filename -prefix $output_filename`
 
 
 **Pipeline example**
