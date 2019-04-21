@@ -31,7 +31,7 @@ For example: `mas_mapping -h`
 - You can check the voxel dimension using:
   - the `fslinfo` command in the [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki) package (field name: `pixdim`); 
   - the `mri_info` command in the [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/) package (field name: `voxel sizes`), 
-  - the `nifti_tool` command in the [AFNI](https://afni.nimh.nih.gov/)package: `nifti_tool -disp_hdr -infiles $input_filename`.
+  - the `nifti_tool` command in the [AFNI](https://afni.nimh.nih.gov/) package: `nifti_tool -disp_hdr -infiles $input_filename`.
   - or other GUI tools such as [ITK-SNAP](http://www.itksnap.org/pmwiki/pmwiki.php) (in: Tools - Image Information).
 - A convenient tool to change the voxel dimension (field name: `pixeldim`) is: [`nifti_tool`](https://afni.nimh.nih.gov/pub/dist/doc/program_help/nifti_tool.html) from the [AFNI](https://afni.nimh.nih.gov/) package. Here is an example to change the input with incorrected voxel size (e.g. 1mm) into the correct one (0.1mm): `nifti_tool -mod_hdr -mod_field pixdim '0.0 0.1 0.1 0.1 0.1 0.1 0.1 0.1' -infiles $input_filename -prefix $output_filename`
 
