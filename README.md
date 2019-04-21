@@ -9,7 +9,8 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
 
 - This script achieve automatic brain MRI image segmentation with given __mouse brain MRI atlases__ - which is a set of pairs of template images along with their manually labells. Sample atlases can be downloadable from the Github respsitory [here](https://github.com/dancebean/mouse-brain-atlas). (This script should also be capable of handelling for multi-atlas-based human brain parcellation, providing appropriate human-brain atlases are givien.)
 
-- Pre-requisite package installation: [NityReg](https://github.com/KCL-BMEIS/niftyreg/wiki), [NitySeg](https://github.com/KCL-BMEIS/NiftySeg), and [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki). (Please make sure you have installed the latest version, and added into the system `$PATH` variable the directories of the executable files for all thre packages - which is the *bin* subdirectory within directory where ther packages are installed)
+- Pre-requisite package installation: [NityReg](https://github.com/KCL-BMEIS/niftyreg/wiki), [NitySeg](https://github.com/KCL-BMEIS/NiftySeg), and [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki).
+  - Ther easist and recommended way to install `NiftyReg` and `NiftySeg` is by installing [`NifTK`](https://github.com/NifTK/NifTK/releases) which will install both packages automatically, as well as other useful tools, including a 3D nifti file viewer. If you choose to compile the two packages from source code instead, please make sure you have downloaded and installed the latest version, and added into the system `$PATH` variable the directories of the executable files for all thre packages - which is the *bin* subdirectory within directory where ther packages are installed)
 
 - The bash script is compatible with Linux/Windows/Mac system. For detailed description of the pipeline, please refer to the papers [[1]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0086576) [[2]](https://www.frontiersin.org/articles/10.3389/fnins.2019.00011). Citation of the two papers are listed at the bottom of this page.
 
@@ -26,7 +27,13 @@ For example: `mas_mapping -h`
 
 **Please make sure the orientation information in the header of your test image is correct before process**. Sometimes, it is a bit tricky to get the correct orientation for nifty images (please see the detailed explanation at FSL website [Ref1](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Orientation%20Explained) and [Ref 2](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Fslutils#Orientation-related_Utilities). Additional information in the answer of the first question in the Q/A session.
 
-**Please make sure the voxel resolution of the image is correct**. If the images are reconstructed using tools for human brian MRI, sometimes the voxel resolusion will be set to 1mm isotropic, which is incorrect and will affect the registration algorithm. A typical resolution for *in vivo* mouse brain MRI would be around 0.1-0.2mm, and for *ex vivo* can be as small as 0.05mm. You can check the voxel resolusion using the `fslinfo` command in the [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki) package (field name: `pixdim`), or the `mri_info` command in the [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/) package (field name: `voxel sizes`), or other GUI tools such as [ITK-SNAP](http://www.itksnap.org/pmwiki/pmwiki.php) (in: Tools - Image Information).
+**Please make sure the voxel dimension (voxel size) of the image is correct**. If the images are reconstructed using tools for human brian MRI, sometimes the voxel dimension will be set to 1mm isotropic, which is incorrect and will affect the registration algorithm. A typical resolution for *in vivo* mouse brain MRI would be around 0.1-0.2mm, and for *ex vivo* can be as small as 0.05mm. 
+- You can check the voxel dimension using:
+  - the `fslinfo` command in the [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki) package (field name: `pixdim`); 
+  - the `mri_info` command in the [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/) package (field name: `voxel sizes`), 
+  - the `nifti_tool` command in the [AFNI](https://afni.nimh.nih.gov/)package: `nifti_tool -disp_hdr -infiles $input_filename`.
+  - or other GUI tools such as [ITK-SNAP](http://www.itksnap.org/pmwiki/pmwiki.php) (in: Tools - Image Information).
+- A convenient tool to change the voxel dimension (field name: `pixeldim`) is: [`nifti_tool`](https://afni.nimh.nih.gov/pub/dist/doc/program_help/nifti_tool.html) from the [AFNI](https://afni.nimh.nih.gov/) package. Here is an example to change the input with incorrected voxel size (e.g. 1mm) into the correct one (0.1mm): `nifti_tool -mod_hdr -mod_field pixdim '0.0 0.1 0.1 0.1 0.1 0.1 0.1 0.1' -infiles $input_filename -prefix $output_filename`
 
 
 **Pipeline example**
@@ -125,7 +132,7 @@ For example: `mas_mapping -h`
   - If you have FSL installed, use `fslorient` to check the image orientation, and use `fslswapdim` to change the image orientation.
   - If you have FreeSurfer installed, use `mri_info` to check the image orientations in the nifti header. use `mri_convert --in_orientation $input_orientation --out_orientation $output_orientation -ot nifti -odt float $input_image $output_image` to change the image orientation.
 
-- Q. Why is my parcellation not properly overlayed with the original image?
+- Q. Why is part of my parcellation not properly overlayed with the original image?
 
   A. Check if your MR image has been properly oriented to RAS (See the Q/A above). If that's not the problem, then make sure your MR image has been preprocessed to correct for the intensity inhomogeneity (also called bias field correction). There are several tools that can perform the bias field correction:
     
