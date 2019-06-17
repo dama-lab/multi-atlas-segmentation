@@ -1070,6 +1070,7 @@ function mas_masking_batch(){
 	echo "result_dir=$result_dir"
 	echo "atlas_dir=$atlas_dir"
 	echo "atlas_name=$atlas_name"
+	echo "atlas_list=$atlas_list"
 	echo "exe_mode=$exe_mode"
 	echo " ========================="
 	
@@ -1118,7 +1119,7 @@ function mas_masking_batch(){
 			done
 			########## label fusion step ############
 			echo -e "\n [$function_name] run label fusion locally for target: $target_id ... \n"
-			mas_masking_fusion $target_dir $target_id $result_dir $atlas_dir
+			mas_masking_fusion $target_dir $target_id $result_dir $atlas_dir $atlas_list
 			# potential final step: cleanup unwanted files
 		elif [[ "$exe_mode" == "cluster" ]]; then
 			local job_name=$jid.$target_id
@@ -1178,7 +1179,7 @@ function mas_masking_batch(){
 				fi
 
 				echo "source $mas_script_path" >> $pbs_file
-				echo "mas_masking_fusion $target_dir $target_id $result_dir $atlas_dir" >> $pbs_file
+				echo "mas_masking_fusion $target_dir $target_id $result_dir $atlas_dir $atlas_list" >> $pbs_file
 				# submit pbs job and store at joblist
 				qsub $pbs_file
 				echo "1,qsub $pbs_file" >> $job_list
