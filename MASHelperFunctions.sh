@@ -2142,7 +2142,7 @@ function mas_mask_dilate_batch(){
 	local exe_mode=$6
 
 	mkdir -p $dilate_mask
-	result_dir=$dilate_mask
+	local result_dir=$dilate_mask
 	# set default dilation voxel
 	if [[ -z $dil_voxel ]]; then
 		dil_voxel=1
