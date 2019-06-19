@@ -17,7 +17,7 @@ cat FVB_NCrl_in_vivo/template_list.cfg | head -n 3 > FVB_NCrl_in_vivo/template_l
 cd ..
 
 # create input directory, file, and target list
-mkdir input
+mkdir -p input
 cd input
 target_id="A0"
 svn export https://github.com/dancebean/mouse-brain-atlas/trunk/NeAt/in_vivo/template/$target_id.nii.gz
