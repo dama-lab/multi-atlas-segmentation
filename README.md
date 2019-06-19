@@ -12,7 +12,11 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
 - Pre-requisite package installation: [NityReg](https://github.com/KCL-BMEIS/niftyreg/wiki), [NitySeg](https://github.com/KCL-BMEIS/NiftySeg), and [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki) (FSL is optional, but recommended as it is used to generate QuickCheck figures which will make the inspection of the results much easier).
   - Ther easist and recommended way to install `NiftyReg` and `NiftySeg` is by installing [`NifTK`](https://github.com/NifTK/NifTK/releases) which will install both packages automatically, as well as other useful tools, including a 3D nifti file viewer.
   - [**Important**] If you choose to compile the two packages from source code instead, please make sure you have downloaded and installed the latest version. Specifically for NiftyReg, please use one of the line below to download the lastest version of the source code for compile, as recommended from the NiftyReg's [install page](https://github.com/KCL-BMEIS/niftyreg/wiki/install), since the earlier version of NityReg is not compatible with our `MASHelperFunctions.sh` script:
+  
   `git clone git://git.code.sf.net/p/niftyreg/git niftyreg`
+  
+  or
+  
   `git clone git@cmiclab.cs.ucl.ac.uk:mmodat/niftyreg.git niftyreg`
   - [**Important**] Remember to added into the system `$PATH` variable the directories of the executable files for all thre packages - which is the *bin* subdirectory within directory where ther packages are installed). For example, if you're using Linux, and installed NiftyReg and NiftySeg at : `/home/YourUserName/nifty_reg` and `/home/YourUserName/nifty_seg`, then add the following lines to the file `~/.bashrc` (normally located at `/home/YoutUserName/.bashrc`):
   
