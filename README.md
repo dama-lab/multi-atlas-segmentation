@@ -56,7 +56,7 @@ For example: `mas_mapping -h`
 **Pipeline example**
 - pipeline demo
  
- The [demo script](demo/mas_demo.sh) shows a complete end-to-end demonstration showing how to build and run the pipeline. It first download the atlas and test image from the [mouse brain atlas](https://github.com/dancebean/mouse-brain-atlas). It then run the following steps in sequential: brain extraction => brain structural parcellation (which itself consist of 3 sub-steps: atlas-to-test image registration -> atlas label propagation -> and multi-atlas label fusion).
+ The [demo script](demo/mas_demo.sh) shows a complete end-to-end demonstration showing how to build and run the pipeline. It first download the atlas and test image from the [mouse brain atlas](https://github.com/dancebean/mouse-brain-atlas). It then run the following steps in sequential: brain extraction => brain structural parcellation (which itself consists of 3 sub-steps: atlas-to-test image registration -> atlas label propagation -> and multi-atlas label fusion).
   
 - Load script:
 
