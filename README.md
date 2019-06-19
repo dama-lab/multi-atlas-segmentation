@@ -18,7 +18,7 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
   or
   
   `git clone git@cmiclab.cs.ucl.ac.uk:mmodat/niftyreg.git niftyreg`
-  - [**Important**] Remember to added into the system `$PATH` variable the directories of the executable files for all thre packages - which is the *bin* subdirectory within directory where ther packages are installed). For example, if you're using Linux, and installed NiftyReg and NiftySeg at : `/home/YourUserName/nifty_reg` and `/home/YourUserName/nifty_seg`, then add the following lines to the file `~/.bashrc` (normally located at `/home/YoutUserName/.bashrc`):
+  - [**Important**] After installation or successful compilation from the source code, do remember to added the directories of the executable files for all thre packages - which is the *bin* subdirectory within directory where ther packages are installed) - to the system `$PATH` variable. For example, if you're using Linux, and installed NiftyReg and NiftySeg at: `/home/YourUserName/nifty_reg` and `/home/YourUserName/nifty_seg`, then add the following lines to the file `~/.bashrc` (normally located at `/home/YoutUserName/.bashrc`):
   
   `export PATH=${PATH}:"/home/YourUserName/nifty_reg/bin"`
 
