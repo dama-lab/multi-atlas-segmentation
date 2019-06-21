@@ -37,19 +37,19 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
         
 - [**Important**] After install or compilation the executable binary files, do remember to add the directories of the executable binary files - which is the `bin` subdirectory within directory where ther packages are installed) - to the system `$PATH` variable.
   
-     For example, if you're using Linux, and installed the NifTK at: `/home/YourUserName/niftk`, then add the following 2 lines to the file `/home/YourUserName/.bashrc` (e.g. by typing:  `gedit $HOME/.bashrc`):
+   - For example, if you're using Linux, and installed the NifTK at: `/home/YourUserName/niftk`, then add the following 2 lines to the file `/home/YourUserName/.bashrc` (e.g. by typing:  `gedit $HOME/.bashrc`):
   
-        export PATH=${PATH}:"$HOME/niftk/bin"
-        export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"$HOME/niftk/bin"
+         export PATH=${PATH}:"$HOME/niftk/bin"
+         export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"$HOME/niftk/bin"
   
-     Otherwise, if you download and compiled NiftyReg and NiftySeg separately at: `/home/YourUserName/nifty_reg` and `/home/YourUserName/nifty_seg`, then add the following 4 lines to the file `~/.bashrc`:
+   - Otherwise, if you download and compiled NiftyReg and NiftySeg separately at: `/home/YourUserName/nifty_reg` and `/home/YourUserName/nifty_seg`, then add the following 4 lines to the file `~/.bashrc`:
   
-        export PATH=${PATH}:"$HOME/nifty_reg/bin"
-        export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}/"$HOME/nifty_reg/lib"
-        export PATH=${PATH}:"$HOME/nifty_seg/bin"
-        export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:"$HOME/nifty_seg/lib"
+         export PATH=${PATH}:"$HOME/nifty_reg/bin"
+         export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}/"$HOME/nifty_reg/lib"
+         export PATH=${PATH}:"$HOME/nifty_seg/bin"
+         export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:"$HOME/nifty_seg/lib"
 
-     ($HOME represent your home directory, which is located at `/home/YourUserName/`).
+     (`$HOME` represent your home directory, which is located at `/home/YourUserName/`).
 
 - After the above "installation" procedure, you're ready to use the script. The bash script is compatible with Linux/Windows/Mac system. For detailed description of the pipeline, please refer to the papers [[1]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0086576) [[2]](https://www.frontiersin.org/articles/10.3389/fnins.2019.00011). Citation of the two papers are listed at the bottom of this page.
 
