@@ -7,7 +7,7 @@ Author: Da Ma d.ma.11@ucl.ac.uk, da_ma@sfu.ca
 
 This bash scripts is created for "Multi-atlas based automatic brain structural parcellation", mainly for mouse brain MRI.
 
-- This script achieve automatic brain MRI image segmentation with given __mouse brain MRI atlases__ - which is a set of pairs of template images along with their manually labells. Sample atlases can be downloadable from the Github respsitory [here](https://github.com/dancebean/mouse-brain-atlas). In theory, this script should also be capable of handelling for multi-atlas-based parcellation/segmentation for other type of images, specious or organs (e.g. CT, human, macaque, embryo, heart, etc), providing appropriate human-brain atlases are givien.
+- This script achieve automatic brain MRI image segmentation with given __mouse brain MRI atlases__ - which is a set of pairs of template images along with their manually labells. Sample atlases can be downloadable from the Github respsitory [here](https://github.com/dancebean/mouse-brain-atlas). For detailed description of the pipeline, please refer to the papers [[1]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0086576) [[2]](https://www.frontiersin.org/articles/10.3389/fnins.2019.00011). Citation of the two papers are listed at the bottom of this page. The script is originally created to segment mouse brain MRI. It should be, in theory, also capable of handelling the multi-atlas-based parcellation/segmentation for other type of images, organs, or species (e.g. CT, heart, embryo, human, macaque,  etc), providing appropriate atlases are givien.
 
 **Installation**
 - Pre-requisite package installation: [NityReg](https://github.com/KCL-BMEIS/niftyreg/wiki), [NitySeg](https://github.com/KCL-BMEIS/NiftySeg), and [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki) (FSL is optional, but recommended as it is used to generate QuickCheck figures which will make the inspection of the results much easier).
@@ -51,7 +51,7 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
 
      (`$HOME` represent your home directory, which is located at `/home/YourUserName/`).
 
-- After the above "installation" procedure, you're ready to use the script. The bash script is compatible with Linux/Windows/Mac system. For detailed description of the pipeline, please refer to the papers [[1]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0086576) [[2]](https://www.frontiersin.org/articles/10.3389/fnins.2019.00011). Citation of the two papers are listed at the bottom of this page.
+- After the above "installation" procedure, you're ready to use the script. The bash script is compatible with Linux/Windows/Mac system.
 
 
 **Usage**
