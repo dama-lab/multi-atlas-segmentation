@@ -1,7 +1,7 @@
 Multi Atlas Segmentation (MAS) for mouse brain MRI
 ================================================
 
-Author: Da Ma (Primary Email: da_ma@sfu.ca, Secondary Email: d.ma.11@ucl.ac.uk)
+Author: Da Ma (Primary email: da_ma@sfu.ca; Secondary email: d.ma.11@ucl.ac.uk)
 
 **Description**
 
