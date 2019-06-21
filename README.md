@@ -11,14 +11,25 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
 
 - Pre-requisite package installation: [NityReg](https://github.com/KCL-BMEIS/niftyreg/wiki), [NitySeg](https://github.com/KCL-BMEIS/NiftySeg), and [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki) (FSL is optional, but recommended as it is used to generate QuickCheck figures which will make the inspection of the results much easier).
   - Ther easist and recommended way to install `NiftyReg` and `NiftySeg` is by installing [`NifTK`](https://github.com/NifTK/NifTK/releases) which will install both packages automatically, as well as other useful tools, including a 3D nifti file viewer.
+  For example, installation on ubuntu can be down in the following two lines, and all the files :
+  `# Download binary files'
+  `wget https://github.com/NifTK/NifTK/releases/download/v18.05.4/niftk-v18.05.4-ubuntu-14.04-x64.tar.bz2`
+  `# extracct the binary files`
+  `tar -xvjf niftk-v18.05.4-ubuntu-14.04-x64.tar.bz2`
   - [**Important**] If you choose to compile the two packages from source code instead, please make sure you have downloaded and installed the latest version. Specifically for NiftyReg, please use one of the line below to download the lastest version of the source code for compile, as recommended from the NiftyReg's [install page](https://github.com/KCL-BMEIS/niftyreg/wiki/install), since the earlier version of NityReg is not compatible with our `MASHelperFunctions.sh` script:
   
-  `git clone git://git.code.sf.net/p/niftyreg/git niftyreg`
+        `git clone git://git.code.sf.net/p/niftyreg/git niftyreg`
   
-  or
+        or
   
-  `git clone git@cmiclab.cs.ucl.ac.uk:mmodat/niftyreg.git niftyreg`
-  - [**Important**] After installation or successful compilation from the source code, do remember to add the directories of the executable files for all thre packages - which is the *bin* subdirectory within directory where ther packages are installed) - to the system `$PATH` variable. For example, if you're using Linux, and installed NiftyReg and NiftySeg at: `/home/YourUserName/nifty_reg` and `/home/YourUserName/nifty_seg`, then add the following lines to the file `~/.bashrc` (normally located at `/home/YoutUserName/.bashrc`):
+        `git clone git@cmiclab.cs.ucl.ac.uk:mmodat/niftyreg.git niftyreg`
+        
+  - [**Important**] After installation or successful compilation from the source code, do remember to add the directories of the executable files for all thre packages - which is the *bin* subdirectory within directory where ther packages are installed) - to the system `$PATH` variable.
+  For example, if you're using Linux, and installed the NifTK at: `/home/YourUserName/niftk`, then add the following 2 lines to the file `~/.bashrc` (located at `/home/YoutUserName/.bashrc`):
+  `export PATH=${PATH}:"/home/YourUserName/niftk/bin"`
+  `export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}/"/home/YourUserName/niftk/bin"`
+  
+  Otherwise, if you download and compiled NiftyReg and NiftySeg at: `/home/YourUserName/nifty_reg` and `/home/YourUserName/nifty_seg`, then add the following 4 lines to the file `~/.bashrc`:
   
   `export PATH=${PATH}:"/home/YourUserName/nifty_reg/bin"`
 
@@ -27,6 +38,7 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
   `export PATH=${PATH}:"/home/YourUserName/nifty_seg/bin"`
 
   `export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:"/home/YourUserName/nifty_seg/lib"`
+  
 
 - The bash script is compatible with Linux/Windows/Mac system. For detailed description of the pipeline, please refer to the papers [[1]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0086576) [[2]](https://www.frontiersin.org/articles/10.3389/fnins.2019.00011). Citation of the two papers are listed at the bottom of this page.
 
