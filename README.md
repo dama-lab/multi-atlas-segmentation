@@ -35,7 +35,7 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
       
         `git clone https://github.com/KCL-BMEIS/NiftySeg.git`
         
-- [**Important**] After install or compilation the executable binary files, do remember to add the directories of the executable binary files - which is the *bin* subdirectory within directory where ther packages are installed) - to the system `$PATH` variable.
+- [**Important**] After install or compilation the executable binary files, do remember to add the directories of the executable binary files - which is the `bin` subdirectory within directory where ther packages are installed) - to the system `$PATH` variable.
   
      For example, if you're using Linux, and installed the NifTK at: `/home/YourUserName/niftk`, then add the following 2 lines to the file `/home/YourUserName/.bashrc` (e.g. by typing:  `gedit $HOME/.bashrc`):
   
