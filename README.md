@@ -26,7 +26,9 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
         
   - [**Important**] After installation or successful compilation from the source code, do remember to add the directories of the executable files for all thre packages - which is the *bin* subdirectory within directory where ther packages are installed) - to the system `$PATH` variable.
   For example, if you're using Linux, and installed the NifTK at: `/home/YourUserName/niftk`, then add the following 2 lines to the file `~/.bashrc` (located at `/home/YoutUserName/.bashrc`):
+  
   `export PATH=${PATH}:"/home/YourUserName/niftk/bin"`
+  
   `export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}/"/home/YourUserName/niftk/bin"`
   
   Otherwise, if you download and compiled NiftyReg and NiftySeg at: `/home/YourUserName/nifty_reg` and `/home/YourUserName/nifty_seg`, then add the following 4 lines to the file `~/.bashrc`:
