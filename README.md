@@ -24,14 +24,14 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
   
   - If you choose to compile the `NiftyReg` and `NiftySeg` from source code instead, please make sure you have downloaded and installed the latest version, since the earlier version might not be compatible with this tool.
   
-     For NiftyReg, please use the command line below to download the lastest version of the source code, and follow the compile instruction from the NiftyReg's [install page](https://github.com/KCL-BMEIS/niftyreg/wiki/install) to build and compile the binary files.
+     - For NiftyReg, please use the command line below to download the lastest version of the source code, and follow the compile instruction from the NiftyReg's [install page](https://github.com/KCL-BMEIS/niftyreg/wiki/install) to build and compile the binary files.
      
         git clone git://git.code.sf.net/p/niftyreg/git niftyreg
       or
       
         git clone git@cmiclab.cs.ucl.ac.uk:mmodat/niftyreg.git niftyreg
         
-      For NitySeg, please use the command line below to download the lastest version of the source code for compile, and follow the compile instruction from the NitySeg's [install page](https://github.com/KCL-BMEIS/NiftySeg) to build and compile the binary files.
+      - For NitySeg, please use the command line below to download the lastest version of the source code for compile, and follow the compile instruction from the NitySeg's [install page](https://github.com/KCL-BMEIS/NiftySeg) to build and compile the binary files.
       
         `git clone https://github.com/KCL-BMEIS/NiftySeg.git`
         
