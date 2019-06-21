@@ -12,13 +12,19 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
 **Installation**
 - Pre-requisite package installation: [NityReg](https://github.com/KCL-BMEIS/niftyreg/wiki), [NitySeg](https://github.com/KCL-BMEIS/NiftySeg), and [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki) (FSL is optional, but recommended as it is used to generate QuickCheck figures which will make the inspection of the results much easier).
   - Ther easist and recommended way to install `NiftyReg` and `NiftySeg` is by installing [`NifTK`](https://github.com/NifTK/NifTK/releases) which includes both of the two packages, as well as other useful tools, including a 3D nifti file viewer.
+  
   For example, to download and install NifTK version v18.05.4 on ubuntu to your `home` folder, using the following lines:
-  `cd $HOME`
-  `# Download binary files'
-  `wget https://github.com/NifTK/NifTK/releases/download/v18.05.4/niftk-v18.05.4-ubuntu-14.04-x64.tar.bz2`
-  `# extracct the binary files`
-  `tar -xvjf niftk-v18.05.4-ubuntu-14.04-x64.tar.bz2`
-  `# a folder called 'niftk' will be created under your $HOME folder`
+      `cd $HOME`
+
+      `# Download binary files`
+
+      `wget https://github.com/NifTK/NifTK/releases/download/v18.05.4/niftk-v18.05.4-ubuntu-14.04-x64.tar.bz2`
+
+      `# extracct the binary files`
+
+      `tar -xvjf niftk-v18.05.4-ubuntu-14.04-x64.tar.bz2`
+
+      `# a folder called 'niftk' will be created under your $HOME folder`
   
   - If you choose to compile the two packages from source code instead, please make sure you have downloaded and installed the latest version, since the earlier version of NityReg is not compatible with our `MASHelperFunctions.sh`.
   
