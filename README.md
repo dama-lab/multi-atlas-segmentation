@@ -37,7 +37,7 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
         
 - [**Important**] After install or compilation the executable binary files, do remember to add the directories of the executable binary files - which is the `bin` subdirectory within directory where ther packages are installed) - to the system `$PATH` variable.
   
-   - For example, if you're using Linux, and installed the NifTK at: `/home/YourUserName/niftk-18.5.4`, then add the following 2 lines to the file `/home/YourUserName/.bashrc` (e.g. by typing:  `gedit $HOME/.bashrc`):
+   - For example, if you're using Linux, and installed the NifTK at: `/home/YourUserName/niftk-18.5.4`, then add the following 2 lines to the file `/home/YourUserName/.bashrc` (e.g. by typing: `gedit $HOME/.bashrc` or `nano $HOME/.bashrc` or `emacs $HOME/.bashrc`):
   
          export PATH=${PATH}:"$HOME/niftk-18.5.4/bin"
          export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"$HOME/niftk-18.5.4/bin"
