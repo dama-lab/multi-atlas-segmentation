@@ -20,7 +20,7 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
       wget https://github.com/NifTK/NifTK/releases/download/v18.05.4/niftk-v18.05.4-ubuntu-14.04-x64.tar.bz2
       # extracct the binary files
       tar -xvjf niftk-v18.05.4-ubuntu-14.04-x64.tar.bz2
-      # a folder called 'niftk' will be created under your $HOME folder
+      # A folder called 'niftk-18.5.4' will be created under your $HOME folder
   
   - If you choose to compile the `NiftyReg` and `NiftySeg` from source code instead, please make sure you have downloaded and installed the latest version, since the earlier version might not be compatible with this tool.
   
@@ -37,10 +37,10 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
         
 - [**Important**] After install or compilation the executable binary files, do remember to add the directories of the executable binary files - which is the `bin` subdirectory within directory where ther packages are installed) - to the system `$PATH` variable.
   
-   - For example, if you're using Linux, and installed the NifTK at: `/home/YourUserName/niftk`, then add the following 2 lines to the file `/home/YourUserName/.bashrc` (e.g. by typing:  `gedit $HOME/.bashrc`):
+   - For example, if you're using Linux, and installed the NifTK at: `/home/YourUserName/niftk-18.5.4`, then add the following 2 lines to the file `/home/YourUserName/.bashrc` (e.g. by typing:  `gedit $HOME/.bashrc`):
   
-         export PATH=${PATH}:"$HOME/niftk/bin"
-         export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"$HOME/niftk/bin"
+         export PATH=${PATH}:"$HOME/niftk-18.5.4/bin"
+         export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"$HOME/niftk-18.5.4/bin"
   
    - Otherwise, if you download and compiled NiftyReg and NiftySeg separately at: `/home/YourUserName/nifty_reg` and `/home/YourUserName/nifty_seg`, then add the following 4 lines to the file `~/.bashrc`:
   
