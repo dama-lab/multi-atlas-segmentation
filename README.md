@@ -22,7 +22,7 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
       tar -xvjf niftk-v18.05.4-ubuntu-14.04-x64.tar.bz2
       # a folder called 'niftk' will be created under your $HOME folder
   
-  - If you choose to compile the two packages from source code instead, please make sure you have downloaded and installed the latest version, since the earlier version of NityReg is not compatible with our `MASHelperFunctions.sh`.
+  - If you choose to compile the `NiftyReg` and `NiftySeg` from source code instead, please make sure you have downloaded and installed the latest version, since the earlier version might not be compatible with this tool.
   
      For NiftyReg, please use the command line below to download the lastest version of the source code, and follow the compile instruction from the NiftyReg's [install page](https://github.com/KCL-BMEIS/niftyreg/wiki/install) to build and compile the binary files.
      
