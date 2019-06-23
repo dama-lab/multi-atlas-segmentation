@@ -1,15 +1,14 @@
-Multi Atlas Segmentation (MAS) for mouse brain MRI
-================================================
+# Multi Atlas Segmentation (MAS) for mouse brain MRI
 
 Author: Da Ma (Primary email: da_ma@sfu.ca; Secondary email: d.ma.11@ucl.ac.uk)
 
-**Description**
+## Description
 
 This bash scripts is created for "Multi-atlas based automatic brain structural parcellation", mainly for mouse brain MRI.
 
-- This script achieve automatic brain MRI image segmentation with given [__mouse brain MRI atlases__](https://github.com/dancebean/mouse-brain-atlas) - which is a set of pairs of template images along with their manually labells. Sample atlases can be downloadable from the Github respsitory [here](https://github.com/dancebean/mouse-brain-atlas). For detailed description of the pipeline, please refer to the papers [[1]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0086576) [[2]](https://www.frontiersin.org/articles/10.3389/fnins.2019.00011). Citation of the two papers are listed at the bottom of this page. The script is originally created to segment mouse brain MRI. It should be, in theory, also capable of handelling the multi-atlas-based parcellation/segmentation for other type of images, organs, or species (e.g. CT, heart, embryo, human, macaque, _etc._), providing appropriate atlases are givien.
+- This script achieve automatic brain MRI image segmentation with given [__mouse brain MRI atlases__](https://github.com/dancebean/mouse-brain-atlas) - which is a set of pairs of template images along with their manually labells. Sample atlases can be downloadable from the Github respsitory [here](https://github.com/dancebean/mouse-brain-atlas). For detailed description of the pipeline, please refer to the papers [[1]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0086576) [[2]](https://www.frontiersin.org/articles/10.3389/fnins.2019.00011). Citation of the two papers are listed at the [bottom](#citation) of this page. The script is originally created to segment mouse brain MRI. It should be, in theory, also capable of handelling the multi-atlas-based parcellation/segmentation for other type of images, organs, or species (e.g. CT, heart, embryo, human, macaque, _etc._), providing appropriate atlases are givien.
 
-**Installation**
+## Installation
 - Pre-requisite package installation: [NityReg](https://github.com/KCL-BMEIS/niftyreg/wiki), [NitySeg](https://github.com/KCL-BMEIS/NiftySeg), and [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki) (FSL is optional, but recommended as it is used to generate QuickCheck figures which will make the inspection of the results much easier).
   - Ther easist and recommended way to install `NiftyReg` and `NiftySeg` is by installing [`NifTK`](https://github.com/NifTK/NifTK/releases) which includes both of the two packages, as well as other useful tools, including a 3D nifti file viewer.
   
@@ -61,7 +60,7 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
 - If correct installation location is given with the two command above, now you're ready to use the `MASHelperFunctions.sh` script. The bash script is compatible with Linux/Windows/Mac system.
 
 
-**Usage**
+## Usage
 
 There is only one main script: *MASHelperFunctions.sh*, which is capable of handling batch brain parcellation (functions with suffix `_batch`) either on the local workstation or on PBS cluster by simply specifying the `-e` flag as either `local` or `cluster`).
 To load the script, simply type `source MASHelperFunctions.sh` to load all corresponding functions.
@@ -83,11 +82,13 @@ For example: `mas_mapping -h`
 - Sometimes, the image origin in the nifty head will be misplaced after the pixeldim change, which will make the affine registration fail (for both the mas_masking step and the mas_parcellation). A quick solution is to load the image into the [`NifTK`](https://github.com/NifTK/NifTK/releases), and "save as" a `.nii` or `.nii.gz` file, which will effectively reinitialize the image origin information int he nifti file header. We will post a more elegant solution with future update.
 
 
-**Pipeline example**
-- pipeline demo
+## Pipeline example
+
+### pipeline demo
  
  A [demo script](demo/mas_demo.sh) is provided, which contains a complete end-to-end demonstration showing how to build and run the pipeline. It first download the atlas and test image from the [mouse brain atlas](https://github.com/dancebean/mouse-brain-atlas). It then run the following steps in sequential: brain extraction => brain structural parcellation (which itself consists of 3 sub-steps: atlas-to-test image registration -> atlas label propagation -> and multi-atlas label fusion).
   
+### Function demo
 - Load script:
 
   `source MASHelperFunctions.sh`
@@ -121,11 +122,10 @@ For example: `mas_mapping -h`
   - `-a`: text file list the templates inside the atlas folder to be used (default:  `template_list.cfg` file within the atlas folder)
   - `-p`: configuration file to tune the parameters for the registration and label fusion algorithms
 
-**Sample image of the pipeline output**
+## Sample image of the pipeline output
 [![Sample output](docs/quickcheckdemo.png) "Click for sample quality control image of the parcellation output (generated using mas_quickcheck)."](docs/quickcheckdemo.png) The similar color between the olfactory bulb and the cortex is due to the limited colormap of `jet`.
 
-
-**List of functions**
+## List of functions
 
 [Basic functions]
 - `check_image_file`
@@ -163,7 +163,7 @@ For example: `mas_mapping -h`
 - `mas_extract_volume_batch`
 - `mas_quickcheck_panorama`
 
-**History and Roadmap**
+## Version History and Roadmap
 - Older implementation in previous version (will be removed in future release)
   (Code repository move from the [original page](http://cmic.cs.ucl.ac.uk/staff/da_ma/multi_atlas/) that is stated in the paper.)
   - for_single_workstation: to be used on a single PC.
@@ -171,7 +171,7 @@ For example: `mas_mapping -h`
   - parameter_samples: sample parameter files that can be fed to the command when running the script [optional].
 - Future release will also provide suport for Slurm-based clusters.
 
-**Q/A**
+## Q/A
 
 - Q. What image orientation should my test image be?
 
@@ -196,7 +196,7 @@ For example: `mas_mapping -h`
     
     (4) The [NiftySeg](http://cmic.cs.ucl.ac.uk/staff/da_ma/Multi_Atlas/) package provide bias field correction using automatic tissue segmentation (**seg_EM**).
 
-**Citation**
+## Citation
 
 If you used our code in your study, we ask you to kindly cite the following papers:
 
