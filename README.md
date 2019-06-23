@@ -50,8 +50,15 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
          export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:"$HOME/nifty_seg/lib"
 
      (`$HOME` represent your home directory, which is located at `/home/YourUserName/`).
+     
+    - After setting up the system variables, reinitialize your bash environment by simply type `bash` in the terminal, or open a new termina, or logout/login again. To check if the `NiftyReg` and `NiftySeg` has been installed and loaded successfully in the correct location:
+         
+         `which reg_resample`
+         
+         `which seg_LabFusion`
+         
 
-- After the above "installation" procedure, you're ready to use the script. The bash script is compatible with Linux/Windows/Mac system.
+- After the above "installation" procedure. Now you're ready to use the script. The bash script is compatible with Linux/Windows/Mac system.
 
 
 **Usage**
