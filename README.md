@@ -121,6 +121,10 @@ For example: `mas_mapping -h`
   - `-a`: text file list the templates inside the atlas folder to be used (default:  `template_list.cfg` file within the atlas folder)
   - `-p`: configuration file to tune the parameters for the registration and label fusion algorithms
 
+**Sample image of the pipeline output**
+[![Sample output](docs/quickcheckdemo.png) "Click for sample quality control image of the parcellation output (generated using mas_quickcheck)."](docs/quickcheckdemo.png) The similar color between the olfactory bulb and the cortex is due to the limited colormap of `jet`.
+
+
 **List of functions**
 
 [Basic functions]
@@ -158,9 +162,6 @@ For example: `mas_mapping -h`
 - `mas_extract_volume`
 - `mas_extract_volume_batch`
 - `mas_quickcheck_panorama`
-
-**Sample image of the pipeline output**
-[![Sample output](docs/quickcheckdemo.png) "Click for sample quality control image of the parcellation output (generated using mas_quickcheck)."](docs/quickcheckdemo.png) The similar color between the olfactory bulb and the cortex is due to the limited colormap of `jet`.
 
 **History and Roadmap**
 - Older implementation in previous version (will be removed in future release)
