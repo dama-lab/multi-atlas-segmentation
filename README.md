@@ -51,7 +51,7 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
 
      (`$HOME` represent your home directory, which is located at `/home/YourUserName/`).
      
-    - After setting up the system variables, reinitialize your bash environment by simply type `bash` in the terminal, or open a new termina, or logout/login again. To check if the `NiftyReg` and `NiftySeg` has been installed and loaded successfully in the correct location:
+    - After setting up the system variables, refresh your bash environment by simply type `bash` in the terminal, or open a new termina, or logout/login again. Type the following two command in the refreshed terminal to check whether the `NiftyReg` and `NiftySeg` has been installed and loaded successfully in the correct location:
          
          `which reg_resample`
          
