@@ -51,14 +51,14 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
 
      (`$HOME` represent your home directory, which is located at `/home/YourUserName/`).
      
-    - After setting up the system variables, refresh your bash environment by simply type `bash` in the terminal, or open a new termina, or logout/login again. Type the following two command in the refreshed terminal to check whether the `NiftyReg` and `NiftySeg` has been installed and loaded successfully in the correct location:
+    - After setting up the system variables, refresh your bash environment by simply type `bash` in the terminal, or open a new termina, or logout/login again. Type the following two command in the refreshed terminal to check whether the `NiftyReg` and `NiftySeg` has been installed and loaded successfully in the correct locations:
          
          `which reg_resample`
          
          `which seg_LabFusion`
          
 
-- After the above "installation" procedure. Now you're ready to use the script. The bash script is compatible with Linux/Windows/Mac system.
+- If correct installation location is given with the two command above, now you're ready to use the `MASHelperFunctions.sh` script. The bash script is compatible with Linux/Windows/Mac system.
 
 
 **Usage**
