@@ -3,9 +3,9 @@
 ######## prepare demo data #########
 ####################################
 
-# (Optional) create demo directory (or cd to your own empty folder)
-mkdir ~/demo
-cd ~/demo
+# (Optional) create demo directory within the current folder (preferrably an empty folder)
+mkdir -p ./demo
+cd ./demo
 
 # Download the "in_vivo" atlas from: https://github.com/dancebean/mouse-brain-atlas
 mkdir -p Atlas
@@ -17,18 +17,18 @@ cat FVB_NCrl_in_vivo/template_list.cfg | head -n 3 > FVB_NCrl_in_vivo/template_l
 cd ..
 
 # create input directory, file, and target list
-mkdir -p input
-cd input
+mkdir -p ./input
+cd ./input
 target_id="A0"
 svn export https://github.com/dancebean/mouse-brain-atlas/trunk/NeAt/in_vivo/template/$target_id.nii.gz
 echo $target_id > targetlist.txt
 cd ..
 
 # create targetlist (only 1 file)
-ls input | head -n 1 | cut -d. -f1 > targetlist.txt
+ls ./input | head -n 1 | cut -d. -f1 > targetlist.txt
 
 # create output directory
-mkdir output
+mkdir -p ./output
 
 
 ####################################
