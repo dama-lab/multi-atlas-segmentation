@@ -11,3 +11,10 @@ labfusion_param=""
 
 # parameter for reg_f3d in mas_mapping
 nrr_param=""
+
+
+################################################################
+# AVOID define parameters for the following internal variable:
+# -mas_mapping_param, mas_fusion_param, mas_parcell_fusion_param
+# Otherwise, may cause program error
+################################################################
