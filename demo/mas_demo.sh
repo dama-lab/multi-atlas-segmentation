@@ -10,8 +10,7 @@ cd ./demo
 # Download the "in_vivo" atlas from: https://github.com/dancebean/mouse-brain-atlas
 mkdir -p Atlas
 cd Atlas
-svn export https://github.com/dancebean/mouse-brain-atlas/trunk/FVB_NCrl/in_vivo/
-mv in_vivo FVB_NCrl_in_vivo
+svn export https://github.com/dancebean/mouse-brain-atlas/trunk/FVB_NCrl/in_vivo FVB_NCrl_in_vivo
 # only use three atlas for fast processing and demonstration purpose
 cat FVB_NCrl_in_vivo/template_list.cfg | head -n 3 > FVB_NCrl_in_vivo/template_list_demo.cfg
 cd ..
