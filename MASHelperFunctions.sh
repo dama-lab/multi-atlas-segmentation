@@ -1255,8 +1255,10 @@ function mas_masking_fusion(){
 		local merge_cmd="seg_maths \$mask_1 -merge $atlas_no 4 \$mask_n $merged_4d_mask"
 		eval $merge_cmd
 	fi
-	# start label fusion
+	# start brain mask label fusion
 	labfusion_mask=$result_dir/mask/$target_id.mask.$atlas_name.nii.gz
+
+	# check if brain mask label fusion has already been created
 	check_image_file $labfusion_mask
 	if [[ $? -eq 0 ]]; then
 		echo "[$function_name] ($target_id) brain mask already exist: $labfusion_mask, skip label fusion ..."
