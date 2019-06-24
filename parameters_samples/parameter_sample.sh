@@ -11,12 +11,3 @@ labfusion_param=""
 
 # parameter for reg_f3d in mas_mapping
 nrr_param=""
-
-# parameter for reg_f3d in mas_mapping_batch
-mas_mapping_param=""
-
-# parameter for seg_LabFusion in mas_fusion
-mas_fusion_param=""
-
-# parameter for seg_LabFusion in mas_parcellation
-mas_parcell_fusion_param=""
