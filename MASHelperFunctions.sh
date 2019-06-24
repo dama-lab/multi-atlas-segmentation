@@ -1256,10 +1256,16 @@ function mas_masking_fusion(){
 		eval $merge_cmd
 	fi
 	# start label fusion
+	labfusion_mask=$result_dir/mask/$target_id.mask.$atlas_name.nii.gz
+	check_image_file $labfusion_mask
+	if [[ $? -eq 0 ]]; then
+		echo "[$function_name] ($target_id) brain mask already exist: $labfusion_mask, skip label fusion ..."
+		return 0
+	fi
+
 	local labfusion_param="-unc -v 1"
 	labfusion_param="$labfusion_param -STAPLE "
 	labfusion_param="$labfusion_param -in $merged_4d_mask"
-	labfusion_mask=$result_dir/mask/$target_id.mask.$atlas_name.nii.gz
 	labfusion_param="$labfusion_param -out $labfusion_mask"
 	echo -e "\n [$function_name] fuse mapped mask from $atlas_name for $target_id"
 	seg_LabFusion $labfusion_param
@@ -1824,22 +1830,22 @@ function mas_parcellation_batch(){
 		fi
 		# fusion parameter generated (for both local/cluster) prior to loop
 		# mapping parameter generated inside the loop for local/cluster seperately)
-		local mas_fusion_param=""
-		mas_fusion_param="$mas_fusion_param -T $target_dir"
-		mas_fusion_param="$mas_fusion_param -t $target_id"
-		mas_fusion_param="$mas_fusion_param -A $atlas_name"
-		mas_fusion_param="$mas_fusion_param -a $atlas_list"
-		mas_fusion_param="$mas_fusion_param -r $result_dir"
+		local mas_parcell_fusion_param=""
+		mas_parcell_fusion_param="$mas_parcell_fusion_param -T $target_dir"
+		mas_parcell_fusion_param="$mas_parcell_fusion_param -t $target_id"
+		mas_parcell_fusion_param="$mas_parcell_fusion_param -A $atlas_name"
+		mas_parcell_fusion_param="$mas_parcell_fusion_param -a $atlas_list"
+		mas_parcell_fusion_param="$mas_parcell_fusion_param -r $result_dir"
 		# Add Optional parameters if specified
 		if [[ ! -z $targetmask_dir ]]; then
 			target_mask=$targetmask_dir/$target_id$targetmask_suffix
-			mas_fusion_param="$mas_fusion_param -m $target_mask"
+			mas_parcell_fusion_param="$mas_parcell_fusion_param -m $target_mask"
 		fi
 		if [[ ! -z $parameter_cfg ]]; then
-			mas_fusion_param="$mas_fusion_param -p $parameter_cfg"
+			mas_parcell_fusion_param="$mas_parcell_fusion_param -p $parameter_cfg"
 		fi
 		if [[ ! -z $cleanup_flag ]]; then
-			mas_fusion_param="$mas_fusion_param -c $cleanup_flag"
+			mas_parcell_fusion_param="$mas_parcell_fusion_param -c $cleanup_flag"
 		fi
 
 		# start parcellation (mapping+fusion) for target $target_id
@@ -1884,8 +1890,8 @@ function mas_parcellation_batch(){
 			###############################
 			# label fusion step
 			echo -e "\n [$function_name] run label fusion locally for target: $target_id \n"
-			# echo "mas_fusion $mas_fusion_param"
-			mas_fusion $mas_fusion_param
+			# echo "mas_fusion $mas_parcell_fusion_param"
+			mas_fusion $mas_parcell_fusion_param
 			# potential final step: cleanup unwanted files
 		elif [[ "$exe_mode" == "cluster" ]]; then
 			echo "[$function_name] start cluster parcellation for target: ($target_id) ..."
@@ -2000,7 +2006,7 @@ function mas_parcellation_batch(){
 			fi
 
 			echo "source $mas_script_path" >> $pbs_file
-			echo "mas_fusion $mas_fusion_param" >> $pbs_file
+			echo "mas_fusion $mas_parcell_fusion_param" >> $pbs_file
 			# submit pbs job and store at joblist 
 			if [[ $cluster_type == "SGE" ]]; then
 				qsub $pbs_file
