@@ -57,12 +57,12 @@ This bash scripts is created for "Multi-atlas based automatic brain structural p
          `which seg_LabFusion`
          
 
-- If correct installation location is given with the two command above, now you're ready to use the `MASHelperFunctions.sh` script. The bash script is compatible with Linux/Windows/Mac system.
+- If correct installation location is given with the two command above, now you're ready to use the [`MASHelperFunctions.sh`](MASHelperFunctions.sh) script, or test the [demo](demo/mas_demo.sh) script. The bash script is compatible with Linux/Windows/Mac system.
 
 
 ## Usage
 
-There is only one main script: *MASHelperFunctions.sh*, which is capable of handling batch brain parcellation (functions with suffix `_batch`) either on the local workstation or on PBS cluster by simply specifying the `-e` flag as either `local` or `cluster`).
+There is only one main script: the [*MASHelperFunctions.sh*](MASHelperFunctions.sh), which is capable of handling batch brain parcellation (functions with suffix `_batch`) either on the local workstation or on PBS cluster by simply specifying the `-e` flag as either `local` or `cluster`).
 To load the script, simply type `source MASHelperFunctions.sh` to load all corresponding functions.
 
 To get help for each function, type `function_name -h`.
