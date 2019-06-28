@@ -4,7 +4,7 @@
 # multi brain seperation
 ##################
 
-source MultiAtlasSegmentation
+source MASHelperFunctions.sh
 
 function convert_dcm_to_nifti_batch(){
 	local function_name=${FUNCNAME[0]}
