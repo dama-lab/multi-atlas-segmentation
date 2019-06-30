@@ -77,7 +77,7 @@ mas_quickcheck $target_dir/$target_id $dilate_mask_dir/$target_id$mask_suffix $r
 
 # 3. ~~~~~ parcellation ~~~~~
 mas_parcellation_batch -T $target_dir -t $target_list -A $atlas_dir -a $atlas_list -r $result_dir \
-                       -M $dilate_mask_dir -m $mask_suffix -e local # -p $parameter_cfg
+                       -M $dilate_mask_dir -m $mask_suffix -e $exe_mode # -p $parameter_cfg
 
 # # alternatively, if using non-dilated mask:
 # mas_parcellation_batch -T $target_dir -t $target_list -A $atlas_dir -a $atlas_list -r $result_dir \
