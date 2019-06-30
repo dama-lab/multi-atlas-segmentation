@@ -143,26 +143,19 @@ function reorient_brain(){
 	local out_orientation=RAS
 
 	if [[ "$location" = "S" ]]; then
-		orientation=RSA
-		# fix_header_info $target_dir/$target_id RSA $result_dir/$target_id.nii.gz
+		# orientation=RSA
+		orientation=RSP
 	elif [[ "$location" = "R" ]]; then
-		orientation=ILA
-		# fix_header_info $target_dir/$target_id IRA $result_dir/$target_id.nii.gz
+		# orientation=ILA
+		orientation=ILP
 	elif [[ "$location" = "L" ]]; then
-		orientation=SRA
+		# orientation=SRA
+		orientation=SRP
 	fi
 	# local 
 	target_file=$(ls $target_dir/${target_id}* | cut -d' ' -f1)
 
 	fix_header_info $target_file $orientation $result_dir/$target_id.nii.gz
-
-	# local tmp_dir=$result_dir/tmp_${RANDOM}
-	# mkdir -p $tmp_dir
-	# fix_header_info $target_file $orientation $tmp_dir/$target_id.img "analyze"
-	# reorder_brain $tmp_dir/$target_id.img $tmp_dir/${target_id}.reorder.img $out_orientation
-	# fix_header_info $tmp_dir/${target_id}.reorder.img $out_orientation $result_dir/$target_id.nii.gz
-	# rm -rf $tmp_dir
-
 }
 
 function reorient_brain_batch_3brain(){

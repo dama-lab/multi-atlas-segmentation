@@ -426,12 +426,12 @@ function mas_quickcheck(){
 	mkdir -p $tmp_dir
 
 	local bg_name=$(basename $bg_img | cut -d. -f1)
-	local overlay_tmp=$tmp_dir/overlay.$bg_name.$overlay_name
 	local slicer_cmd
 
 	if [[ ! -z $overlay_img ]]; then
 		local overlay_name=$(basename $overlay_img | cut -d. -f1)
-		local overlay_nan=$tmp_dir/masknan.$bg_name.$overlay_name
+		local overlay_nan=$tmp_dir/masknan.$bg_name.$overlay_name.nii.gz
+		local overlay_tmp=$tmp_dir/overlay.$bg_name.$overlay_name.nii.gz
 
 		# determine label range
 		seg_maths $overlay_img -masknan $overlay_img $overlay_nan
@@ -454,7 +454,8 @@ function mas_quickcheck(){
 		fi
 		slicer_cmd="slicer -t -n -l $LUT_file"
 	else # no overlay_img
-		ln -s $bg_img $overlay_tmp.nii.gz
+		local overlay_tmp=$tmp_dir/$bg_name.nii.gz
+		ln -s $bg_img $overlay_tmp
 		slicer_cmd="slicer"
 	fi
 
@@ -2467,8 +2468,8 @@ target_name=$target_name
 			local overlay_img=$label_dir/$target_id$label_suffix.nii.gz
 			local bg_name=$(basename $bg_img | cut -d. -f1)
 			local overlay_name=$(basename $overlay_img | cut -d. -f1)
-			local overlay_nan=$tmp_dir/masknan.$bg_name.$overlay_name
-			local overlay_tmp=$tmp_dir/overlay.$bg_name.$overlay_name
+			local overlay_nan=$tmp_dir/masknan.$bg_name.$overlay_name.nii.gz
+			local overlay_tmp=$tmp_dir/overlay.$bg_name.$overlay_name.nii.gz
 
 			# determine label range
 			seg_maths $overlay_img -masknan $overlay_img $overlay_nan
