@@ -431,7 +431,7 @@ function mas_quickcheck(){
 
 	if [[ ! -z $overlay_img ]]; then
 		local overlay_name=$(basename $overlay_img | cut -d. -f1)
-		local overlay_nan=$tmp_dir/masknan.$bg_name.$overlay_name
+		local overlay_nan=$tmp_dir/masknan.$bg_name.$overlay_name.nii.gz
 
 		# determine label range
 		seg_maths $overlay_img -masknan $overlay_img $overlay_nan
