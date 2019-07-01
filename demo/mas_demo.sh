@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Add niftk installation location to system paths: `PATH` and `LD_LIBRARY_PATH`.
-#This will only work if user followed the installation instruction, and installed packages in the recommended location.
+# This will only work if user followed the installation instruction, and installed packages in the recommended location.
+# If you installed the packages in other locations, please change the variable `$HOME` to your own installed locations.
 
 # Option 1: if user installed the default niftk package
 export PATH=${PATH}:"$HOME/niftk-18.5.4/bin"
