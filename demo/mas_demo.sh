@@ -1,4 +1,18 @@
 #!/bin/bash
+
+# Add niftk installation location to system paths: `PATH` and `LD_LIBRARY_PATH`.
+#This will only work if user followed the installation instruction, and installed packages in the recommended location.
+
+# Option 1: if user installed the default niftk package
+export PATH=${PATH}:"$HOME/niftk-18.5.4/bin"
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"$HOME/niftk-18.5.4/bin"
+
+# option 2: if use choose to compile the niftyreg/niftyseg from the source code.
+export PATH=${PATH}:"$HOME/nifty_reg/bin"
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}/"$HOME/nifty_reg/lib"
+export PATH=${PATH}:"$HOME/nifty_seg/bin"
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:"$HOME/nifty_seg/lib"
+
 ####################################
 ######## prepare demo data #########
 ####################################
