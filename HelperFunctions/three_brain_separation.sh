@@ -21,13 +21,14 @@ function convert_dcm_to_nifti_batch(){
 function multi_brain_seperation(){
 	local function_name=${FUNCNAME[0]}
 	if [[ $# -lt 3 ]]; then
-		echo "Usage: $function_name [target_dir] [target_id] [result_dir] [(Optional) brain_no]"
+		echo "Usage: $function_name [target_dir] [target_id] [result_dir] (Optional) [brain_no] [threshold]"
 		return 1
 	fi
 
 	local target_dir=$1
 	local target_id=$2
 	local result_dir=$3
+	## Number of brain to separate
 	local brain_no
 	if [[ ! -z $4 ]]; then
 		brain_no=$4
@@ -35,12 +36,18 @@ function multi_brain_seperation(){
 		# default number of brain = 3
 		brain_no=3
 	fi
+	## Threshold value to extract the brain region
+	if [[ ! -z $5 ]]; then
+		local thr=$4
+	else
+		# default threshold = 5000
+		local thr=5000
+	fi
 
 	echo "target_dir=$target_dir"
 	echo "target_id=$target_id"
 	echo "result_dir=$result_dir"
 
-	local thr=5000
 	local ero=2
 	local dil=4
 	local ero2=2

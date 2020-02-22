@@ -615,10 +615,7 @@ function mas_masking(){
 		affine_param="$affine_param -ref $target_dir/$target_id"
 		affine_param="$affine_param -res $tmp_dir/$atlas_id.$target_id.aff.nii.gz"
 		affine_param="$affine_param -aff $tmp_dir/$atlas_id.$target_id.aff"
-		# use target mask if specified
-		if [[ ! -z $target_mask ]]; then
-			affine_param="$affine_param -rmask $target_mask"
-		fi
+
 		reg_aladin $affine_param
 	fi
 
