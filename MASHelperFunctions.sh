@@ -2583,6 +2583,7 @@ function mas_N4_batch(){
 	local function_name=${FUNCNAME[0]}
 	if [[ $# -lt 2 ]]; then
 		echo "[$function_name] [input_dir] [target_list] [result_dir] (optional) [exe_mode] [mask_flag] [mask_dir] [mask_suffix]"
+		echo "    [Important] assuming target_list doesn include suffix, and file extension is nii.gz"
 		return 1
 	fi
 	local input_dir=$1
