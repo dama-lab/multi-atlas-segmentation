@@ -411,9 +411,9 @@ function mas_quickcheck(){
 	local qc_dir=$3
 	local qc_filename=$4
 
-	echo "bg_img =      $bg_img"
+	echo "bg_img      = $bg_img"
 	echo "overlay_img = $overlay_img"
-	echo "qc_dir =      $qc_dir"
+	echo "qc_dir      = $qc_dir"
 	echo "qc_filename = $qc_filename"
 
 	# check if FSL is installed (by checking variable $FSLDIR)
@@ -561,24 +561,24 @@ function mas_masking(){
 		source $parameter_cfg
 	fi
 
-	echo "[mas_mapping] begin mapping template $atlas_id to $target_id"
+	echo "[$function_name] begin mapping template $atlas_id to $target_id"
 	local error_flag=0
 
 	# check mapping input/output file existance 
 	# check_mapping_file $target_dir $target_id $atlas_dir $atlas_list $result_dir
 	# local file_tag=$?
 	# if [[ $file_tag -eq 2 ]]; then
-	# 	echo "[mas_mapping] Mapping file already exist: $target_dir/$target_id "
+	# 	echo "[$function_name] Mapping file already exist: $target_dir/$target_id "
 	# 	return 0
 	# elif [[ $file_tag -ne 0 ]]; then
-	# 	echo "[mas_mapping] cannot find target ($target_id)"
+	# 	echo "[$function_name] cannot find target ($target_id)"
 	# 	return 1
 	# fi
 
 	# checking atlas_file existance
 	check_atlas_file $atlas_dir $atlas_id
 	if [[ $? -ne 0 ]]; then
-		echo "[mas_mapping] cannot find atlas $atlas_file_type: $atlas_dir/template/$atlas_id"
+		echo "[$function_name] cannot find atlas $atlas_file_type: $atlas_dir/template/$atlas_id"
 		return 1
 	fi
 
@@ -621,7 +621,7 @@ function mas_masking(){
 
 	# check if affine matrix file generated successfully
 	if [[ ! -f $tmp_dir/$atlas_id.$target_id.aff ]]; then
-		echo "[mas_mapping] failed to generate affine matrix file"
+		echo "[$function_name] failed to generate affine matrix file"
 		return 1
 	fi
 	# resample the label, as well as mask
@@ -727,6 +727,9 @@ function mas_mapping(){
 			echo "[mas_mapping] cannot find target mask for ($target_id): $target_mask"
 			return 1
 		fi
+	# else # need to create target_mask first
+	# 	mas_masking -T $target_dir -t $target_id -A $atlas_dir -a $atlas_id -r $result_dir -p $parameter_cfg
+	# 	local target_mask = $result_dir/mask/$atlas_name/$target_id.mask.$atlas_id.affine.nii.gz
 	fi
 	# checking atlas_file existance
 	check_atlas_file $atlas_dir $atlas_id

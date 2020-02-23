@@ -1,10 +1,48 @@
 #!/bin/bash
 
-##################
-# multi brain seperation
-##################
+##########################
+# multi brain seperation #
+##########################
 
 source MASHelperFunctions.sh
+
+function generate_quickcheck(){
+	if [[ $# -lt 3 ]]; then
+		echo "Usage: $function_name [bg_img] [qc_dir] [qc_filename]"
+		return 1
+	fi
+
+	local bg_img=$1
+	local qc_dir=$3
+	local qc_filename=$4
+
+	echo "bg_img 		  = $bg_img"
+	echo "qc_dir      = $qc_dir"
+	echo "qc_filename = $qc_filename"
+
+	# check if FSL is installed (by checking variable $FSLDIR)
+	if [[ -z $FSLDIR ]]; then
+		echo "[$function_name] variable \$FSLDIR not set, cannot determine FSL installed location, exitng ..."
+		return 1
+	fi
+
+	local tmp_dir=$qc_dir/tmp_$RANDOM
+	mkdir -p $tmp_dir
+
+	local bg_name=$(basename $bg_img | cut -d. -f1)
+	local slicer_cmd
+
+	# create tmp directory
+	local overlay_tmp=$tmp_dir/$bg_img.nii.gz
+	ln -s $bg_img $overlay_tmp
+	
+	# create png using slicer
+	slicer_cmd="slicer"
+	slice_cmd="$slicer_cmd $bg_name \
+	-x 0.10 $tmp_dir/
+	"
+
+}
 
 function convert_dcm_to_nifti_batch(){
 	local function_name=${FUNCNAME[0]}
@@ -209,36 +247,32 @@ function extract_label(){
 	seg_maths $target_dir/$target_id.nii.gz -thr $(($label-0.5)) -uthr $(($label+0.5)) $result_dir/$target_id.nii.gz
 }
 
-function masking_batch_nii(){
-	local function_name=${FUNCNAME[0]}
-	if [[ $# -lt 3 ]]; then
-		echo "Usage: $function_name [target_dir] [target_list] [result_dir] [(optional) atlas_dir]"
-		return 1
-	fi
+# function masking_batch_nii(){
+# 	local function_name=${FUNCNAME[0]}
+# 	if [[ $# -lt 3 ]]; then
+# 		echo "Usage: $function_name [target_dir] [target_list] [result_dir] [(optional) atlas_dir]"
+# 		return 1
+# 	fi
 
-	local target_dir=$1
-	local target_list=$2
-	local result_dir=$3
-	if [[ ! -z $4 ]]; then
-		atlas_dir=$4
-	else # default $atlas_dir
-		atlas_dir="/ensc/NEWTON5/STUDENTS/DMA73/Dropbox/Documents/SFU/Projects/BORG/Mouse_Brain_Atlas/NeAt_ex_vivo_LR"
-	fi
+# 	local target_dir=$1
+# 	local target_list=$2
+# 	local result_dir=$3
+# 	local atlas_dir=$4
 
-	echo "target_dir=$target_dir"
-	echo "target_list=$target_list"
-	echo "result_dir=$result_dir"
-	echo "atlas_dir=$atlas_dir"
+# 	echo "target_dir=$target_dir"
+# 	echo "target_list=$target_list"
+# 	echo "result_dir=$result_dir"
+# 	echo "atlas_dir=$atlas_dir"
 
-	local target_id
+# 	local target_id
 
-	for target_id in $(cat $target_list); do
-		# $$AtlasListFileName=template_list.cfg
-		for atlas_id in $(cat $atlas_dir/$AtlasListFileName); do
-			# cloud process need to run on rcg-queen
-			# local target_result_dir=$result_dir/$target_id
-			# mkdir -p $target_result_dir
-			mas_masking -T $target_dir -t $target_id -A $atlas_dir -a $atlas_id -r $result_dir
-		done
-	done
-}
+# 	for target_id in $(cat $target_list); do
+# 		# $$AtlasListFileName=template_list.cfg
+# 		for atlas_id in $(cat $atlas_dir/$AtlasListFileName); do
+# 			# cloud process need to run on rcg-queen
+# 			# local target_result_dir=$result_dir/$target_id
+# 			# mkdir -p $target_result_dir
+# 			mas_masking -T $target_dir -t $target_id -A $atlas_dir -a $atlas_id -r $result_dir
+# 		done
+# 	done
+# }
