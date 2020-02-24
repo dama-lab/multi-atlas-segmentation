@@ -1,5 +1,4 @@
 #!/bin/bash
-#!/bin/bash
 
 #########################################
 # Demonstrate the comman usage of the
@@ -39,8 +38,11 @@ cd $RAW_DIR
 
 # Get the data if not already existed/downloaded
 tc1_269455=$RAW_DIR/'tc1_269455.nii.gz'
+tc1_269455=$RAW_DIR/'010913_02.nii.gz'
 if [[ ! -e $tc1_269455 ]]; then
 	wget --content-disposition -P $RAW_DIR https://ndownloader.figshare.com/files/5275453
+	wget --content-disposition -P $RAW_DIR https://ndownloader.figshare.com/files/5303806
+
 fi
 
 ####################################
@@ -58,4 +60,16 @@ source $script/MASHelperFunctions.sh > /dev/null 2>&1
 # Alternatively, if you want to show the listing of all the available functions, use:
 # source ./MASHelperFunctions.sh 
 
+
+
+## Three brain separation
+
+
+
+## Quickcheck
 mas_quickcheck [bg_img] [(optional) overlay_img] [qc_dir] [qc_filename]
+
+
+
+
+###################################

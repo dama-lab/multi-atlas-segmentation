@@ -1,6 +1,9 @@
 #!/bin/bash
+
+##########################################################
 # Multi-Atlas-Segmentation, parcellation, and label fusion
 # To report any bugs/request, please contact: Da Ma (da_ma@sfu.ca,d.ma.11@ucl.ac.uk)
+##########################################################
 
 # -------------------------------------------------
 # define some global variables, (if not predefined)
