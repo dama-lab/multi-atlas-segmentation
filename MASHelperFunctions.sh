@@ -26,6 +26,8 @@ mas_script_file = $mas_script_file
 # - check_mapping_file
 # - check_label_fusion_file
 
+# - get_orientation
+
 [ Single processing functions ]
 # - mas_masking (prerequisite: NiftyReg)
 # - mas_masking_fusion (prerequisite: NiftyReg)
@@ -59,6 +61,44 @@ mas_script_file = $mas_script_file
 
 # define some default global variable value
 AtlasListFileName=template_list.cfg
+
+# ---------------------------------
+#  function: get_orientation
+# ---------------------------------
+function get_orientation(){
+    local function_name=${FUNCNAME[0]}
+    if [ "$#" -lt 1 ]; then
+        echo "Get nifti file header"
+        echo "Usage: $function_name [input_img]"
+        return 1
+    else
+        local IMG=$1
+    fi
+
+    ORIENT=`mri_info $IMG | grep Orientation`
+    ORIENT=${ORIENT##*\ }
+    echo $ORIENT
+}
+
+function get_orientation_batch(){
+    local function_name=${FUNCNAME[0]}
+    if [ "$#" -lt 2 ]; then
+        echo "Get nifti file header"
+        echo "Usage: $function_name [input_dir] [targetlist]"
+        return 1
+    else
+        local input_dir=$1
+        local targetlist=$2
+    fi
+
+    echo "input_dir=$input_dir"
+    echo "targetlist=$targetlist"
+
+    local target_id
+    for target_id in $(cat $targetlist); do
+        echo $target_id $(get_orientation $input_dir/$target_id.nii.gz)
+    done
+}
 
 # ---------------------------------
 #  function: check_image_file

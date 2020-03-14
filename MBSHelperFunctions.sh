@@ -9,24 +9,6 @@
 
 source MASHelperFunctions.sh > /dev/null 2>&1 
 
-# ---------------------------------
-#  function: get_orientation
-# ---------------------------------
-function get_orientation(){
-    local function_name=${FUNCNAME[0]}
-    if [ "$#" -lt "1" ]; then
-        echo "Get nifti file header"
-        echo "Usage: $function_name [input_img]"
-        return 1
-    else
-        IMG=$1
-    fi
-
-    ORIENT=`mri_info $IMG | grep Orientation`
-    ORIENT=${ORIENT##*\ }
-    echo $ORIENT
-}
-
 function convert_dcm_to_nifti_batch(){
     local function_name=${FUNCNAME[0]}
     if [[ $# -lt 3 ]]; then
@@ -195,7 +177,7 @@ function reorient_brain(){
     target_file=$(ls $target_dir/${target_id}* | cut -d' ' -f1)
 
     # Fix nifti hearder info using FreeSurfer
-    fix_header_info $target_file $orientation $result_dir/$target_id.nii.gz
+    fix_header_info $target_file $orientation $result_dir/$target_id.nii.gz 
 
     # If FSL is installed, reorient into LAS MNI152 space
     # check if FSL is installed (by checking variable $FSLDIR)
@@ -255,9 +237,9 @@ function reorient_brain_batch_3brain(){
                     # rename to add orientation guess behind
                     target_id_oriented=${target_id}_$location
                     mv $result_dir/$target_id.nii.gz $result_dir/$target_id_oriented.nii.gz
-                    # generate quickcheck
-                    echo ".......... generating quickcheck ......" 
-                    mas_quickcheck $result_dir/$target_id_oriented.nii.gz '' $result_dir $target_id_oriented $qc_orientation
+                    # generate quickcheck (not working as expected yet, due to the limitation of FSL's slicer command)
+                    # echo ".......... generating quickcheck ......" 
+                    # mas_quickcheck $result_dir/$target_id_oriented.nii.gz '' $result_dir $target_id_oriented $qc_orientation
                 fi
             done
         done
