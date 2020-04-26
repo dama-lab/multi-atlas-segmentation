@@ -1,7 +1,7 @@
-% Matlab function to batch-reorient .nii images using the Matlab NIfTI
-% toolbox.
-% @author: MA, Da, d.ma.11@ucl.ac.uk
-%       TIG@CMIC & Phenotyping@CABI, UCL, London, UK
+% Matlab function to batch-reorient .nii images
+% Require the Matlab NIfTI toolbox available at:
+%     (https://www.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image)
+% @author: MA, Da, da_ma@sfu.ca, d.ma.11@ucl.ac.uk
 
 function orient_nii(input,output_folder)
 
