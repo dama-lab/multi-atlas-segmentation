@@ -1,0 +1,1 @@
+function reorientNiiBatch(inNiiDir,outNiiDir,targetList)
