@@ -83,6 +83,8 @@ For example: `mas_mapping -h`
 
 
 ## Pipeline example
+### Processing pipeline schematic diagram
+[![pipeline schematic](docs/journal.pone.0086576.g001.png) "Click for sample quality control image of the pipeline schematic diagram"](docs/journal.pone.0086576.g001.png).
 
 ### pipeline demo
  
@@ -122,7 +124,7 @@ For example: `mas_mapping -h`
   - `-a`: text file list the templates inside the atlas folder to be used (default:  `template_list.cfg` file within the atlas folder)
   - `-p`: configuration file to tune the parameters for the registration and label fusion algorithms
 
-## Sample image of the pipeline output
+### Sample image of the pipeline output
 [![Sample output](docs/quickcheckdemo.png) "Click for sample quality control image of the parcellation output (generated using mas_quickcheck)."](docs/quickcheckdemo.png) The similar color between the olfactory bulb and the cortex is due to the limited colormap of `jet`.
 
 ## List of functions
