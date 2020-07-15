@@ -49,7 +49,7 @@ function multi_brain_seperation(){
     fi
     ## Threshold value to extract the brain region
     if [[ ! -z $5 ]]; then
-        local thr=$4
+        local thr=$5
     else
         # default threshold = 5000
         local thr=5000
