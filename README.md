@@ -1,4 +1,4 @@
-# Multi Atlas Segmentation and Morphological analysis toolket (MASMAT) for mouse brain MRI
+# Multi Atlas Segmentation and Morphometric analysis toolket (MASMAT) for mouse brain MRI
 
 Author: Da Ma (Primary email: da_ma@sfu.ca; Secondary email: d.ma.11@ucl.ac.uk)
 
