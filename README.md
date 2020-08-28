@@ -1,10 +1,10 @@
-# Multi Atlas Segmentation (MAS) for mouse brain MRI
+# Multi Atlas Segmentation and Morphological analysis toolket (MASMAT) for mouse brain MRI
 
 Author: Da Ma (Primary email: da_ma@sfu.ca; Secondary email: d.ma.11@ucl.ac.uk)
 
 ## Description
 
-This bash scripts is created for "Multi-atlas based automatic brain structural parcellation", mainly for mouse brain MRI.
+This bash scripts is created for `Multi-atlas based automatic brain structural parcellation`, mainly for mouse brain MRI.
 
 - This script achieve automatic brain MRI image segmentation with given [__mouse brain MRI atlases__](https://github.com/dancebean/mouse-brain-atlas) - which is a set of pairs of template images along with their manually labells. Sample atlases can be downloadable from the Github respsitory [here](https://github.com/dancebean/mouse-brain-atlas). For detailed description of the pipeline, please refer to the papers [[1]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0086576) [[2]](https://www.frontiersin.org/articles/10.3389/fnins.2019.00011). [Citation](#citation) of the two papers are listed at the bottom of this page. The script is originally created to segment mouse brain MRI. It should be, in theory, also capable of handelling the multi-atlas-based parcellation/segmentation for other type of images, organs, or species (e.g. CT, heart, embryo, human, macaque, _etc._), providing appropriate atlases are givien.
 
