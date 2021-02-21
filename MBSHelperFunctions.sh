@@ -9,6 +9,20 @@
 
 source MASHelperFunctions.sh > /dev/null 2>&1 
 
+function getOrientation(){
+#gets orientation string using mri_info
+
+    if [ "$#" -lt "1" ]; then
+        return 1
+    else
+        IMG=$1
+    fi
+
+    ORIENT=`mri_info $IMG | grep Orientation`
+    ORIENT=${ORIENT##*\ }
+    echo $ORIENT
+}
+
 function convert_dcm_to_nifti_batch(){
     local function_name=${FUNCNAME[0]}
     if [[ $# -lt 3 ]]; then
@@ -131,7 +145,7 @@ function fix_header_info(){
 function reorder_brain(){
     # not working properly
     local function_name=${FUNCNAME[0]}
-    if [[ $# -lt 3 ]];then
+    if [[ $# -lt 2 ]];then
         echo "Usage: $function_name [input_nii] [output_nii] [out_orientation (Optional,default=RAS)]"
         return 1
     fi
@@ -141,7 +155,7 @@ function reorder_brain(){
     local orient_out=$3 #RAS
 
     local orient_in=$(getOrientation $input_nii)
-    mri_convert --in_orientation $input_nii $orient_in $output_nii $orient_out
+    mri_convert --in_orientation $orient_in $input_nii $output_nii $orient_out
     fix_header_info $output_nii $orient_out $output_nii
 }
 

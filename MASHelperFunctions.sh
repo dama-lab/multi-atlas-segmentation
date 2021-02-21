@@ -62,6 +62,7 @@ mas_script_file = $mas_script_file
 # define some default global variable value
 AtlasListFileName=template_list.cfg
 
+
 # ---------------------------------
 #  function: get_orientation
 # ---------------------------------
@@ -114,7 +115,12 @@ function check_image_file(){
 	local function_name=${FUNCNAME[0]}
 	
 	# check existence with any valid extension
-	for ext in "" .nii .nii.gz .img .hdr; do
+  if [[ -f $file_path ]]; then
+    exist_flag=1
+    return 0
+    fi
+  ext_array=("" ".nii" ".nii.gz" ".img" ".hdr")
+  for ext in ${ext_array[@]}; do
 		if [[ -f $file_path$ext ]]; then
 			exist_flag=1
 			break
@@ -319,6 +325,55 @@ function check_label_fusion_file(){
 		return $return_flag
 	fi
 	return $return_flag
+}
+
+# ------------------------------
+#  function: lable2mask
+# ------------------------------
+function label2masks(){
+	local function_name=${FUNCNAME[0]}
+	usage() {
+		echo """binarize label 2 mask
+		[Usage]: $function_name \$label_dir \$mask_dir [Optional]
+		"""
+	}
+	if [[ $# -lt 2 ]]; then
+		usage; return 1;
+	fi
+
+	local label_dir=$1
+	local mask_dir=$2
+
+	mkdir -p $mask_dir
+	for id in $(ls $label_dir); do
+		echo "create binarized mask for: $id"
+		seg_maths $label_dir/$id -bin $mask_dir/$id
+	done
+}
+
+# ------------------------------
+#  function: dilate_mask
+# ------------------------------
+function dilate_masks(){
+  local function_name=${FUNCNAME[0]}
+  usage() {
+    echo """dilate mask by [dil]
+    [Usage]: $function_name \$mask_dir \$mask_dil_dir \$dil
+    """
+  }
+  if [[ $# -lt 3 ]]; then
+    usage; return 1;
+  fi
+
+  local mask_dir=$1
+  local mask_dil_dir=$2
+  local dil=$3
+
+  mkdir -p $mask_dil_dir
+  for id in $(ls $mask_dir); do
+    echo "dilate [$dil] for mask: $id"
+    seg_maths $mask_dir/$id -dil $dil $mask_dil_dir/$id
+  done
 }
 
 # ------------------------------
@@ -621,7 +676,7 @@ function mas_masking(){
 	# checking atlas_file existance
 	check_atlas_file $atlas_dir $atlas_id
 	if [[ $? -ne 0 ]]; then
-		echo "[$function_name] cannot find atlas $atlas_file_type: $atlas_dir/template/$atlas_id"
+		echo "[$function_name] cannot find atlas $atlas_file_type: $atlas_dir atlas_id: atlas_id"
 		return 1
 	fi
 
@@ -777,7 +832,7 @@ function mas_mapping(){
 	# checking atlas_file existance
 	check_atlas_file $atlas_dir $atlas_id
 	if [[ $? -ne 0 ]]; then
-		echo "[mas_mapping] cannot find atlas $atlas_file_type: $atlas_dir/template/$atlas_id"
+		echo "[mas_mapping] cannot find atlas $atlas_file_type: $atlas_dir atlas_id: $atlas_id"
 		return 1
 	fi
 
@@ -1243,7 +1298,7 @@ function mas_masking_batch(){
 function mas_masking_fusion(){
 	local function_name=${FUNCNAME[0]}
 	if [[ $# -lt 3 ]]; then
-		echo "Usage: $function_name [target_dir] [target_id] [result_dir] [(optional) atlas_dir] [(optional) atlas_list]"
+		echo "Usage: $function_name [target_dir] [target_id] [result_dir] atlas_dir] [(optional) atlas_list]"
 		return 1
 	fi
 
@@ -1251,14 +1306,10 @@ function mas_masking_fusion(){
 	local target_id=$2
 	local result_dir=$3
 
-	local atlas_dir
+	local atlas_dir=$4
 	local atlas_list
 
-	if [[ ! -z $4 ]]; then
-		atlas_dir=$4
-	else # default $atlas_dir
-		atlas_dir="/ensc/NEWTON5/STUDENTS/DMA73/Dropbox/Documents/SFU/Projects/BORG/Mouse_Brain_Atlas/NeAt_ex_vivo_LR"
-	fi
+
 	if [[ ! -z $5 ]]; then
 		atlas_list=$5
 	else
@@ -2040,7 +2091,9 @@ function mas_parcellation_batch(){
 			pbsBoilerPlate -n $job_name_fusion -m $MEM_FUSION -w $WALLTIME_FUSION -j -O $log_file -f $pbs_file # -O /dev/null
 			if [[ ! -z $job_id_mapping ]]; then
 				# if mapping job array submitted, then add job dependency
-				echo "#PBS -W depend=afterokarray:$job_id_mapping" >> $pbs_file
+				if [[ cluster_type == "SGE" ]]; then
+  				echo "#PBS -W depend=afterokarray:$job_id_mapping" >> $pbs_file
+  			fi
 			else
 				if [[ $label_fusion_file_exist -eq 0 ]]; then
 					# all mapping already done previously, start fusion step without dependency
@@ -2698,4 +2751,149 @@ function mas_N4_batch(){
 			echo "1,qsub $pbs_file" >> $job_list
 		fi
 	done
+}
+
+
+# ---------------------------------
+#  function: slurmBoilerPlate
+# ---------------------------------
+function slurmBoilerPlate(){
+	local function_name=${FUNCNAME[0]}
+	usage() {
+		echo -e """[Usage] $function_name -a \$account -m \$mem -t \$time -n \$job_name  -f \$sbatch_file -o \$log_file		 """
+		return 1
+	}
+	# -o /dev/null
+
+	local OPTIND
+	local options
+	# print a seperate line
+	echo ""
+
+	while getopts ":a:m:t:n:f:o:h" options; do
+		case $options in
+			a ) echo "Account name:         $OPTARG"
+				local account=$OPTARG;;
+			m ) echo "Memory:               $OPTARG"
+				local mem_per_cpu=$OPTARG;;
+			t ) echo "Wall time:            $OPTARG"
+				local time=$OPTARG;;
+			n ) echo "Job name:             $OPTARG"
+				local job_name=$OPTARG;;
+			f ) echo "Sbatch file:          $OPTARG"
+				local sbatch_file=$OPTARG;;
+			o ) echo "Log file:             $OPTARG"
+				local log_file=$OPTARG;;
+			h ) usage; return 1;;
+			\?) echo "Unknown option"
+			 	usage; return 1;;
+			: ) usage; return 1;;
+		esac
+	done
+
+	if [[ $OPTIND -eq 1 ]]; then
+		echo "[$function_name] no option specified"
+		usage; return 1
+	fi 
+
+	echo "[$function_name] generating sbatch files $sbatch_file... "
+	echo "#!/bin/bash" > $sbatch_file
+	echo "#SBATCH --account=$account" >> $sbatch_file
+	echo "#SBATCH --time=$time"       >> $sbatch_file
+	echo "#SBATCH --mem-per-cpu=$mem" >> $sbatch_file
+	echo "#SBATCH --job-name=$name"   >> $sbatch_file
+	echo "#SBATCH --output=$log_file" >> $sbatch_file
+}
+
+
+# ---------------------------------
+#  function: slurm_mas_masking
+# ---------------------------------
+function slurm_mas_masking(){
+  local function_name=${FUNCNAME[0]}
+  usage() {
+    echo """[Usage] $function_name \$target_dir \$atlas_dir \$target_id \$atlas_id \$result_dir \$job_dir"""
+    return 1
+  }
+
+  if [[ $# -lt 4 ]]; then
+    usage; return 1;
+  fi
+    
+  local target_dir=$1
+  local atlas_dir=$2
+  local target_id=$3
+  local atlas_id=$4
+  
+  job_name="${target_id}-${atlas_id}_label_prop_affine"
+  sbatch_file="${job_dir}/sbatch/${job_name}.sh"
+  log_file="${job_dir}/logs/${job_name}.log"
+
+  #%% jobs
+  slurmBoilerPlate -a $account\
+                   -m $mem \
+                   -t $time \
+                   -n $job_name  \
+                   -f $sbatch_file \
+                   -o $log_file
+                    # -o /dev/null
+
+  mas_cmd=$(echo mas_masking \
+    -T $target_dir \
+    -t $target_id \
+    -A $atlas_dir \
+    -a $atlas_id \
+    -r $result_dir )
+
+    
+  # %%
+  echo $mas_cmd >> $sbatch_file
+
+  return 0
+}
+
+# ---------------------------------
+#  function: slurm_mas_masking
+# ---------------------------------
+function slurm_mas_masking_atlas_array(){
+  local function_name=${FUNCNAME[0]}
+  usage() {
+    echo """[Usage] $function_name \$target_dir \$atlas_dir \$target_id \$job_dir"""
+    return 1
+  }
+
+  if [[ $# -lt 4 ]]; then
+    usage; return 1;
+  fi
+    
+  local target_dir=$1
+  local atlas_dir=$2
+  local target_id=$3
+  local atlas_id=$4
+  
+  job_name="${target_id}-${atlas_id}_label_prop_affine"
+  sbatch_file="${job_dir}/sbatch/${job_name}.sh"
+  log_file="${job_dir}/logs/${job_name}.log"
+
+  #%% jobs
+  slurmBoilerPlate -a $account\
+                   -m $mem \
+                   -t $time \
+                   -n $job_name  \
+                   -f $sbatch_file \
+                   -o $log_file
+                    # -o /dev/null
+
+  mas_cmd=$(echo mas_masking \
+    -T $target_dir \
+    -t $target_id \
+    -A $atlas_dir \
+    -a $atlas_id \
+    -r $result_dir )
+
+    
+  # %%
+  echo $mas_cmd >> $sbatch_file
+
+  return 0
 }
