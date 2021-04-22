@@ -3,7 +3,7 @@
 %     (https://www.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image)
 % @author: MA, Da, da_ma@sfu.ca, d.ma.11@ucl.ac.uk
 
-function orient_nii(input,output_folder)
+function reorientNii(input,output_folder)
 
 [~,input_name,input_ext]=fileparts(input);
 % load test image

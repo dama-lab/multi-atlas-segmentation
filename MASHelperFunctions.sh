@@ -365,8 +365,8 @@ function dilate_masks(){
     usage; return 1;
   fi
 
-  local mask_dir=$1
-  local mask_dil_dir=$2
+  local mask_dir=$(readlink -f $1)
+  local mask_dil_dir=$(readlink -f $2)
   local dil=$3
 
   mkdir -p $mask_dil_dir
@@ -890,7 +890,7 @@ function mas_mapping(){
 		fi
 		# load nrr_param from parameter_cfg if specified
 		if [[ -z $nrr_param ]]; then
-			local nrr_param="$nrr_param -smooR 0.04 -vel -nogce" #  -ln 4 lp 4
+			local nrr_param="$nrr_param -vel -nogce -vel -smooF 0.04 -smooR 0.04 -ln 4 -lp 4" # -smooR 0.04 -ln 4 -lp 4
 		fi
 		nrr_param="$nrr_param -flo $atlas_dir/template/$atlas_id"
 		nrr_param="$nrr_param -fmask $atlas_dir/mask/$atlas_id"
