@@ -2,9 +2,8 @@
 import os
 
 #%% function to write to a sbatch file
-def get_default_conda_env(conda_env_sh="/project/ctb-popowich/dma73/Tools/miniconda3/etc/profile.d/conda.sh"):
+def get_default_conda_env(conda_env_sh):
   conda_lines = f'''## activate the virtual environment
-# [alternatively, not working] source /project/ctb-popowich/dma73/Tools/miniconda3/envs/fastai2/bin/activate
 source {conda_env_sh}
 conda_init              > /dev/null 2>&1
 conda deactivate        > /dev/null 2>&1
