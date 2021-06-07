@@ -3,7 +3,7 @@ import nipype
 from med_deeplearning.HelperFunctions import bash_function_generators as slurm
 
 #%% Change this to your local location that store MASHelperFunctions.sh
-mas_helpfunctions_path = f'/project/6003102/dma73/Code/multi-atlas-segmentation/MASHelperFunctions.sh'
+mas_helpfunctions_path = f'../../MASHelperFunctions.sh'
 
 #%%
 def reg_aladin(ref_file, flo_file, res_file, aff_file=None, fmask_file=None, verbose=False, n_cpu=None, args='', **kwargs):
