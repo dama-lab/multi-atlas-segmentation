@@ -1,6 +1,6 @@
 import os, subprocess, multiprocessing
 import nipype
-from med_deeplearning.HelperFunctions import bash_function_generators as slurm
+import bash_function_generators as slurm
 
 #%% Change this to your local location that store MASHelperFunctions.sh
 mas_helpfunctions_path = f'../../MASHelperFunctions.sh'
@@ -63,10 +63,29 @@ def reg_resample(ref_file, flo_file, trans_file, res_file, inter=0, verbose=Fals
   if verbose is True: print(node.cmdline)
   
   return node
-  
+
+def N4_correction(input_fname, n4_fname, mask_fname=None, exe=True, verbose=False):
+  '''N4 Bias Field Correction using nipype'''
+  from nipype.interfaces.ants import N4BiasFieldCorrection
+  # skip if result file already exist
+  if os.path.isfile(n4_fname):
+    if verbose==True: print(f"  --  {n4_fname} exist, skipping ...")
+    return
+  n4 = N4BiasFieldCorrection()
+  n4.inputs.dimension = 3
+  n4.inputs.input_image = input_fname
+  n4.inputs.output_image = n4_fname
+  n4.bspline_fitting_distance = 300
+  n4.inputs.shrink_factor = 3
+  n4.inputs.n_iterations = [50,50,30,20]
+  n4.inputs.convergence_threshold = 1e-6
+  if mask_fname is not None: n4.inputs.mask_image = mask_fname
+  if exe == True: n4.run()
+  return n4.cmdline
+
 #%% ===================
 # [slurm] affine mask propagation
-def slurm_affine_mask_propagation(target_dir, target_id, atlas_dir, result_dir, job_dir=None, verbose=False, mas_helpfunctions_path=mas_helpfunctions_path, **kwargs):
+def affine_mask_propagation(target_dir, target_id, atlas_dir, result_dir, job_dir=None, verbose=False, mas_helpfunctions_path=mas_helpfunctions_path, **kwargs):
   '''generate slurm sbatch file for affine mask mask propagation
   - target_dir
   - target_id
@@ -107,7 +126,7 @@ def slurm_affine_mask_propagation(target_dir, target_id, atlas_dir, result_dir, 
 
 #%% ===================
 # [slurm] affine label/mask fusion
-def slurm_affine_label_fusion(target_dir, target_id, result_dir, atlas_dir, exe_mode='local', job_dir=None, mas_helpfunctions_path=mas_helpfunctions_path, **kwargs):
+def affine_label_fusion(target_dir, target_id, result_dir, atlas_dir, exe_mode='local', job_dir=None, mas_helpfunctions_path=mas_helpfunctions_path, **kwargs):
   '''[SLURM] affine label fusion (after slurm_affine_mask_propagation)'''
   # MASHelpfunction-specific lines
   src_line = f'source {mas_helpfunctions_path} > /dev/null'  
@@ -127,7 +146,7 @@ def slurm_affine_label_fusion(target_dir, target_id, result_dir, atlas_dir, exe_
   
 #%% =================
 # non-rigid label propagation
-def slurm_nonrigid_label_propagation(target_dir, target_id, target_mask, atlas_dir, result_dir, exe_mode='slurm', job_dir=None, verbose=False, mas_helpfunctions_path=mas_helpfunctions_path, **kwargs):
+def nonrigid_label_propagation(target_dir, target_id, target_mask, atlas_dir, result_dir, exe_mode='slurm', job_dir=None, verbose=False, mas_helpfunctions_path=mas_helpfunctions_path, **kwargs):
   '''[SLURM] nonrigid label fusion
   '''
   # get template list
@@ -163,7 +182,7 @@ def slurm_nonrigid_label_propagation(target_dir, target_id, target_mask, atlas_d
 
 #%% ===================
 # [slurm] affine label/mask fusion
-def slurm_nonrigid_label_fusion(target_dir, target_id, atlas_name, atlas_list, result_dir, target_mask, exe_mode='local', job_dir=None, mas_helpfunctions_path=mas_helpfunctions_path, verbose=False, **kwargs):
+def nonrigid_label_fusion(target_dir, target_id, atlas_name, atlas_list, result_dir, target_mask, exe_mode='local', job_dir=None, mas_helpfunctions_path=mas_helpfunctions_path, verbose=False, **kwargs):
   '''[SLURM] nonrigid label fusion (after slurm_nonrigid_label_propagation)'''
   # MASHelpfunction-specific lines
   src_line = f'source {mas_helpfunctions_path} > /dev/null'  
@@ -184,5 +203,35 @@ def slurm_nonrigid_label_fusion(target_dir, target_id, atlas_name, atlas_list, r
       slurm.write_slurm_script(slurm_cmd , cmd_path, slurm=True, **kwargs)
     return cmd_path, slurm_cmd 
   
+def extract_label_volumes(label_dir, targetlist, vol_dir, vol_csv_fname, ext='.nii.gz', tmp_subdir="tmp", structure_list=None):
+  '''extract label volumes
+  tmp_subdir: temp directory to save individual ccsv volumetrics files'''
+  # make directory for individual volume csv
+  vol_individuals = f"{vol_dir}/{tmp_subdir}"
+  Path(vol_individuals).mkdir(exist_ok=True, parents=True)
+  # remove result file if already exist
+  vol_csv = f"{vol_dir}/{vol_csv_fname}"
+  if os.path.isfile(vol_csv): os.remove(vol_csv)
+
+  # add invidual volme one at a time
+  for target_id in targetlist:
+    vol_csv_individual = f"{vol_individuals}/{target_id}.csv"
+    # extract the volume for single structure
+    cmd = f"seg_stats {label_dir}/{target_id}{ext} -Vl {vol_csv_individual}"
+    returned_value = subprocess.call(cmd, shell=True)
+    # print('returned value:', returned_value)
+    # write to master csv
+    cmd = f'echo -e "{target_id},$(cat {vol_csv_individual})" >> {vol_csv}'
+    returned_value = subprocess.call(cmd, shell=True)
+    # break
+
+  # read structure list if it's a file path
+  if isinstance(structure_list, (str,Path)):
+    structure_list = pd.read_csv(structure_list_csv).structure_name
+  # adding structural title to volume list  if structure_list is not None:
+  volume_df = pd.read_csv(vol_csv, names=structure_list, header=None, index_col=0)
+  volume_df.to_csv(vol_csv)
+
+  return volume_df
 
 

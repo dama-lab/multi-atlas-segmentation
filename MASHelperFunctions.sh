@@ -864,7 +864,7 @@ function mas_mapping(){
 		if [[ -z $affine_param ]]; then
 			local affine_param="" # "-rigOnly"
 		fi
-		affine_param="$affine_param -ln 4 -lp 4" #  -speeeeed
+		affine_param="$affine_param -ln 4 -lp 4 -speeeeed" #
 		affine_param="$affine_param -flo $atlas_dir/template/$atlas_id"
 		affine_param="$affine_param -fmask $atlas_dir/mask/$atlas_id"
 		affine_param="$affine_param -ref $target_dir/$target_id"
@@ -2138,7 +2138,7 @@ function mas_quickcheck_batch(){
 	echo ""
 	echo "Multi Atlas Segmentation - Part 3: Quality control (QC - Quickcheck)"
 	echo "Usage: $function_name [-T target_dir] [-l target_list] [-s segmentation_dir] [-q quickcheck_dir]"
-	echo "       (optional) [-t seg_type(label/mask)] [-A atlas_name] [-a atlas_list (quickcheck for mapping images)]"
+	echo "       (optional) [-y seg_type(label/mask)] [-A atlas_name] [-a atlas_list (quickcheck for mapping images)]"
 	echo ""
 	return 1
 	}
