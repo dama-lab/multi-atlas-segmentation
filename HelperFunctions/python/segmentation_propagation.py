@@ -1,6 +1,7 @@
 import os, subprocess, multiprocessing
-import nipype
+import nipype, pandas as pd
 import bash_function_generators as slurm
+from pathlib import Path
 
 #%% Change this to your local location that store MASHelperFunctions.sh
 mas_helpfunctions_path = f'../../MASHelperFunctions.sh'
@@ -227,10 +228,12 @@ def extract_label_volumes(label_dir, targetlist, vol_dir, vol_csv_fname, ext='.n
 
   # read structure list if it's a file path
   if isinstance(structure_list, (str,Path)):
-    structure_list = pd.read_csv(structure_list_csv).structure_name
-  # adding structural title to volume list  if structure_list is not None:
-  volume_df = pd.read_csv(vol_csv, names=structure_list, header=None, index_col=0)
-  volume_df.to_csv(vol_csv)
+    structure_list = pd.read_csv(structure_list).structure_name
+    # adding structural title to volume list  if structure_list is not None:
+    volume_df = pd.read_csv(vol_csv, names=structure_list, header=None, index_col=0)
+    volume_df.to_csv(vol_csv)
+  else:
+    volume_df = pd.read_csv(vol_csv, header=None, index_col=0)
 
   return volume_df
 
