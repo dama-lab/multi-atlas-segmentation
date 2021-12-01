@@ -40,7 +40,7 @@ This script achieve automatic brain MRI image segmentation with given [__mouse b
    - For example, if you're using Linux, and installed the NifTK at: `/home/YourUserName/niftk-18.5.4`, then add the following 2 lines to the file `/home/YourUserName/.bashrc` (e.g. by typing: `gedit $HOME/.bashrc` or `nano $HOME/.bashrc` or `emacs $HOME/.bashrc`):
   
          export PATH=${PATH}:"$HOME/niftk-18.5.4/bin"
-         export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"$HOME/niftk-18.5.4/bin"
+         export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:"$HOME/niftk-18.5.4/bin"
   
    - Otherwise, if you download and compiled NiftyReg and NiftySeg separately at: `/home/YourUserName/nifty_reg` and `/home/YourUserName/nifty_seg`, then add the following 4 lines to the file `~/.bashrc`:
   
