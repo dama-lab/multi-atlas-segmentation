@@ -681,7 +681,7 @@ function mas_masking(){
 	fi
 
 	# eliminate .ext from id
-	local target_id=$(echo $target_id | cut -d. -f1)
+	# local target_id=$(echo $target_id | cut -d. -f1) # to avoid cases where there are dots ('.') in the filename
 	local atlas_id=$(echo $atlas_id | cut -d. -f1)
 
 	# creat folders
@@ -837,7 +837,7 @@ function mas_mapping(){
 	fi
 
 	# eliminate .ext from id
-	local target_id=$(echo $target_id | cut -d. -f1)
+	# local target_id=$(echo $target_id | cut -d. -f1)
 	local atlas_id=$(echo $atlas_id | cut -d. -f1)
 
 	# creat folders
@@ -987,7 +987,7 @@ function mas_fusion(){
 		usage; return 1
 	fi 
 
-	local target_id=$(echo $target_id | cut -d. -f1)
+	# local target_id=$(echo $target_id | cut -d. -f1)
 
 	local mapping_dir="$result_dir/mapping/$atlas_name"
 	local mask_dir="$result_dir/mask/$atlas_name"

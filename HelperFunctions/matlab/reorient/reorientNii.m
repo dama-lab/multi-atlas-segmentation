@@ -6,8 +6,8 @@
 function reorientNii(input,output_folder)
 
 [~,input_name,input_ext]=fileparts(input);
-% load test image
-A=load_nii(input);
+% load test image with maximum tolerance
+A=load_nii(input,'','','','','',1);
 % display test image
 view_nii(A);
 % reorient test image

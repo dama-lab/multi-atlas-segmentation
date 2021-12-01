@@ -45,9 +45,8 @@ def generate_slurm_boilerplate(time="3:00:00", ntasks=1, account='rrg-mfbeg-ad',
   for key in kwargs.keys():
     sbatch_str += (f"{bol} --{key.replace('_','-')}={kwargs[key]}{eol}")
     
-  sbatch_str += eol
+  # sbatch_str += eol
   return sbatch_str
-
 
 def generate_slurm_conda_boilerplate(**kwargs):
   sbatch_str = generate_slurm_boilerplate(**kwargs) + get_default_conda_env()
