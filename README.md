@@ -183,7 +183,7 @@ For example: `mas_mapping -h`
   
   - Alternatively, you can use the reorientation function provided by the latest version of [ITK-SNAP](http://www.itksnap.org/) to reorient the image (Tools - Reorient Image).
 
-  - If you have FSL installed, use `fslorient` to check the image orientation, and use `fslswapdim` to swap the image dimension.
+  - If you have FSL installed, use `fslorient` to check the image orientation, and use `fslswapdim` to change the image orientation (swap the image dimension).
   - If you have FreeSurfer installed, use `mri_info` to check the image orientations in the nifti header. use `mri_convert --in_orientation $input_orientation --out_orientation $output_orientation -ot nifti -odt float $input_image $output_image` to change the image orientation.
 
 ### Q. Why is part of my parcellation not properly overlayed with the original image?
