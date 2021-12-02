@@ -5,8 +5,8 @@ from pathlib import Path
 import SimpleITK as sitk
 
 #%% Change this to your local location that store MASHelperFunctions.sh
-mas_helpfunctions_path = f'../../MASHelperFunctions.sh'
-mas_helpfunctions_path = f'/project/6003102/dma73/Code/multi-atlas-segmentation/MASHelperFunctions.sh'
+# mas_helpfunctions_path = f'../../MASHelperFunctions.sh'
+mas_helpfunctions_path = f'{os.getenv("HOME")}/Codes/Github/multi-atlas-segmentation/MASHelperFunctions.sh'
 
 #%%
 def reg_aladin(ref_file, flo_file, res_file, aff_file=None, fmask_file=None, verbose=False, n_cpu=None, args='', **kwargs):
@@ -121,15 +121,21 @@ def N4_correction_slicer(input_fname, n4_fname, mask_fname=None, exe=True, verbo
   from nipype.interfaces.slicer.filtering import n4itkbiasfieldcorrection
   # skip if result file already exist
   if os.path.isfile(n4_fname):
-    if verbose==True: print(f"  --  {n4_fname} exist, skipping ...")
+    if verbose==True:
+      print(f"  --  {n4_fname} exist, skipping ...")
     return
-
+  n4 = n4itkbiasfieldcorrection()
+  n4.inputs.inputimage = input_fname
+  n4.inputs.outputimage = input_fname
+  
+  # mask
   if mask_fname is not None: n4.inputs.mask_image = mask_fname
+
   if exe == True: n4.run()
   return n4.cmdline
 
 def N4_correction_itk(input_fname, n4_fname, mask_fname=None, exe=True, verbose=False, image_type=sitk.sitkFloat64, mask_type=sitk.sitkUInt8):
-  '''N4 bias field correction with ITK
+  '''N4 bias field correction with SimpleITK
   # Parameter options: https://www.programcreek.com/python/example/122771/nipype.interfaces.ants.N4BiasFieldCorrection
   '''
   import SimpleITK as sitk

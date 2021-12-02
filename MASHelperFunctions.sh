@@ -1,4 +1,5 @@
 #!/bin/bash
+source $HOME/.bashrc
 
 ##########################################################
 # Multi-Atlas-Segmentation, parcellation, and label fusion
@@ -13,6 +14,13 @@ mas_script_dir=${mas_script_path%/*}
 mas_script_file="$(basename $mas_script_path)"
 # Alternatively: mas_script_name=${mas_script_path##*/}
 mas_script_name=$(echo $mas_script_file | cut -d. -f1 )
+
+# define some default global variable value
+AtlasListFileName=template_list.cfg
+
+# define FSLDIR explicitely
+export FSLDIR="$HOME/Tools/fsl"
+source ${FSLDIR}/etc/fslconf/fsl.sh
 
 echo """
 =======================
@@ -58,9 +66,6 @@ mas_script_file = $mas_script_file
 # - mas_quickcheck_panorama
 =======================
 """
-
-# define some default global variable value
-AtlasListFileName=template_list.cfg
 
 
 # ---------------------------------
