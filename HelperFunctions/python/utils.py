@@ -38,6 +38,6 @@ def reorient_nii(src_fname, dest_fname, old_orient="PIR", new_orient="RAS", verb
   vol_reorient = reorient_vol(vol_nii.get_fdata(), old_orient,new_orient)
   # save the reoriented images
   #%% save reoriented images # https://bic-berkeley.github.io/psych-214-fall-2016/saving_images.html
-  vol_reorient_nii = nib.Nifti1Image(vol_reorient, vol_nii.affine, vol_nii.header)
+  vol_reorient_nii = nib.Nifti1Image(vol_reorient, affine=vol_nii.affine, header=vol_nii.header)
   vol_reorient_nii.to_filename(dest_fname)
   return
