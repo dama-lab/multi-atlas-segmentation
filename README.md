@@ -175,7 +175,7 @@ For example: `mas_mapping -h`
 
 ## Q/A
 
-- Q. What image orientation should my test image be?
+### Q. What image orientation should my test image be?
 
   A. The orientation of the default atlas is: RAS, although the algorithms should be able to identify any correctly oriented images.
   
@@ -183,10 +183,10 @@ For example: `mas_mapping -h`
   
   - Alternatively, you can use the reorientation function provided by the latest version of [ITK-SNAP](http://www.itksnap.org/) to reorient the image (Tools - Reorient Image).
 
-  - If you have FSL installed, use `fslorient` to check the image orientation, and use `fslswapdim` to change the image orientation.
+  - If you have FSL installed, use `fslorient` to check the image orientation, and use `fslswapdim` to change the image orientation (swap the image dimension).
   - If you have FreeSurfer installed, use `mri_info` to check the image orientations in the nifti header. use `mri_convert --in_orientation $input_orientation --out_orientation $output_orientation -ot nifti -odt float $input_image $output_image` to change the image orientation.
 
-- Q. Why is part of my parcellation not properly overlayed with the original image?
+### Q. Why is part of my parcellation not properly overlayed with the original image?
 
   A. Check if your MR image has been properly oriented to RAS (See the Q/A above). If that's not the problem, then make sure your MR image has been preprocessed to correct for the intensity inhomogeneity (also called bias field correction). There are several tools that can perform the bias field correction:
     
