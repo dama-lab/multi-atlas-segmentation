@@ -88,7 +88,7 @@ For example: `mas_mapping -h`
 [![pipeline schematic](docs/journal.pone.0086576.g001.png) "Click here for the paper with detailed description of the processing pipeline"](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0086576)
 ### pipeline demo
  
- A [demo script](demo/mas_demo.sh) is provided, which contains a complete end-to-end demonstration showing how to build and run the pipeline. It first download the atlas and test image from the [mouse brain atlas](https://github.com/dancebean/mouse-brain-atlas). It then run the following steps in sequential: brain extraction => N4 Bias Field Correction => brain structural parcellation (which itself consists of 3 sub-steps: atlas-to-test image registration -> atlas label propagation -> and multi-atlas label fusion).
+ A [demo script](demo/mas_demo.sh) is provided, which contains a complete end-to-end demonstration showing how to build and run the pipeline. It first download the atlas and test image from the [mouse brain atlas](https://github.com/dancebean/mouse-brain-atlas). It then run the following steps in sequential: brain extraction => N4 Bias Field Correction => brain structural parcellation (which itself consists of 3 sub-steps: atlas-to-test image registration (using dilated mask and bias-field-corrected brain image) -> atlas label propagation -> and multi-atlas label fusion).
   
 ### Function demo
 - Load script:
@@ -114,11 +114,12 @@ For example: `mas_mapping -h`
 
 - Step 3. __*brain structure parcellation*__
 
-  `mas_parcellation_batch -T "target_dir" -t "target_list" -A "atlas_dir" -r "result_dir" -M "targetmask_dir"`
+  `mas_parcellation_batch -T "target_dir" -t "target_list" -A "atlas_dir" -r "result_dir" -M "targetmask_dir" -M "dilate_mask_dir" -m "mask_suffix" -e "exe_mode"`
   - `-h`: Use mas_masking_batch -h to show help for usage
-  - `-T`: specify folder contain the test image to be segmented
+  - `-T`: specify folder contain the test image to be segmented (please use the bias-field corrected image)
   - `-t`: specify text file contain a list of target image file names inside the target_dir (in nifty format: nii or nii.gz, can only provide file name without extension)
   - `-A`: folder contains the atlas (sample atlas containing multiple templates can be downloaded here)
+  - `-M`: folder contain the dilated brain mask
   
   [optional argument]
   - `-M`: folder containing the brainmask file of the test images
