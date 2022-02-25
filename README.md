@@ -88,7 +88,7 @@ For example: `mas_mapping -h`
 [![pipeline schematic](docs/journal.pone.0086576.g001.png) "Click here for the paper with detailed description of the processing pipeline"](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0086576)
 ### pipeline demo
  
- A [demo script](demo/mas_demo.sh) is provided, which contains a complete end-to-end demonstration showing how to build and run the pipeline. It first download the atlas and test image from the [mouse brain atlas](https://github.com/dancebean/mouse-brain-atlas). It then run the following steps in sequential: brain extraction => brain structural parcellation (which itself consists of 3 sub-steps: atlas-to-test image registration -> atlas label propagation -> and multi-atlas label fusion).
+ A [demo script](demo/mas_demo.sh) is provided, which contains a complete end-to-end demonstration showing how to build and run the pipeline. It first download the atlas and test image from the [mouse brain atlas](https://github.com/dancebean/mouse-brain-atlas). It then run the following steps in sequential: brain extraction =>  => brain structural parcellation (which itself consists of 3 sub-steps: atlas-to-test image registration -> atlas label propagation -> and multi-atlas label fusion).
   
 ### Function demo
 - Load script:
@@ -108,7 +108,11 @@ For example: `mas_mapping -h`
   - `-p`: configuration file to tune the parameters for the registration and label fusion algorithms
   - `-e`: specify to run locally (`local`) on on `cluster` . Specify `cluster` will submit parallel pbs jobs to cluster; specify `local` will run job sequentially on local machine. cluster is set by default
 
-- Step 2. __*brain structure parcellation*__
+= Step 2. bias field correction
+> This is an important step before the parcellation. It is skipped in the demo as the images are already "bias-corrected" using the N4 algorithm
+`mas_N4_batch`
+
+- Step 3. __*brain structure parcellation*__
 
   `mas_parcellation_batch -T "target_dir" -t "target_list" -A "atlas_dir" -r "result_dir" -M "targetmask_dir"`
   - `-h`: Use mas_masking_batch -h to show help for usage
