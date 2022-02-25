@@ -96,7 +96,10 @@ mas_mask_dilate_batch $target_list $raw_mask_dir $dilate_mask_dir $mask_suffix $
 mas_quickcheck $target_dir/$target_id $dilate_mask_dir/$target_id$mask_suffix $result_dir/quickcheck/ \
                $target_id$mask_suffix.d_$dil_voxel # -p $parameter_cfg
 
-# 3. ~~~~~ parcellation ~~~~~
+# 3. ~~~~~ bias field correction ~~~~~
+# [Skipped] This is an important step before the parcellation. It is skipped in the demo as the images are already "bias-corrected" using the N4 algorithm
+
+# 4. ~~~~~ parcellation ~~~~~
 mas_parcellation_batch -T $target_dir -t $target_list -A $atlas_dir -a $atlas_list -r $result_dir \
                        -M $dilate_mask_dir -m $mask_suffix -e $exe_mode # -p $parameter_cfg
 
