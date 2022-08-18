@@ -1,6 +1,6 @@
-# Group-wise Registration (Average Template Creation) pipeline.
+# Group-wise Registration (Average Template Creation) pipeline
 
-This Group-wise Registration pipeline is modified from NiftyReg's original groupwise registration pipeline, which was designed for SGE pbs cluster architecture, and added the SLURM cluster compatibility
+This Group-wise Registration pipeline is modified from NiftyReg's original groupwise registration pipeline, which was designed for SGE pbs cluster architecture, and added the SLURM cluster compatibility.
 
 This script can be run either locally or on SLURM cluster.
 
