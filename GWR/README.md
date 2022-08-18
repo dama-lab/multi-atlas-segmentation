@@ -5,7 +5,7 @@ This Group-wise Registration pipeline is modified from NiftyReg's original group
 This script can be run either locally or on SLURM cluster.
 
 # Sample results on mouse model:
-<img src="../docs/groupwise_ex_vivo.png"  alt="Groupwise Ex Vivo" style="zoom:50%;" />
+<img src="../docs/groupwise_ex-vivo.png"  alt="Groupwise Ex Vivo" style="zoom:50%;" />
 <img src="../docs/groupwise_in_vivo.png"  alt="Groupwise In Vivo" style="zoom:50%;" />
 
 # Reference:
