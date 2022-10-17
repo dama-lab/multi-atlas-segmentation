@@ -63,11 +63,13 @@ This script achieve automatic brain MRI image segmentation with given [__mouse b
 
 ## Usage
 
-There is only one main script: the [*MASHelperFunctions.sh*](MASHelperFunctions.sh), which is capable of handling batch brain parcellation (functions with suffix `_batch`) either on the local workstation or on PBS cluster by simply specifying the `-e` flag as either `local` or `cluster`).
+- The core functions of *MASMAT* toolbox are in the main script: the [*MASHelperFunctions.sh*](MASHelperFunctions.sh), which is capable of handling batch brain parcellation (functions with suffix `_batch`) either on the local workstation or on PBS cluster by simply specifying the `-e` flag as either `local` or `cluster`).
 To load the script, simply type `source MASHelperFunctions.sh` to load all corresponding functions.
 
 To get help for each function, type `function_name -h`.
 For example: `mas_mapping -h`
+
+- To run the *MASMAT* in python, and take advantage of the cluster-based parallel computation pipeline (i.e. on `SLURM` cluster), import and load the python helper function `segmentation_propagation.py` in [HelperFunctions/python](HelperFunctions/python) folder.
 
 **[Important]**
 
