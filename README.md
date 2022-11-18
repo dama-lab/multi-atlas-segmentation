@@ -1,4 +1,6 @@
-# Multi Atlas Segmentation and Morphometric Analysis Toolkit (MASMAT) for mouse brain MRI
+# Multi Atlas Segmentation and Morphometric Analysis Toolkit (MASMAT)
+
+> Originally designed for mouse brain MRI, but is applicable to any spicious (e.g. Non-human primate, or even human neuroimages)
 
 Author: Da Ma (dma@wakehealth.edu; da_ma@sfu.ca; d.ma.11@ucl.ac.uk)
 
