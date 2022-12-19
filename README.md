@@ -188,7 +188,7 @@ For example: `mas_mapping -h`
 
   A. The orientation of the default atlas is: RAS, although the algorithms should be able to identify any correctly oriented images.
   
-  - A simple script `orient_nii.m` is provided in this package, which uses the Matlab NIfTI toolbox (https://www.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image) to interactively visualize and determine the orientation, as well as reorient it. 
+  - A simple but effective script [`orient_nii.m`](https://github.com/dama-lab/multi-atlas-segmentation/tree/master/HelperFunctions/matlab/reorient) is provided in this package. It uses the Matlab NIfTI toolbox (https://www.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image) to interactively visualize and determine the orientation, as well as reorient it. 
   
   - Alternatively, you can use the reorientation function provided by the latest version of [ITK-SNAP](http://www.itksnap.org/) to reorient the image (Tools - Reorient Image).
 
@@ -197,15 +197,17 @@ For example: `mas_mapping -h`
 
 ### Q. Why is part of my parcellation not properly overlayed with the original image?
 
-  A. Check if your MR image has been properly oriented to RAS (See the Q/A above). If that's not the problem, then make sure your MR image has been preprocessed to correct for the intensity inhomogeneity (also called bias field correction). There are several tools that can perform the bias field correction:
-    
-    (1) If you have the [ANTs](http://stnava.github.io/ANTs/) tools installed, the function `mas_N4_batch` used the handy bias field correction function `N4BiasFieldCorrection`  provide by ANTs package, which used an upgrade version of the N3 algorithm as used in the FreeSurfer's nu_correct, and it can handle the nifti format out-of-the-box as it's using the ITK framework.
+  A. Check if your MR image has been properly oriented to RAS (See the Q/A above). If that's not the problem, then make sure your MR image has been preprocessed to correct for the intensity inhomogeneity (also called bias field correction). There are several tools that can perform the bias field correction. We provide the implementation for several of them in the python helpfunctions [`segmentation_propagation.py`](https://github.com/dama-lab/multi-atlas-segmentation/tree/master/HelperFunctions/python) including: `N4_correction`, `N4_correction_slicer`, and `N4_correction_itk`. You shall have the corresponding toolbox installed in the system (i.e. ANTs, 3D-Slicer, SimpleITK).
+  
+  Alternatively, you can also use the following tools directly to achieve bias field corrrection:
+   
+  - (1) If you have the [ANTs](http://stnava.github.io/ANTs/) tools installed, the function `mas_N4_batch` used the handy bias field correction function `N4BiasFieldCorrection`  provide by ANTs package, which used an upgrade version of the N3 algorithm as used in the FreeSurfer's nu_correct, and it can handle the nifti format out-of-the-box as it's using the ITK framework.
 
-    (2) If you have have [3D-slicer](https://www.slicer.org/wiki/Documentation/4.3/Modules/N4ITKBiasFieldCorrection) installed, it also provide  the N4ITK implementation of function `N4BiasFieldCorrection` through command line interface (CLI).
+  - (2) If you have have [3D-slicer](https://www.slicer.org/wiki/Documentation/4.3/Modules/N4ITKBiasFieldCorrection) installed, it also provide  the N4ITK implementation of function `N4BiasFieldCorrection` through command line interface (CLI).
     
-    (3) The [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/) package provide a tool `nu_correct` which uses N3 bias field correction algorithm.
+  - (3) The [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/) package provide a tool `nu_correct` which uses N3 bias field correction algorithm.
     
-    (4) The [NiftySeg](http://cmic.cs.ucl.ac.uk/staff/da_ma/Multi_Atlas/) package provide bias field correction using automatic tissue segmentation (**seg_EM**).
+  - (4) The [NiftySeg](http://cmic.cs.ucl.ac.uk/staff/da_ma/Multi_Atlas/) package provide bias field correction using automatic tissue segmentation (**seg_EM**).
 
 ## Citation
 
