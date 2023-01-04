@@ -19,8 +19,8 @@ mas_script_name=$(echo $mas_script_file | cut -d. -f1 )
 AtlasListFileName=template_list.cfg
 
 # define FSLDIR explicitely
-export FSLDIR="$HOME/Tools/fsl"
-source ${FSLDIR}/etc/fslconf/fsl.sh
+# export FSLDIR="$HOME/Tools/fsl"
+# source ${FSLDIR}/etc/fslconf/fsl.sh
 
 echo """
 =======================
@@ -631,7 +631,7 @@ function mas_masking(){
 	
 	local OPTIND
 	local options
-	while getopts ":T:t:A:a:r:p:c:h" options; do
+	while getopts ":T:t:A:a:f:r:p:c:h" options; do
 		case $options in
 			T ) echo "Target directory: $OPTARG"
 				local target_dir=$OPTARG;;
@@ -641,6 +641,8 @@ function mas_masking(){
 				local atlas_dir=$OPTARG;;
 			a ) echo "Atlas ID: $OPTARG"
 				local atlas_id=$OPTARG;;
+			f ) echo "Affine parameter: $OPTARG"
+				local affine_param=$OPTARG;;
 			r ) echo "Result directory: $OPTARG"
 				local result_dir=$OPTARG;;
 			p ) echo "Parameter config file: $OPTARG"
@@ -712,7 +714,7 @@ function mas_masking(){
 		if [[ -z $affine_param ]]; then
 			local affine_param="" # "-rigOnly"
 		fi
-		affine_param="$affine_param -ln 4 -lp 4" #  -speeeeed
+		affine_param="$affine_param -speeeeed" #  -ln 4 -lp 4
 		affine_param="$affine_param -flo $atlas_dir/template/$atlas_id"
 		affine_param="$affine_param -fmask $atlas_dir/mask/$atlas_id"
 		affine_param="$affine_param -ref $target_dir/$target_id"

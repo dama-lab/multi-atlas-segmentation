@@ -82,17 +82,17 @@ def reorient(src_fname, dest_fname, old_orient="PIR", new_orient="RAS", verbose=
   vol_reorient_nii.to_filename(dest_fname)
   return
 
-def N4_correction(input_fname, n4_fname, mask_fname=None, exe=True, verbose=True, **kwargs):
+def N4_correction(input_fname, n4_fname, mask_fname=None, exe=True, verbose=True, bspline_fitting_distance=20, bspline_order=4, shrink_factor=4, n_iterations = [150,100,80,50], convergence_threshold = 1e-12, **kwargs):
   '''N4 Bias Field Correction using nipype
   # Ref: https://nipype.readthedocs.io/en/latest/api/generated/nipype.interfaces.ants.segmentation.html
   # Parameter options: https://www.programcreek.com/python/example/122771/nipype.interfaces.ants.N4BiasFieldCorrection
   # kwarg exsample:
-    n4.inputs.dimension = 3
-    n4.inputs.bspline_fitting_distance = 10
-    n4.inputs.bspline_order = 4
-    n4.inputs.shrink_factor = 3
-    n4.inputs.n_iterations = [150,100,50,30]
-    n4.inputs.convergence_threshold = 1e-11
+    n4.inputs: dimension = 3
+    n4.inputs: bspline_fitting_distance = 10
+    n4.inputs: bspline_order = 4
+    n4.inputs: shrink_factor = 3
+    n4.inputs: n_iterations = [150,100,50,30]
+    n4.inputs: convergence_threshold = 1e-11
   '''
   from nipype.interfaces.ants import N4BiasFieldCorrection
   # skip if result file already exist
@@ -102,6 +102,12 @@ def N4_correction(input_fname, n4_fname, mask_fname=None, exe=True, verbose=True
   n4 = N4BiasFieldCorrection()
   n4.inputs.input_image = input_fname
   n4.inputs.output_image = n4_fname
+  n4.inputs.bspline_fitting_distance = bspline_fitting_distance # default=10
+  n4.inputs.bspline_order = bspline_order # default=4
+  n4.inputs.shrink_factor = shrink_factor # default=3
+  n4.inputs.n_iterations  = n_iterations  # default=[150,100,50,30]
+  n4.inputs.convergence_threshold = convergence_threshold # default=1e-11
+
   # use mask if specified
   if mask_fname is not None:
     n4.inputs.mask_image = mask_fname
@@ -181,7 +187,7 @@ def mas_quickcheck(bg_img, qc_dir, qc_filename=None, overlay_img="''", exe=True,
 
 
 # [slurm] affine mask propagation
-def affine_mask_propagation(target_dir, target_id, atlas_dir, result_dir, job_dir=None, verbose=False, mas_helpfunctions_path=mas_helpfunctions_path, **kwargs):
+def affine_mask_propagation(target_dir, target_id, atlas_dir, result_dir, job_dir=None, verbose=False, mas_helpfunctions_path=mas_helpfunctions_path, affine_param='', **kwargs):
   '''generate slurm sbatch file for affine mask mask propagation
   - target_dir
   - target_id
@@ -210,7 +216,7 @@ def affine_mask_propagation(target_dir, target_id, atlas_dir, result_dir, job_di
   slurm_cmd += "atlas_id=${templatelist[$SLURM_ARRAY_TASK_ID]}\n"
   
   # command line
-  slurm_cmd += f"mas_masking -T {target_dir} -t {target_id} -A {atlas_dir} -a $atlas_id -r {result_dir}"
+  slurm_cmd += f"mas_masking -T {target_dir} -t {target_id} -A {atlas_dir} -a $atlas_id -r {result_dir} -f {affine_param}"
   
   # print command
   if verbose is True:
