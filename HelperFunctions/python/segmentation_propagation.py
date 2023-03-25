@@ -400,5 +400,3 @@ def extract_label_volumes(label_dir, targetlist, vol_dir, vol_csv_fname, ext='.n
   os.rmdir(vol_individuals)
   # shutil.rmtree(vol_individuals)
   return volume_df
-
-
