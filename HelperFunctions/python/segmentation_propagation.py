@@ -1,4 +1,4 @@
-import os, subprocess, multiprocessing
+import os, subprocess, multiprocessing, shutil
 import nipype, pandas as pd
 import bash_function_generators as slurm
 from pathlib import Path
@@ -167,7 +167,7 @@ def N4_correction_itk(input_fname, n4_fname, mask_fname=None, exe=True, verbose=
 
 #%% ===================
 
-def mas_quickcheck(bg_img, qc_dir, qc_filename=None, overlay_img="''", exe=True, exe_mode='local'):
+def mas_quickcheck(bg_img, qc_dir, qc_filename=None, overlay_img="''", exe=True, exe_mode='local', job_dir=None):
   '''generate quickcheck files'''
   # initialize slurm cmd
 
@@ -177,13 +177,25 @@ def mas_quickcheck(bg_img, qc_dir, qc_filename=None, overlay_img="''", exe=True,
   # MASHelpfunction-specific lines
   src_line = f'source {mas_helpfunctions_path} > /dev/null'  
   mas_quickcheck_cmd = f"{src_line}; mas_quickcheck {bg_img} {overlay_img} {qc_dir} {qc_filename}"
-
+  cmd_path = None
+  
   if exe == True:
     if exe_mode == 'local':
       returned_value = subprocess.call(mas_quickcheck_cmd, shell=True)
       print('returned value:', returned_value)
+    elif exe_mode == 'slurm':
+      if job_dir is None:
+        job_dir = Path(qc_dir)/'job'
+      job_out_dir = f"{job_dir}/output"
+      Path(job_out_dir).mkdir(exist_ok=True, parents=True)
+      cmd_path = f'{job_dir}/{qc_filename}_mask_labelfusion.sh'
+      slurm_output=f"{job_out_dir}/{qc_filename}_%j.out\n"
+      slurm_error=f"{job_out_dir}/{qc_filename}_%j.error\n"
+      print(f"=== writing cmd to {cmd_path} ===")
+      slurm.write_slurm_script(mas_quickcheck_cmd, cmd_path, slurm=True,
+                                output=slurm_output, error=slurm_error, **kwargs)
       
-  return mas_quickcheck_cmd
+  return mas_quickcheck_cmd, cmd_path
 
 
 # [slurm] affine mask propagation
@@ -259,11 +271,13 @@ def affine_label_fusion(target_dir, target_id, atlas_dir, result_dir, exe_mode='
     return mas_masking_fusion_cmd
   elif exe_mode == 'slurm':
     cmd_path = None
-    if job_dir is not None:
-      Path(job_dir).mkdir(exist_ok=True, parents=True)
+    # if job_dir is not None:
+    #   Path(job_dir).mkdir(exist_ok=True, parents=True)
+    job_out_dir = f"{job_dir}/output"
+    Path(job_out_dir).mkdir(exist_ok=True, parents=True)
     cmd_path = f'{job_dir}/{target_id}_mask_labelfusion.sh'
-    slurm_output=f"{job_dir}/{target_id}_%j.out\n"
-    slurm_error=f"{job_dir}/{target_id}_%j.error\n"
+    slurm_output=f"{job_out_dir}/{target_id}_%j.out\n"
+    slurm_error=f"{job_out_dir}/{target_id}_%j.error\n"
     print(f"=== writing cmd to {cmd_path} ===")
     slurm.write_slurm_script(mas_masking_fusion_cmd, cmd_path, slurm=True,
                               output=slurm_output, error=slurm_error, **kwargs)
@@ -314,7 +328,7 @@ def nonrigid_label_propagation(target_dir, target_id, target_mask, atlas_dir, re
 
 #%% ===================
 # [slurm] affine label/mask fusion
-def nonrigid_label_fusion(target_dir, target_id, atlas_name, atlas_list, result_dir, target_mask=None, exe_mode='local', parallel = False, job_dir=None, mas_helpfunctions_path=mas_helpfunctions_path, verbose=False, **kwargs):
+def nonrigid_label_fusion(target_dir, target_id, atlas_name, atlas_list, result_dir, target_mask=None, exe_mode='local', execution=True, parallel = False, job_dir=None, mas_helpfunctions_path=mas_helpfunctions_path, verbose=False, **kwargs):
   '''[SLURM] nonrigid label fusion (after slurm_nonrigid_label_propagation)'''
   # MASHelpfunction-specific lines
   src_line = f'source {mas_helpfunctions_path} > /dev/null'  
@@ -322,22 +336,28 @@ def nonrigid_label_fusion(target_dir, target_id, atlas_name, atlas_list, result_
   slurm_cmd = f"{src_line}; mas_fusion -T {target_dir} -t {target_id} -A {atlas_name} -a {atlas_list} -r {result_dir}"
   if target_mask is not None: slurm_cmd += f" -m {target_mask}"
   if exe_mode == 'local':
-    print("=== running locally ===")
-    if parallel == True:
-      returned_value = subprocess.Popen(slurm_cmd , shell=True)
-    elif parallel == False:
-      returned_value = subprocess.call(slurm_cmd , shell=True)
-    print('returned value:', returned_value)
+    if execution == True:
+      print("=== running locally ===")
+      if parallel == True:
+        returned_value = subprocess.Popen(slurm_cmd , shell=True)
+      elif parallel == False:
+        returned_value = subprocess.call(slurm_cmd , shell=True)
+      print('returned value:', returned_value)
     return slurm_cmd, returned_value
   elif exe_mode == 'slurm':
     cmd_path = None
-    if not job_dir is None:
-      job_out_dir = f"{job_dir}/output"
-      Path(job_out_dir).mkdir(exist_ok=True, parents=True)
+    if job_dir is None:
+      job_dir = Path(result_dir)/'jobs'
+    job_out_dir = f"{job_dir}/output"
+    Path(job_out_dir).mkdir(exist_ok=True, parents=True)
     cmd_path = f'{job_dir}/{target_id}_labelfusion.sh'
-    slurm_output=f"{job_dir}/{target_id}_%j.out\n"
-    slurm_error=f"{job_dir}/{target_id}_%j.error\n"
+    slurm_output=f"{job_out_dir}/{target_id}_%j.out\n"
+    slurm_error=f"{job_out_dir}/{target_id}_%j.error\n"
     print(f"=== writing cmd to {cmd_path} ===")
+    slurm_cmd_path = f'{job_dir}/{target_id}_affine_mask.sh'
+    slurm.write_slurm_script(slurm_cmd, slurm_cmd_path, slurm=True,
+                              output=slurm_output, error=slurm_error, **kwargs)
+
     if verbose is True:
       print(slurm_cmd)
 
@@ -376,6 +396,9 @@ def extract_label_volumes(label_dir, targetlist, vol_dir, vol_csv_fname, ext='.n
   else:
     volume_df = pd.read_csv(vol_csv, header=None, index_col=0)
 
+  # remove temp folder
+  os.rmdir(vol_individuals)
+  # shutil.rmtree(vol_individuals)
   return volume_df
 
 
